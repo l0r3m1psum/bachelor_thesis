@@ -4,7 +4,7 @@
 
 int
 main(void) {
-	FILE *fp = fopen("../turano.csv", "r");
+	FILE *fp = fopen("../res/turano.csv", "r");
 	if (!fp) {
 		perror("fopen");
 		return 1;
