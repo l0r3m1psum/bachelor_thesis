@@ -1,6 +1,10 @@
 #ifndef CSV_INCLUDE
 #define CSV_INCLUDE
 
+#ifdef __linux__
+	#define _GNU_SOURCE
+#endif
+
 #include <stdio.h> /* FILE */
 #include <stdint.h>
 #include <stdbool.h>
