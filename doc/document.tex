@@ -1,0 +1,444 @@
+\documentclass[draft]{article}
+
+\usepackage[T1]{fontenc} % for italian babel warnings
+\usepackage[italian]{babel}
+\usepackage{hyperref} %this should always be the last package
+
+% Abbreviazioni
+\newcommand{\mytitle}{Specifica dei requisiti per la tesi}
+\newcommand{\eg}{\textit{e.g.}}
+\newcommand{\psql}{\texttt{psql(1)}}
+\newcommand{\file}{\textit{file}}
+\newcommand{\e}{\epsilon}
+
+\newtheorem{requirement}{Requisito}
+
+\hypersetup{
+	pdfauthor={Diego Bellani},
+	pdftitle={\mytitle},
+	pdfsubject={Specifica dei requisiti},
+	pdfkeywords={requisiti,tesi},
+	pdfproducer={LaTeX},
+	pdfcreator={pdfLaTeX},
+	pdfborder={0 0 0},
+	pageanchor=false
+}
+
+\title{\mytitle}
+\date{2021}
+\author{Diego Bellani\thanks{Studente}\and Enrico Tronci\thanks{Professore}}
+
+\begin{document}
+
+\begin{titlepage}
+	\maketitle
+
+	\begin{abstract}
+	Questo documento \marginpar{Da espandere.} contiene le specifiche dei
+	requisiti per la tesi sulla simulazione \textit{multi-core} di incendi.
+	\end{abstract}
+
+	\tableofcontents
+	% \listoffigures
+	% \listoftables
+\end{titlepage}
+
+\section{Introduzione}
+
+Questa tesi fa parte di un progetto per fornire ai vigili del fuoco uno
+strumento per prevedere l'espansione di un incendio in un'area forestale. Questo
+saraà fatto utilizzando dei sensori sul campo e dei satelliti per raccogliere le
+informazioni. Queste ultime saranno utilizzate da un modello matematico, che
+verrà realizzato da un simulatore. In fine i vigili del fuoco lo utilizzeranno
+tramite un'interfaccia web.
+
+\section{Ambito della Tesi}
+
+La tesi si occuperà esclusivamente dell'implementazione del modello matematico
+fornitoci da Tor Vergata. Durante il documento saranno elencati tutti i suoi
+requisiti. Identifichiamo il primo.
+
+\begin{requirement}
+La simulazione deve avvenire \textit{faster-then-real-time} per poter effetuare
+delle previsioni.
+\end{requirement}
+
+\section{Dati a disposizione}
+
+Il simulatore avrà a disposizioni dati geografici e meteo, da satelliti, sulla
+zona di interesse per la simulazione. La rona è divisa in rettangoli tutti
+uguali e ad ognuno di questi rettangoli avrà dei dati uniformi.
+
+Per identificare i rettangoli sulla mappa essi verranno forniti con coordinate
+LAEA\footnote{proiezione Lambert azimuthal Equal-Area} Europe \cite{laeae} con
+sistema di riferimento ETRS89\footnote{European Terrestrial Reference System}
+\cite{etrs89}.
+
+\paragraph{Dati Geografici}
+
+\marginpar{Più avanti tutti questi dati saranno descritti con più precisione.}
+
+Essi sono: l'altimetria, il tipo di foresta, il livello di urbanizzazione, il
+tipo di acqua presente nella zona e la carta natura.
+
+\paragraph{Dati Meteo}
+
+Quelli di interesse sono solo direzione e velocità del vento.
+
+\section{Il Modello}
+
+Il modello matematico che descrive l'evoluzione dell'incendio in un'area
+forestale è uno di tipo automa cellulare come quello in figura
+\ref{fig:automata}.
+
+\subsection{Statica}
+
+Il modello ha dei parametri che sono costanti e uguali per tutte le celle,
+descritti nella tabella \ref{tab:globals} ed altri, sempre costanti, che possono
+cambiare di cella in cella descritti nella tabella \ref{tab:params}. Questi
+ultimi sono derivati dai dati geografici descritti nella tabella \ref{tab:geo}
+con le seguenti corrispondenze matematiche:
+
+\marginpar{In seguito saranno fatte delle precisazioni su alcune di queste
+corrispondenze.}
+
+\begin{eqnarray}
+H_{ij} &=& \cases{1 + G_{ij}, &se $0 \leq H_{ij} \leq 2$;\cr
+                  0, &se $H_{ij} = 255$.}\\
+A_{ij} &=& \cases{U_{ij}/100, &se $0 \leq U_{ij} \leq 100$;\cr
+                  0, &se $U_{ij} = 255$.}\\
+W_{ij} &=& \cases{0, &se $W1_{ij} = 0$;\cr
+                  1, &se $W1_{ij} = 1$;\cr
+                  0.75, &se $W1_{ij} = 2$;\cr
+                  0.75, &se $W1_{ij} = 3$;\cr
+                  0.5, &se $W1_{ij} = 4$;\cr
+                  1, &se $W1_{ij} = 253$;\cr
+                  1, &se $W1_{ij} = 255$.}\\
+S_{ij} &=& H_{ij} \cdot (1-A_{ij}) \cdot (1-W_{ij})\textrm{,}\\
+P_{ij} &=& P_{ij}\textrm{.}
+\end{eqnarray}
+
+\begin{figure}
+\centering
+\setlength{\unitlength}{0.7cm}
+\begin{picture}(6,6)
+	\newlength{\piccenter}
+	\setlength{\piccenter}{3\unitlength}
+	% Grid
+	\thicklines
+	\multiput(0,0)(2,0){4}{\line(0,1){6}} % columns
+	\multiput(0,0)(0,2){4}{\line(1,0){6}} % rows
+
+	% Arrays
+	\thinlines
+	\put(\piccenter,\piccenter){\vector(1,0){2}}
+	\put(\piccenter,\piccenter){\vector(0,1){2}}
+	\put(\piccenter,\piccenter){\vector(-1,0){2}}
+	\put(\piccenter,\piccenter){\vector(0,-1){2}}
+	\put(\piccenter,\piccenter){\vector(1,1){2}}
+	\put(\piccenter,\piccenter){\vector(-1,1){2}}
+	\put(\piccenter,\piccenter){\vector(1,-1){2}}
+	\put(\piccenter,\piccenter){\vector(-1,-1){2}}
+
+	% Black square
+	\newlength{\side}
+	\setlength{\side}{0.8\unitlength}
+	\linethickness{\side}
+	\newlength{\ypos}
+	\setlength{\ypos}{\piccenter}
+	\addtolength{\ypos}{-0.5\side}
+	\put(\piccenter,\ypos){\line(0,0){\side}}
+\end{picture}
+\caption{Automa cellulare}
+\label{fig:automata}
+\end{figure}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|c|}
+	\hline
+	\textbf{Nome parametro} & \textbf{Descrizione} & \textbf{Unità di Misura}\\
+	\hline
+	$\tau$ & passo temporale & secondi\\
+	$L$ & lunghezza della singola cella & metri\\
+	$W$ & ampiezza della singola cella & metri\\
+	$L^*$ & lunghezza area monitorata & celle\\
+	$W^*$ & ampiezza area monitorata & celle\\
+	$\beta$ & consumo combustibile & combustibile/secondo\\
+	\hline
+\end{tabular}
+\caption{Parametri globali della simulazione.}
+\label{tab:globals}
+\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|c|}
+	\hline
+	\textbf{Nome Dato} & \textbf{Descrizione} & \textbf{Intervallo valori}\\
+	\hline
+	$G_{ij}$ & Foreste & 0,1,2,255\\
+	$U_{ij}$ & Urbanizzazione & 0,\ldots,100,255\\
+	$W1_{ij}$ & Water1 & 0,\ldots,4,253,255\\
+	$W2_{ij}$ & Water2 & 0,1\\
+	$P_{ij}$ & Altimetria & 0,\ldots,4380\\
+	\hline
+\end{tabular}
+\caption{Dati geografici per le singole celle.}
+\label{tab:geo}
+\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|}
+	\hline
+	\textbf{Nome parametro} & \textbf{Descrizione}\\
+	\hline
+	$H_{ij}$ & altezza media della vegetazione\\
+	$A_{ij}$ & abitazione media\\
+	$W_{ij}$ & presenza di acqua\\
+	$\gamma_{ij}$ & quantità di combustibile\\ % non è chiaro come calcolarlo
+	$S_{ij}$ & indice di infiammabilità\\
+	$P_{ij}$ & altitudine media\\
+	$D_{ij}$ & direzione del vento\\
+	$F_{ij}$ & velocità del vento\\
+	\hline
+\end{tabular}
+\caption{Parametri delle singole celle.}
+\label{tab:params}
+\end{table}
+
+\subsection{Dinamica}
+
+Ora tutta la parte statica del modello è stata descritta e possiamo passare alla
+sua dinamica. Questa è descritta tramite tre funzioni diopendenti descritte
+nella tabella \ref{tab:dynamic}.
+
+Le funzione in quest'ultima tabella sono definite come segue
+
+\marginpar{Definirla una probabilità è incorretto siccome la funzione è
+deterministica.}
+
+\begin{equation}
+p_{ij}(\e_1, \e_2, t) = k_0 S_{ij} C(i+\e_1, j+\e_2) d(\e_1, \e_2) f_w f_P\textrm{,}
+\end{equation}
+
+dove $k_0$ è un parametro di ottimizzazione di soglia e
+
+\begin{eqnarray}
+(\e_1, \e_2) &\in& \Gamma = \{\,(x, y) \mid x, y \in \{-1, 0, 1\}\,\}\textrm{,}\\
+C(i,j) &=& \sin\left(\pi\frac{B_{ij}}{\gamma_{ij}}\right)\textrm{,}\label{eq:combust}\\
+d(\e_1,\e_2) &=& \left(1-\frac{1}{2}|\e_1\e_2|\right)\textrm{,}\label{eq:disom}\\
+f_w &=& \exp\left(k_1 F(i+\e_1, j+\e_2)\frac{\begin{array}{c}\e_1\cos(D(i+\e_1,j+\e_2))\\
+        \mbox{}+\e_2\sin(D(i+\e_1,j+\e_2))\end{array}}{\sqrt{\e_1^2 + \e_2^2}}\right)\textrm{,}\label{eq:wind}\\
+f_P &=& \exp\left(k_2\arctan\left(\frac{P_{ij}-P_{i+\e_1j+\e_2}}{L}\right)\right)\textrm{.}\label{eq:slope}
+\end{eqnarray}
+
+L'equazione \ref{eq:combust} indica lo stato di combusione della cella, la
+\ref{eq:disom} è il fattore di disomogeneità, mentre \ref{eq:wind} e
+\ref{eq:slope} sono il contributo alla probabilità del vento e della pendenza
+rispettivamente.
+
+Nell'equazione \ref{eq:wind} $k_1$ è un parametro di ottimizzazione relativo al
+contributo vento, nell'equazione \ref{eq:slope} $k_2$ è il parametro di
+ottimizzazione relativo al contributo pendenza.
+
+\marginpar{Anche questo è un parametro globale costante.}
+
+Sia ora $\theta$ un parametro di sglia per la probabilità di propagazione
+dell'incendio. Sia
+
+\begin{equation}
+Q_{ij}(\e_1, \e_2, t) = \cases{1, &se $p_{ij}(\e_1, \e_2) N_{i+\e_1j+\e_2} > \theta$;\cr
+                               0, &altrimenti.}
+\end{equation}
+
+Quindi $Q_{ij}(\e_1, \e_2, t) = 1 \iff N_{i+\e_1j+\e_2} = 1 \land
+p_{ij}(\e_1, \e_2) > \theta$, in questo caso l'incendio nella cella limitrofa
+$(i+\e_1, j+\e_2$ si trasferisce nella cella $(i,j)$. Per controllare tutte le
+celle limitrofe ad una useremo la seguente formula
+
+\begin{equation}
+V_{ij}(t) = \max\{\,Q_{ij}(\e_1, \e_2, t) \mid (\e_1, \e_2) \in \Gamma\,\}\textrm{,}
+\end{equation}
+
+la quale è 1 quando una cella limitrofa a $(i, j)$ porta l'incendio nella cella
+stessa.
+
+\marginpar {Ovviamente l'input esogeno può cambiare nel tempo.}
+
+In fine sia $u_{ij}$ l'input esogeno che definisce o lo stato di quete o di
+incendio con i valori 0 e 1 rispettivamente, che all'atto pratico è ottenuta
+attraverso dati sul campo. La dinamica del sistema è la seguente:
+
+\begin{eqnarray}
+N_{ij}(0) &=& u_{ij}(0)\textrm{,}\\
+B_{ij}(0) &=& \gamma_{ij}\textrm{,}\\
+N_{ij}(t+1) &=& \cases{\max(V_{ij}(t), u_{ij}(t)), &se $B_{ij}(t) > 0$;\cr
+                       0, &altrimenti.}\\
+B_{ij}(t+1) &=& \cases{\max(0, B_{ij}(t)-\beta\tau), &se $N_{ij}(t) > 0$;\cr
+                       B_{ij}(t), &altrimenti.}
+\end{eqnarray}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|}
+	\hline
+	\textbf{Nome parametro} & \textbf{Descrizione}\\
+	\hline
+	$B_{ij}(t)$ & combustibile disponibile\\
+	$N_{ij}(t)$ & stato (in fiamme o meno)\\
+	$p_{ij}(\epsilon_1, \epsilon_2, t)$ & probabilità di trasmissione\\
+	\hline
+\end{tabular}
+\caption{Parametri delle singole celle che variano nel tempo.}
+\label{tab:dynamic}
+\end{table}
+
+% TODO: scrivere come si gestiscono le "condizioni limite"
+% TODO: avvertire il prof della conversione fatta a 1 invece che a 0 (o quello che era)
+% TODO: il vento è gaussiano
+
+\section{Il Simulatore}
+
+Da qua in poi è tutto da riscrivere più o meno
+
+\noindent\hrulefill
+
+L'obbiettivo della tesi è scrivere un programma che simuli efficentemente il
+modello descritto sopra. Per fare ciò esso avrà bisogno di dati meteorologici e
+geografici, oltre che dei punti di partenza dell'incendio e di alcuni parametri
+di configurazione come l'orizonte di simulazione.
+
+I dati sullo stato dell'incendio e del meteo potrebbero cambiare nel mentre la
+simulazione è in corso. Il primo potrebbe succedere ad esempio nel caso di
+incendi dolosi se un piromane dovesse appiccare nuovi focolai, il secondo
+invece a causa del naturale evolvere del meteo e dati come la presenza o medo di
+pioggia e la direzione del vento potrebbero cambiare drasticamente la nostra
+simulazione.
+
+\begin{requirement}
+Il simulatore deve poter aggiornare i dati in tempo reale.
+\end{requirement}
+
+\subsection{Dettagli di implementazione}
+
+I dati saranno quindi presi in input da tre \file\ CSV: uno per i dati
+geografici, uno per quelli meteorologici e uno per lo stato iniziale
+dell'incendio.  Ognuno di questi file sarà corredato da un'altro CSV che ne
+conterrà le informazioni sulla ``grana''. I parametri di configurazione saranno
+presi da linea di comando.
+
+Dato che ogni CSV potrebbe avere una ``grana'' diversa il simulatore dovra
+essere configurato con una sua dimensione di cella interna che deve essere
+sempre minore uguale della minima grana dei tre \file.
+
+\begin{requirement}
+Il simulatore deve poter leggere i CSV.
+\end{requirement}
+
+Per permettere l'aggiornamento di questi dati durante la simulazione il
+simulatore monitorerà la presenza di \file\ con nomi come \texttt{land.csv},
+\texttt{meteo.csv} e \texttt{fire.csv}. Nel caso in cui uno di questi file sia
+presente, dopo l'inizio della simulazione il simulatore provvederà a leggerli,
+aggiornare il suo stato interno e cambiargli nome\footnote{con nomi tipo
+\texttt{land\_<timestamp>.csv}} (o eliminarli) per evitare di rileggerli in
+futuro.
+
+\begin{requirement}
+Il simulaotre deve poter monitorare la presenza di file.
+\end{requirement}
+
+Un implementazione ingenua della scrittura di questi file per l'aggiornamento
+dei dati potrebbe generare una \textit{race-condition}, ovvero la lettura di
+incompletidati, dato che la scrittura in un file non è atomica. Per evirate ciò
+una strateggia potrebbe essere quella di scrivere i dati in file con nomi tipo
+\texttt{tmpXXX} e una volta finito di scriverli si può usare \texttt{rename(2)},
+che è atomica, per dargli il nome giusto. Questo metodo sarà anche usata per la
+scrittura dei file.
+
+I risultati della simulazione saranno scritti, con una frequenza scelta
+dall'utente, in un \file\ CSV.
+
+\subsubsection{Parametri da linea di comando (non è vero sono sempre passati da
+file CSV)}
+
+\begin{itemize}
+\item $\tau$ il passo di tempo per la simulazione
+\item $h$ orizonte di simulazione
+\item $s$ frequenza degli \textit{snapshot} dello stato della simulazione
+\item $l$ lunghezza in metri della singola cella (interna al simualtore)
+\item $w$ larghezza in metri della singola cella (interna al simulatore)
+\item $p_1$ primo punto del rettancolo selezionato sulla mappa
+\item $p_2$ secondo punto del rettancolo selezionato sulla mappa
+\item $\theta$ la soglia di propagazione dell'incendio
+\item $\beta$ la velocità di propagazione dell'incendio
+\item $\alpha$ costante di conversione del compustibile (nostra pezza in attesa
+di Tor Vergata)
+\item $k_0$ ottimizzazione di soglia;
+\item $k_1$ ottimizzazione del contributo del vento;
+\item $k_2$ ottimizzazione del contributo dell'inclinazione;
+\end{itemize}
+
+\subsubsection{Formato dei CSV}
+
+I CSV emessi dalla base di dati conterranno in ogni riga i dati che si
+riferiscono ad una singola cella. I \file\ che ne indicano la grana avranno
+invece la seguente struttura:
+
+\footnote{Domanda}{unità di misura dei dati e tipo (int o float)?}
+\begin{verbatim}
+x1,y1,x2,y2,length,width
+450070,12980,670010,13300,1,1
+\end{verbatim}
+
+dove \texttt{xn} e \texttt{yn} rappresentano le coordinate degli angoli
+dell'area di interesse mentre \texttt{length} e \texttt{width} rappresentano,
+rispettivamente, la lunghezza e l larghezza di ogni singola cella.
+
+Quelli emessi dal simulatore invece avranno la seguente struttura:
+
+\begin{verbatim}
+n11,b11,...,n1i,b1i
+...
+nj1,bj1,...,nji,bji
+\end{verbatim}
+
+Dove \texttt{n} è lo stato della cella, in fiamme o meno, e \texttt{b} è la sua
+quantità di combustibile ancora a disposizione.
+
+\section{Isolamento del simulatore dall'esterno}
+
+Per isolare il simulatore dall'esterno useremo una base di dati, in particolare
+PostgreSQL, che ci permetterà di gestire i vari dati di cui la simulazione ha
+bisogno in maniera uniforme.
+
+\subsection{Creazione dello schema per la base di dati}
+
+Questo programma deve creare la base di dati, tabelle con vincoli, \textit{view}
+sui dati e vincoli per mantenerne la consistenza. Questo può essere realizzato
+tramite un file SQL che verrà interpretato da \psql.
+
+\subsection{Importazione dei dati}
+\label{sec:import}
+
+Questo programma deve importare dati nella base di dati, principalmente CSV, un
+esempio di come si potrebbe fare da \psql\ è il seguente:
+
+\begin{verbatim}
+\copy <table> from 'data.csv' with format csv;
+\end{verbatim}
+
+\subsection{Esportazione dei dati}
+
+In maniera molto simile all'importazione (sezione \ref{sec:import}) i dati
+possono essere esportati grazie a \psql.
+
+\begin{verbatim}
+\copy <table> to 'export.csv' with format csv;
+\end{verbatim}
+
+\bibliographystyle{plain}
+\bibliography{document}
+
+\end{document}
