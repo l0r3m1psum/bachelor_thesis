@@ -3,8 +3,12 @@
 #include <string.h> /* strerror */
 
 int
-main(void) {
-	FILE *fp = fopen("../res/turano.csv", "r");
+main(int argc, char *argv[]) {
+	if (argc < 2) {
+		fprintf(stderr, "error: missing file name argument\n");
+		return 1;
+	}
+	FILE *fp = fopen(argv[1], "r");
 	if (!fp) {
 		perror("fopen");
 		return 1;
