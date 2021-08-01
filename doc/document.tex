@@ -165,6 +165,7 @@ P_{ij} &=& P_{ij}\textrm{.}
 	$L^*$ & lunghezza area monitorata & celle\\
 	$W^*$ & ampiezza area monitorata & celle\\
 	$\beta$ & consumo combustibile & combustibile/secondo\\
+	$\theta$ & probailità propagazione & adimensionale\\
 	\hline
 \end{tabular}
 \caption{Parametri globali della simulazione.}
@@ -243,10 +244,7 @@ Nell'equazione \ref{eq:wind} $k_1$ è un parametro di ottimizzazione relativo al
 contributo vento, nell'equazione \ref{eq:slope} $k_2$ è il parametro di
 ottimizzazione relativo al contributo pendenza.
 
-\marginpar{Anche questo è un parametro globale costante.}
-
-Sia ora $\theta$ un parametro di sglia per la probabilità di propagazione
-dell'incendio. Sia
+Sia
 
 \begin{equation}
 Q_{ij}(\e_1, \e_2, t) = \cases{1, &se $p_{ij}(\e_1, \e_2) N_{i+\e_1j+\e_2} > \theta$;\cr
