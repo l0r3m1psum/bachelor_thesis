@@ -7,6 +7,8 @@
 % Abbreviazioni
 \newcommand{\mytitle}{Specifica dei requisiti per la tesi}
 \newcommand{\eng}[1]{\foreignlanguage{english}{#1}} %TODO: add to all english words
+\let\oldmarginpar\marginpar
+\renewcommand{\marginpar}[1]{\oldmarginpar{\raggedright #1}}
 \newcommand{\eg}{\textit{e.g.}}
 \newcommand{\psql}{\texttt{psql(1)}}
 \newcommand{\file}{\textit{file}}
