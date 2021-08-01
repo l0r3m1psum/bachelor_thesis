@@ -230,7 +230,7 @@ dove $k_0$ è un parametro di ottimizzazione di soglia e
 (\e_1, \e_2) &\in& \Gamma = \{\,(x, y) \mid x, y \in \{-1, 0, 1\}\,\}\textrm{,}\\
 C(i,j) &=& \sin\left(\pi\frac{B_{ij}}{\gamma_{ij}}\right)\textrm{,}\label{eq:combust}\\
 d(\e_1,\e_2) &=& \left(1-\frac{1}{2}|\e_1\e_2|\right)\textrm{,}\label{eq:disom}\\
-f_w &=& \exp\left(k_1 F(i+\e_1, j+\e_2)\frac{\begin{array}{c}\e_1\cos(D(i+\e_1,j+\e_2))\\
+f_w &=& \exp\left(k_1 F(i+\e_1, j+\e_2)\frac{\begin{array}{l}\e_1\cos(D(i+\e_1,j+\e_2))\\
         \mbox{}+\e_2\sin(D(i+\e_1,j+\e_2))\end{array}}{\sqrt{\e_1^2 + \e_2^2}}\right)\textrm{,}\label{eq:wind}\\
 f_P &=& \exp\left(k_2\arctan\left(\frac{P_{ij}-P_{i+\e_1j+\e_2}}{L}\right)\right)\textrm{.}\label{eq:slope}
 \end{eqnarray}
@@ -244,7 +244,7 @@ Nell'equazione \ref{eq:wind} $k_1$ è un parametro di ottimizzazione relativo al
 contributo vento, nell'equazione \ref{eq:slope} $k_2$ è il parametro di
 ottimizzazione relativo al contributo pendenza.
 
-Sia
+Sia \marginpar{Da riscrivere il paragrafo su $Q$.}
 
 \begin{equation}
 Q_{ij}(\e_1, \e_2, t) = \cases{1, &se $p_{ij}(\e_1, \e_2) N_{i+\e_1j+\e_2} > \theta$;\cr
