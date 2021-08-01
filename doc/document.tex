@@ -488,16 +488,24 @@ larghezza di ogni singola cella.
 \label{tab:grain}
 \end{table}
 
-Quelli emessi dal simulatore invece avranno la seguente struttura:
+Quelli emessi dal simulatore invece avranno una struttura come quella della
+tabella \ref{tab:output}.
 
-\begin{verbatim}
-n11,b11,...,n1i,b1i
-...
-nj1,bj1,...,nji,bji
-\end{verbatim}
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+	\hline
+	$n_{11}$ & $b_{11}$ & \dots & $n_{1i}$ & $b_{1i}$\\
+	\vdots & \vdots & $\ddots$ & \vdots & \vdots\\
+	$n_{j1}$ & $b_{j1}$ & \dots & $n_{ji}$ & $b_{ji}$\\
+	\hline
+\end{tabular}
+\caption{Esempio \eng{output} simulatore.}
+\label{tab:output}
+\end{table}
 
-Dove \texttt{n} è lo stato della cella, in fiamme o meno, e \texttt{b} è la sua
-quantità di combustibile ancora a disposizione.
+Dove $n$ è lo stato della cella, in fiamme o meno, e $b$ è la sua quantità di
+combustibile ancora a disposizione.
 
 \section{Isolamento del simulatore dall'esterno}
 
