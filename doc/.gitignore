@@ -6,3 +6,5 @@
 *.toc
 *.html
 *.pdf
+*.lof
+*.lot

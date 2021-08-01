@@ -6,6 +6,7 @@
 
 % Abbreviazioni
 \newcommand{\mytitle}{Specifica dei requisiti per la tesi}
+\newcommand{\eng}[1]{\foreignlanguage{english}{#1}} %TODO: add to all english words
 \newcommand{\eg}{\textit{e.g.}}
 \newcommand{\psql}{\texttt{psql(1)}}
 \newcommand{\file}{\textit{file}}
@@ -35,12 +36,12 @@
 
 	\begin{abstract}
 	Questo documento \marginpar{Da espandere.} contiene le specifiche dei
-	requisiti per la tesi sulla simulazione \textit{multi-core} di incendi.
+	requisiti per la tesi sulla simulazione \eng{multi-core} di incendi.
 	\end{abstract}
 
 	\tableofcontents
-	% \listoffigures
-	% \listoftables
+	\listoffigures
+	\listoftables
 \end{titlepage}
 
 \section{Introduzione}
@@ -59,7 +60,7 @@ fornitoci da Tor Vergata. Durante il documento saranno elencati tutti i suoi
 requisiti. Identifichiamo il primo.
 
 \begin{requirement}
-La simulazione deve avvenire \textit{faster-then-real-time} per poter effetuare
+La simulazione deve avvenire \eng{faster-then-real-time} per poter effetuare
 delle previsioni.
 \end{requirement}
 
@@ -166,9 +167,12 @@ P_{ij} &=& P_{ij}\textrm{.}
 	$W^*$ & ampiezza area monitorata & celle\\
 	$\beta$ & consumo combustibile & combustibile/secondo\\
 	$\theta$ & probailità propagazione & adimensionale\\
+	$k_0$ & ottimizzazione soglia & adimensionale\\
+	$k_1$ & ottimizzazione vento & adimensionale\\
+	$k_2$ & ottimizzazione pendenza & adimensionale\\
 	\hline
 \end{tabular}
-\caption{Parametri globali della simulazione.}
+\caption{Parametri globali del modello.}
 \label{tab:globals}
 \end{table}
 
@@ -215,18 +219,10 @@ Ora tutta la parte statica del modello è stata descritta e possiamo passare all
 sua dinamica. Questa è descritta tramite tre funzioni diopendenti descritte
 nella tabella \ref{tab:dynamic}.
 
-Le funzione in quest'ultima tabella sono definite come segue
-
-\marginpar{Definirla una probabilità è incorretto siccome la funzione è
-deterministica.}
-
-\begin{equation}
-p_{ij}(\e_1, \e_2, t) = k_0 S_{ij} C(i+\e_1, j+\e_2) d(\e_1, \e_2) f_w f_P\textrm{,}
-\end{equation}
-
-dove $k_0$ è un parametro di ottimizzazione di soglia e
+Le funzioni in quest'ultima tabella sono definite come segue
 
 \begin{eqnarray}
+p_{ij}(\e_1, \e_2, t) &=& k_0 S_{ij} C(i+\e_1, j+\e_2) d(\e_1, \e_2) f_w f_P\textrm{,}\label{eq:prob}\\
 (\e_1, \e_2) &\in& \Gamma = \{\,(x, y) \mid x, y \in \{-1, 0, 1\}\,\}\textrm{,}\\
 C(i,j) &=& \sin\left(\pi\frac{B_{ij}}{\gamma_{ij}}\right)\textrm{,}\label{eq:combust}\\
 d(\e_1,\e_2) &=& \left(1-\frac{1}{2}|\e_1\e_2|\right)\textrm{,}\label{eq:disom}\\
@@ -235,16 +231,16 @@ f_w &=& \exp\left(k_1 F(i+\e_1, j+\e_2)\frac{\begin{array}{l}\e_1\cos(D(i+\e_1,j
 f_P &=& \exp\left(k_2\arctan\left(\frac{P_{ij}-P_{i+\e_1j+\e_2}}{L}\right)\right)\textrm{.}\label{eq:slope}
 \end{eqnarray}
 
-L'equazione \ref{eq:combust} indica lo stato di combusione della cella, la
-\ref{eq:disom} è il fattore di disomogeneità, mentre \ref{eq:wind} e
-\ref{eq:slope} sono il contributo alla probabilità del vento e della pendenza
-rispettivamente.
+\marginpar{Definirla una probabilità è incorretto siccome la funzione è
+deterministica.}
 
-Nell'equazione \ref{eq:wind} $k_1$ è un parametro di ottimizzazione relativo al
-contributo vento, nell'equazione \ref{eq:slope} $k_2$ è il parametro di
-ottimizzazione relativo al contributo pendenza.
+Dove l'equazione \ref{eq:prob} è la probabilità che un incendio si traspetta da
+una cella $(i, j)$ ad un'altra $(i+\e_1, j+\e_2)$. Al suo interno l'equazione
+\ref{eq:combust} indica lo stato di combusione della cella, la \ref{eq:disom} è
+il fattore di disomogeneità, mentre \ref{eq:wind} e \ref{eq:slope} sono il
+contributo alla probabilità del vento e della pendenza rispettivamente.
 
-Sia \marginpar{Da riscrivere il paragrafo su $Q$.}
+Invece \marginpar{Da riscrivere il paragrafo su $Q$.}
 
 \begin{equation}
 Q_{ij}(\e_1, \e_2, t) = \cases{1, &se $p_{ij}(\e_1, \e_2) N_{i+\e_1j+\e_2} > \theta$;\cr
@@ -253,8 +249,8 @@ Q_{ij}(\e_1, \e_2, t) = \cases{1, &se $p_{ij}(\e_1, \e_2) N_{i+\e_1j+\e_2} > \th
 
 Quindi $Q_{ij}(\e_1, \e_2, t) = 1 \iff N_{i+\e_1j+\e_2} = 1 \land
 p_{ij}(\e_1, \e_2) > \theta$, in questo caso l'incendio nella cella limitrofa
-$(i+\e_1, j+\e_2$ si trasferisce nella cella $(i,j)$. Per controllare tutte le
-celle limitrofe ad una useremo la seguente formula
+$(i+\e_1, j+\e_2$ si trasferisce nella cella $(i,j)$. In fine per controllare
+tutte le celle limitrofe ad una useremo la seguente formula
 
 \begin{equation}
 V_{ij}(t) = \max\{\,Q_{ij}(\e_1, \e_2, t) \mid (\e_1, \e_2) \in \Gamma\,\}\textrm{,}
@@ -263,9 +259,9 @@ V_{ij}(t) = \max\{\,Q_{ij}(\e_1, \e_2, t) \mid (\e_1, \e_2) \in \Gamma\,\}\textr
 la quale è 1 quando una cella limitrofa a $(i, j)$ porta l'incendio nella cella
 stessa.
 
-\marginpar {Ovviamente l'input esogeno può cambiare nel tempo.}
+\marginpar {Ovviamente l'\eng{input} esogeno può cambiare nel tempo.}
 
-In fine sia $u_{ij}$ l'input esogeno che definisce o lo stato di quete o di
+In fine sia $u_{ij}$ l'\eng{input} esogeno che definisce o lo stato di quete o di
 incendio con i valori 0 e 1 rispettivamente, che all'atto pratico è ottenuta
 attraverso dati sul campo. La dinamica del sistema è la seguente:
 
@@ -293,106 +289,177 @@ B_{ij}(t+1) &=& \cases{\max(0, B_{ij}(t)-\beta\tau), &se $N_{ij}(t) > 0$;\cr
 \label{tab:dynamic}
 \end{table}
 
-% TODO: scrivere come si gestiscono le "condizioni limite"
-% TODO: avvertire il prof della conversione fatta a 1 invece che a 0 (o quello che era)
-% TODO: il vento è gaussiano
+% TODO: descrivere il comportamento del vento (gaussiano)
 
 \section{Il Simulatore}
 
-Da qua in poi è tutto da riscrivere più o meno
+\marginpar{Questa sezione è da riorganizzare e riscrivere.}
 
-\noindent\hrulefill
+Il programma dovrà simulare l'evoluzione dell'incendio dati il modello e i dati
+descritti sopra. Data la grandezza dell'area descritta\footnote{Probabilmente
+questo è il termine sbagliato.} da \cite{laeae}, il programma effetuerà la
+simulaizone solo su una piccola parte di quest'ultima.
 
-L'obbiettivo della tesi è scrivere un programma che simuli efficentemente il
-modello descritto sopra. Per fare ciò esso avrà bisogno di dati meteorologici e
-geografici, oltre che dei punti di partenza dell'incendio e di alcuni parametri
-di configurazione come l'orizonte di simulazione.
+\begin{requirement}\label{thm:subrect}
+Il simulatore deve poter simulare su dei sotto rettangoli di \cite{laeae} a
+scelta.
+\end{requirement}
 
-I dati sullo stato dell'incendio e del meteo potrebbero cambiare nel mentre la
-simulazione è in corso. Il primo potrebbe succedere ad esempio nel caso di
-incendi dolosi se un piromane dovesse appiccare nuovi focolai, il secondo
-invece a causa del naturale evolvere del meteo e dati come la presenza o medo di
-pioggia e la direzione del vento potrebbero cambiare drasticamente la nostra
-simulazione.
+Nel modello non è specificata nessuna condizione di terminazione e per quanto
+sia possibile far continuare la simulazione per un tempo indeterminato è più
+comodo specificare un \emph{orizonte di simulazione}.
+
+\begin{requirement}\label{thm:horizon}
+La simulazione andrà avanti fino ad un determinato orizonte $h$.
+\end{requirement}
+
+Inoltre avrebbe senso e farebbe comodo agli utenti poter vedere lo stato della
+simulazione anche prima che questa termini, per poter creare cose come ad
+esempio animazioni.
+
+\begin{requirement}\label{thm:snapshot}
+Il simulatore deve esporre il suo stato interno ogni $s$ step, questo numero è
+detto frequenza di \eng{snapshot}.
+\end{requirement}
+
+Alcuni dati, come la direzione e la forza del vento, potrebbero drasticamente
+cambiare ad un certo punto della simulazione. Essendo questa
+\eng{faster-then-real-time} potrebbe essere necessario riprendere la
+simulzione da un certo punto nel passato\footnote{Di cui convenientemente
+teniamo degli \eng{snapshot}, come descritto nel requisito \ref{thm:snapshot}.}.
+Lo stesso discorso vale per la comparsa di nuovi focolai in punti non
+previsti\footnote{Questa è un eventualità probabile nel caso di incendi dolosi.}.
+
+\marginpar{Ritengo sia meglio fare così rispetto al monitorare per la presenza
+di nuovi \eng{file} dirante la simulazione, sia per semplicità che per
+correttezza siccome la simulaizone è \eng{faster-then-real-time}.}
 
 \begin{requirement}
-Il simulatore deve poter aggiornare i dati in tempo reale.
+Il simulatore deve poter essere inizializzato con uno stato iniziale arbitrario.
+\end{requirement}
+
+\begin{requirement}\label{thm:termination}
+Il simulatore deve poter essere fermato in maniera ``gentile''.
+\end{requirement}
+
+Il sottorettangolo del requisito \ref{thm:subrect}, sarà espresso come una
+coppia di coordinate $p_1$ e $p_2$ che indicheranno rispettivamente l'angolo in
+basso a sinistra e l'angolo in alto a destra del rettandolo selezionato.
+
+Per garantire la correttezza dei risultati il simulatore deve poter validare
+ciò che riceve in \eng{input} e per fare ciò deve ricevere delle specifiche sul
+formato dei dati, come la loro grana (i.e. quanto spazio ricopre ogni singolo
+\eng{datapoint}).
+
+\begin{requirement}\label{thm:schema}
+Il dati devono essere corredati di una sorta di schema che ne specifici le
+caratteristiche.
+\end{requirement}
+
+\begin{requirement}
+Il simulatore deve validare i dati che riceve basandosi sugli schemi del
+requisito \ref{thm:schema}.
+\end{requirement}
+
+Per come è scritto il modello se eseguito su un'area rettangolare non specifica
+cosa fare sui contorni del rettangolo, ovvero cosa fare quanto intorno ad ogni
+cella non ci sono 8 altre celle.
+
+\begin{requirement}\label{thm:boundary}
+Il siumulatore deve gestire la simulazione nei contorni dell'area rettangolare.
+\end{requirement}
+
+Mentre come descritto dal requisito \ref{thm:schema} i dati hanno delle grane,
+non necessariamente uguali tra loro, anche il simulatore ne ha una sua interna
+sia per permettere una maggiore precisione nei risultati che per permettere dati
+con granularità diversa.
+
+\begin{requirement}\label{thm:grain}
+Il simulatore deve avere una sua grana interna, necessariamente minore uguale a
+quella dei dati ricevuti in \eng{input}.
 \end{requirement}
 
 \subsection{Dettagli di implementazione}
 
-I dati saranno quindi presi in input da tre \file\ CSV: uno per i dati
-geografici, uno per quelli meteorologici e uno per lo stato iniziale
-dell'incendio.  Ognuno di questi file sarà corredato da un'altro CSV che ne
-conterrà le informazioni sulla ``grana''. I parametri di configurazione saranno
-presi da linea di comando.
-
-Dato che ogni CSV potrebbe avere una ``grana'' diversa il simulatore dovra
-essere configurato con una sua dimensione di cella interna che deve essere
-sempre minore uguale della minima grana dei tre \file.
+Il simulatore girera su un \eng{kernel} Linux, e sarà, probabilmente, invocato
+da un servizio \eng{web}. Tutti i dati necessari per la simulazione saranno
+letti da \eng{file} CSV.
 
 \begin{requirement}
-Il simulatore deve poter leggere i CSV.
+Il simulatore deve poter leggere i \eng{file} CSV.
 \end{requirement}
 
-Per permettere l'aggiornamento di questi dati durante la simulazione il
-simulatore monitorerà la presenza di \file\ con nomi come \texttt{land.csv},
-\texttt{meteo.csv} e \texttt{fire.csv}. Nel caso in cui uno di questi file sia
-presente, dopo l'inizio della simulazione il simulatore provvederà a leggerli,
-aggiornare il suo stato interno e cambiargli nome\footnote{con nomi tipo
-\texttt{land\_<timestamp>.csv}} (o eliminarli) per evitare di rileggerli in
-futuro.
+La terminazione ``gentile'', descritta nel requisito \ref{thm:termination} sara
+effetuata alla ricezione del segnale \texttt{SIGUSR1} dal processo.
 
 \begin{requirement}
-Il simulaotre deve poter monitorare la presenza di file.
+Il programma deve poter ricevere e gestire segnali.
 \end{requirement}
 
-Un implementazione ingenua della scrittura di questi file per l'aggiornamento
-dei dati potrebbe generare una \textit{race-condition}, ovvero la lettura di
-incompletidati, dato che la scrittura in un file non è atomica. Per evirate ciò
-una strateggia potrebbe essere quella di scrivere i dati in file con nomi tipo
-\texttt{tmpXXX} e una volta finito di scriverli si può usare \texttt{rename(2)},
-che è atomica, per dargli il nome giusto. Questo metodo sarà anche usata per la
-scrittura dei file.
+Il requisito \ref{thm:boundary} sarà gestito semplicemente ignorando il contorno
+dell'area rettangolare, questo perché l'area selezionata dovrebbe essere
+comunque abbastanza grande da non influire sul risultato finale e per rimanere
+il più fedeli al modello possibile, senza contare la semplicità di
+implementazione.
 
-I risultati della simulazione saranno scritti, con una frequenza scelta
-dall'utente, in un \file\ CSV.
+% NOTE: una figura del bordo ignorato ci starebbe bene, magari disegnando delle
+% `X' sul contorno.
 
-\subsubsection{Parametri da linea di comando (non è vero sono sempre passati da
-file CSV)}
+Oltre ai parametri nella tabella \ref{tab:globals} il simulatore ha anche
+bisogno di alcuni parametri agiuntivi, descritti rispettivamente nei requisiti
+\ref{thm:horizon}, \ref{thm:snapshot}, \ref{thm:subrect} e \ref{thm:grain},
+riassunti nella tabella \ref{tab:config}.
 
-\begin{itemize}
-\item $\tau$ il passo di tempo per la simulazione
-\item $h$ orizonte di simulazione
-\item $s$ frequenza degli \textit{snapshot} dello stato della simulazione
-\item $l$ lunghezza in metri della singola cella (interna al simualtore)
-\item $w$ larghezza in metri della singola cella (interna al simulatore)
-\item $p_1$ primo punto del rettancolo selezionato sulla mappa
-\item $p_2$ secondo punto del rettancolo selezionato sulla mappa
-\item $\theta$ la soglia di propagazione dell'incendio
-\item $\beta$ la velocità di propagazione dell'incendio
-\item $\alpha$ costante di conversione del compustibile (nostra pezza in attesa
-di Tor Vergata)
-\item $k_0$ ottimizzazione di soglia;
-\item $k_1$ ottimizzazione del contributo del vento;
-\item $k_2$ ottimizzazione del contributo dell'inclinazione;
-\end{itemize}
+\begin{table}
+\centering
+\begin{tabular}{|c|l|}
+	\hline
+	\textbf{Nome parametro} & \textbf{Descrizione}\\
+	\hline
+	$h$ & orizonte di simulazione\\
+	$s$ & frequanza \eng{snapshot}\\
+	$p_1$ & primo punto rettangolo\\
+	$p_2$ & secondo punto rettangolo\\
+	$g$ & grana simulatore\\
+	\hline
+\end{tabular}
+\caption{Parametri di configurazione addizionali del simulatore.}
+\label{tab:config}
+\end{table}
+
+% TODO: definire bene il formato dei file di output, perché da essi dipende
+% la possibilità di poter far cominciare la similazione con in input uno stato
+% raggiunto in precedenza.
+
+\vspace{0.5cm}{\huge -- Da qua in poi è tutto da riscrivere --}
+
+\noindent\hrulefill % ----------------------------------------------------------
+
+% $\alpha$ costante di conversione del compustibile (nostra pezza in attesa di Tor Vergata)
 
 \subsubsection{Formato dei CSV}
 
+\marginpar{Unità di misura dei dati? Tipo dei dati (int o float)?}
+
 I CSV emessi dalla base di dati conterranno in ogni riga i dati che si
 riferiscono ad una singola cella. I \file\ che ne indicano la grana avranno
-invece la seguente struttura:
+invece una struttura come quella della tabella \ref{tab:grain}, dove $x_n$ e
+$y_n$ rappresentano le coordinate degli angoli dell'area di interesse mentre
+\eng{length} e \eng{width} rappresentano, rispettivamente, la lunghezza e l
+larghezza di ogni singola cella.
 
-\footnote{Domanda}{unità di misura dei dati e tipo (int o float)?}
-\begin{verbatim}
-x1,y1,x2,y2,length,width
-450070,12980,670010,13300,1,1
-\end{verbatim}
-
-dove \texttt{xn} e \texttt{yn} rappresentano le coordinate degli angoli
-dell'area di interesse mentre \texttt{length} e \texttt{width} rappresentano,
-rispettivamente, la lunghezza e l larghezza di ogni singola cella.
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+	\hline
+	$x_1$ & $y_1$ & $x_2$ & $y_2$ & \textbf{\eng{length}} & \textbf{\eng{width}}\\
+	\hline
+	450070 & 12980 & 670010 & 13300 & 1 & 1\\
+	\hline
+\end{tabular}
+\caption{Esempio \eng{file} grana.}
+\label{tab:grain}
+\end{table}
 
 Quelli emessi dal simulatore invece avranno la seguente struttura:
 
@@ -407,36 +474,63 @@ quantità di combustibile ancora a disposizione.
 
 \section{Isolamento del simulatore dall'esterno}
 
-Per isolare il simulatore dall'esterno useremo una base di dati, in particolare
-PostgreSQL, che ci permetterà di gestire i vari dati di cui la simulazione ha
-bisogno in maniera uniforme.
+Per isolare il simulatore dall'esterno ed integrare tutti i dati useremo una
+base di dati, in particolare PostgreSQL 13 \cite{psql}, che ci permetterà di
+gestire i vari dati di cui la simulazione ha bisogno in maniera uniforme.
 
 \subsection{Creazione dello schema per la base di dati}
 
-Questo programma deve creare la base di dati, tabelle con vincoli, \textit{view}
+Questo programma deve creare la base di dati, tabelle con vincoli, \eng{view}
 sui dati e vincoli per mantenerne la consistenza. Questo può essere realizzato
 tramite un file SQL che verrà interpretato da \psql.
 
 \subsection{Importazione dei dati}
 \label{sec:import}
 
-Questo programma deve importare dati nella base di dati, principalmente CSV, un
-esempio di come si potrebbe fare da \psql\ è il seguente:
+Questo programma deve importare dati nella base di dati, principalmente dei CSV,
+un esempio di come si potrebbe fare da \psql\ è in figura \ref{fig:import}.
 
-\begin{verbatim}
-\copy <table> from 'data.csv' with format csv;
-\end{verbatim}
+\begin{figure}
+\centering\verb+\copy <table> from 'data.csv' with format csv;+
+\caption{Importazione dei dati nella base.}
+\label{fig:import}
+\end{figure}
 
 \subsection{Esportazione dei dati}
 
 In maniera molto simile all'importazione (sezione \ref{sec:import}) i dati
-possono essere esportati grazie a \psql.
+possono essere esportati grazie a \psql, come in figura \ref{fig:export}.
 
-\begin{verbatim}
-\copy <table> to 'export.csv' with format csv;
-\end{verbatim}
+\begin{figure}
+\centering\verb+\copy <table> to 'export.csv' with format csv;+
+\caption{Esportazione dei dati dalla base.}
+\label{fig:export}
+\end{figure}
 
 \bibliographystyle{plain}
 \bibliography{document}
+
+\iffalse % Old stuff for updating the data mid simulation
+I dati saranno quindi presi in \eng{input} da tre \file\ CSV: uno per i dati
+geografici, uno per quelli meteorologici e uno per lo stato iniziale
+dell'incendio. Ognuno di questi file sarà corredato da un'altro CSV che ne
+conterrà le informazioni sulla ``grana''.
+
+Per permettere l'aggiornamento di questi dati durante la simulazione il
+simulatore monitorerà la presenza di \file\ con nomi come \texttt{land.csv},
+\texttt{meteo.csv} e \texttt{fire.csv}. Nel caso in cui uno di questi file sia
+presente, dopo l'inizio della simulazione il simulatore provvederà a leggerli,
+aggiornare il suo stato interno e cambiargli nome\footnote{con nomi tipo
+\texttt{land\_<timestamp>.csv}} (o eliminarli) per evitare di rileggerli in
+futuro.
+
+Un implementazione ingenua della scrittura di questi file per l'aggiornamento
+dei dati potrebbe generare una \eng{race-condition}, ovvero la lettura di
+incompletidati, dato che la scrittura in un file non è atomica. Per evirate ciò
+una strateggia potrebbe essere quella di scrivere i dati in file con nomi tipo
+\texttt{tmpXXX} e una volta finito di scriverli si può usare \texttt{rename(2)},
+che è atomica, per dargli il nome giusto. Questo metodo sarà anche usata per la
+scrittura dei file.
+\fi
 
 \end{document}
