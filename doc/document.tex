@@ -397,13 +397,40 @@ Il programma deve poter ricevere e gestire segnali.
 \end{requirement}
 
 Il requisito \ref{thm:boundary} sarà gestito semplicemente ignorando il contorno
-dell'area rettangolare, questo perché l'area selezionata dovrebbe essere
-comunque abbastanza grande da non influire sul risultato finale e per rimanere
-il più fedeli al modello possibile, senza contare la semplicità di
-implementazione.
+dell'area rettangolare, come in figura \ref{fig:boundary}, questo perché l'area
+selezionata dovrebbe essere comunque abbastanza grande da non influire sul
+risultato finale e per rimanere il più fedeli al modello possibile, senza
+contare la semplicità di implementazione.
 
-% NOTE: una figura del bordo ignorato ci starebbe bene, magari disegnando delle
-% `X' sul contorno.
+\begin{figure}
+\centering
+\setlength{\unitlength}{0.7cm}
+\begin{picture}(6,6)
+	% Grid
+	\thicklines
+	\newlength{\cellside}\setlength{\cellside}{1.5\unitlength}
+	\newcommand{\cellbars}{4}
+	\multiput(0,0)(\cellside,0){\cellbars}{\line(0,1){5}} % columns
+	\multiput(0,0)(0,\cellside){\cellbars}{\line(1,0){5}} % rows
+
+	\newlength{\dotslength}\settowidth{\dotslength}{\dots}
+	\newlength{\dotsdist}\setlength{\dotsdist}{6\unitlength minus 0.5\cellside}
+	\addtolength{\dotsdist}{-\dotslength}
+	\put(\dotsdist, 0.5\cellside){\dots}
+	\put(0.5\cellside, \dotsdist){\vdots}
+	\put(\dotsdist, \dotsdist){$\cdot^{\cdot^\cdot}$} % Ugly hack
+
+	\newsavebox{\cross}
+	\savebox{\cross}(0.7,0.7)[bl]{
+		\put(0,0){\line(1,1){1}}
+		\put(1,0){\line(-1,1){1}}
+	}
+	\multiput(0.3,0.3)(\cellside,0){3}{\usebox{\cross}}
+	\multiput(0.3,0.3)(0,\cellside){3}{\usebox{\cross}}
+\end{picture}
+\caption{Contorno ignorato.}
+\label{fig:boundary}
+\end{figure}
 
 Oltre ai parametri nella tabella \ref{tab:globals} il simulatore ha anche
 bisogno di alcuni parametri agiuntivi, descritti rispettivamente nei requisiti
