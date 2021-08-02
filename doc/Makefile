@@ -9,7 +9,7 @@ BIBTEX = bibtex
 all: document.pdf NOTES.html
 
 clean:
-	rm -rf document.aux document.bbl document.blg document.log document.out document.toc
+	rm -rf document.aux document.bbl document.blg document.log document.out document.toc document.lof document.lot
 
 .tex.pdf:
 	$(LATEX) $(TEXFLAGS) $* \
