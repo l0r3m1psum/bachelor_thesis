@@ -347,10 +347,6 @@ Il simulatore deve poter essere inizializzato con uno stato iniziale arbitrario.
 Il simulatore deve poter essere fermato in maniera ``gentile''.
 \end{requirement}
 
-Il sottorettangolo del requisito \ref{thm:subrect}, sarà espresso come una
-coppia di coordinate $p_1$ e $p_2$ che indicheranno rispettivamente l'angolo in
-basso a sinistra e l'angolo in alto a destra del rettandolo selezionato.
-
 Per garantire la correttezza dei risultati il simulatore deve poter validare
 ciò che riceve in \eng{input} e per fare ciò deve ricevere delle specifiche sul
 formato dei dati, come la loro grana (i.e. quanto spazio ricopre ogni singolo
@@ -393,6 +389,10 @@ simulazione saranno letti da \eng{file} CSV.
 \begin{requirement}
 Il simulatore deve poter leggere i \eng{file} CSV.
 \end{requirement}
+
+Il sottorettangolo del requisito \ref{thm:subrect}, sarà espresso come una
+coppia di coordinate $p_1$ e $p_2$ che indicheranno rispettivamente l'angolo in
+basso a sinistra e l'angolo in alto a destra del rettandolo selezionato.
 
 La terminazione ``gentile'', descritta nel requisito \ref{thm:termination} sara
 effetuata alla ricezione del segnale \texttt{SIGUSR1} dal processo.
