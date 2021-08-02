@@ -386,9 +386,9 @@ quella dei dati ricevuti in \eng{input}.
 
 \subsection{Dettagli di implementazione}
 
-Il simulatore girera su un \eng{kernel} Linux, e sarà, probabilmente, invocato
-da un servizio \eng{web}. Tutti i dati necessari per la simulazione saranno
-letti da \eng{file} CSV.
+Il simulatore girera su un \eng{kernel} Linux \cite{kern}, e sarà,
+probabilmente, invocato da un servizio \eng{web}. Tutti i dati necessari per la
+simulazione saranno letti da \eng{file} CSV.
 
 \begin{requirement}
 Il simulatore deve poter leggere i \eng{file} CSV.
@@ -459,6 +459,13 @@ riassunti nella tabella \ref{tab:config}.
 \caption{Parametri di configurazione addizionali del simulatore.}
 \label{tab:config}
 \end{table}
+
+Per garantire una certa flessibilità e usabilità i file da leggere e la cartella
+dove verrano messi gli \eng{snapshot} saranno specificati da linea di comando.
+
+\begin{requirement}
+Il simulatore deve poter leggere gli argomenti da linea di comando.
+\end{requirement}
 
 % TODO: definire bene il formato dei file di output, perché da essi dipende
 % la possibilità di poter far cominciare la similazione con in input uno stato
