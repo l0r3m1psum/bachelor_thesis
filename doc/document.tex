@@ -53,7 +53,7 @@
 
 Questa tesi fa parte di un progetto per fornire ai vigili del fuoco uno
 strumento per prevedere l'espansione di un incendio in un'area forestale. Questo
-saraà fatto utilizzando dei sensori sul campo e dei satelliti per raccogliere le
+sarà fatto utilizzando dei sensori sul campo e dei satelliti per raccogliere le
 informazioni. Queste ultime saranno utilizzate da un modello matematico, che
 verrà realizzato da un simulatore. In fine i vigili del fuoco lo utilizzeranno
 tramite un'interfaccia web.
@@ -72,7 +72,7 @@ delle previsioni.
 \section{Dati a disposizione}
 
 Il simulatore avrà a disposizioni dati geografici e meteo, da satelliti, sulla
-zona di interesse per la simulazione. La rona è divisa in rettangoli tutti
+zona di interesse per la simulazione. La zona è divisa in rettangoli tutti
 uguali e ad ognuno di questi rettangoli avrà dei dati uniformi.
 
 Per identificare i rettangoli sulla mappa essi verranno forniti con coordinate
@@ -220,9 +220,9 @@ P_{ij} &=& P_{ij}\textrm{.}
 
 \subsection{Dinamica}
 
-Ora che tutta la parte statica del modello è stata descritta e possiamo passare
-alla sua dinamica. Questa è descritta tramite tre funzioni diopendenti descritte
-nella tabella \ref{tab:dynamic}.
+Ora che tutta la parte statica del modello è stata descritta, possiamo passare
+alla sua dinamica. Questa è descritta tramite tre funzioni dipendenti dal tempo
+descritte nella tabella \ref{tab:dynamic}.
 
 \begin{table}
 \centering
@@ -281,8 +281,8 @@ stessa.
 
 \marginpar {Ovviamente l'\eng{input} esogeno può cambiare nel tempo.}
 
-In fine sia $u_{ij}$ l'\eng{input} esogeno che definisce o lo stato di quete o di
-incendio con i valori 0 e 1 rispettivamente, che all'atto pratico è ottenuta
+In fine sia $u_{ij}$ l'\eng{input} esogeno che definisce o lo stato di quiete o
+di incendio con i valori 0 e 1 rispettivamente, che all'atto pratico è ottenuta
 attraverso dati sul campo. La dinamica del sistema è la seguente:
 
 \begin{eqnarray}
@@ -319,8 +319,8 @@ La simulazione andrà avanti fino ad un determinato orizonte $h$.
 \end{requirement}
 
 Inoltre avrebbe senso e farebbe comodo agli utenti poter vedere lo stato della
-simulazione anche prima che questa termini, per poter creare cose come ad
-esempio animazioni.
+simulazione anche prima che questa termini, per poter creare cose come
+animazioni.
 
 \begin{requirement}\label{thm:snapshot}
 Il simulatore deve esporre il suo stato interno ogni $s$ step, questo numero è
@@ -336,7 +336,7 @@ Lo stesso discorso vale per la comparsa di nuovi focolai in punti non
 previsti\footnote{Questa è un eventualità probabile nel caso di incendi dolosi.}.
 
 \marginpar{Ritengo sia meglio fare così rispetto al monitorare per la presenza
-di nuovi \eng{file} dirante la simulazione, sia per semplicità che per
+di nuovi \eng{file} durante la simulazione, sia per semplicità che per
 correttezza siccome la simulaizone è \eng{faster-then-real-time}.}
 
 \begin{requirement}
