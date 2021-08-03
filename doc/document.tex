@@ -13,6 +13,7 @@
 \newcommand{\psql}{\texttt{psql(1)}}
 \newcommand{\file}{\textit{file}}
 \newcommand{\e}{\epsilon}
+\newcommand{\combvar}{Kg}
 
 \newtheorem{requirement}{Requisito}
 
@@ -61,28 +62,32 @@ tramite un'interfaccia web.
 \section{Ambito della Tesi}
 
 La tesi si occuperà esclusivamente dell'implementazione del modello matematico
-fornitoci da Tor Vergata. Durante il documento saranno elencati tutti i suoi
-requisiti. Identifichiamo il primo.
+fornitoci da Tor Vergata \cite{mod}. Durante il documento saranno elencati tutti
+i suoi requisiti. Identifichiamo il primo.
 
-\begin{requirement}
+% TODO: add all errors corrected in the model
+
+\begin{requirement}\label{thm:faster}
 La simulazione deve avvenire \eng{faster-then-real-time} per poter effetuare
 delle previsioni.
 \end{requirement}
 
 \section{Dati a disposizione}
 
-Il simulatore avrà a disposizioni dati geografici e meteo, da satelliti, sulla
-zona di interesse per la simulazione. La zona è divisa in rettangoli tutti
-uguali e ad ognuno di questi rettangoli avrà dei dati uniformi.
+Il simulatore avrà a disposizioni dati geografici da satellite \cite{cop} e
+meteo da stazioni meteo sul posto, sulla zona di interesse per la simulazione.
+La zona è divisa in rettangoli tutti uguali e ad ognuno di questi rettangoli
+avrà dei dati uniformi.
 
 Per identificare i rettangoli sulla mappa essi verranno forniti con coordinate
-LAEA\footnote{proiezione Lambert azimuthal Equal-Area} Europe \cite{laeae} con
+LAEA\footnote{Proiezione Lambert azimuthal Equal-Area} Europe \cite{laeae} con
 sistema di riferimento ETRS89\footnote{European Terrestrial Reference System}
 \cite{etrs89}.
 
 \paragraph{Dati Geografici}
 
-\marginpar{Più avanti tutti questi dati saranno descritti con più precisione.}
+\marginpar{Nel paragrafo \ref{sec:statics} tutti questi dati sono descritti con
+più precisione.}
 
 Essi sono: l'altimetria, il tipo di foresta, il livello di urbanizzazione, il
 tipo di acqua presente nella zona e la carta natura.
@@ -91,7 +96,7 @@ tipo di acqua presente nella zona e la carta natura.
 
 Quelli di interesse sono solo direzione e velocità del vento.
 
-\section{Il Modello}
+\section{Il Modello}\label{sec:model}
 
 Il modello matematico che descrive l'evoluzione dell'incendio in un'area
 forestale è uno di tipo automa cellulare come quello in figura
@@ -132,7 +137,7 @@ forestale è uno di tipo automa cellulare come quello in figura
 \label{fig:automata}
 \end{figure}
 
-\subsection{Statica}
+\subsection{Statica}\label{sec:statics}
 
 Il modello ha dei parametri che sono costanti e uguali per tutte le celle,
 descritti nella tabella \ref{tab:globals} ed altri, sempre costanti, che possono
@@ -149,9 +154,9 @@ con le seguenti corrispondenze matematiche:
 	$\tau$ & passo temporale & secondi\\
 	$L$ & lunghezza della singola cella & metri\\
 	$W$ & ampiezza della singola cella & metri\\
-	$L^*$ & lunghezza area monitorata & celle\\
-	$W^*$ & ampiezza area monitorata & celle\\
-	$\beta$ & consumo combustibile & combustibile/secondo\\
+	$L^*$ & lunghezza area monitorata & metri\textsuperscript{2}\\
+	$W^*$ & ampiezza area monitorata & metri\textsuperscript{2}\\
+	$\beta$ & consumo combustibile & \combvar/secondo\\
 	$\theta$ & probailità propagazione & adimensionale\\
 	$k_0$ & ottimizzazione soglia & adimensionale\\
 	$k_1$ & ottimizzazione vento & adimensionale\\
@@ -164,18 +169,18 @@ con le seguenti corrispondenze matematiche:
 
 \begin{table}
 \centering
-\begin{tabular}{|c|l|}
+\begin{tabular}{|c|l|c|}
 	\hline
-	\textbf{Nome parametro} & \textbf{Descrizione}\\
+	\textbf{Nome parametro} & \textbf{Descrizione} & \textbf{Unità di Misura}\\
 	\hline
-	$H_{ij}$ & altezza media della vegetazione\\
-	$A_{ij}$ & abitazione media\\
-	$W_{ij}$ & presenza di acqua\\
-	$\gamma_{ij}$ & quantità di combustibile\\ % non è chiaro come calcolarlo
-	$S_{ij}$ & indice di infiammabilità\\
-	$P_{ij}$ & altitudine media\\
-	$D_{ij}$ & direzione del vento\\
-	$F_{ij}$ & velocità del vento\\
+	$H$ & altezza media della vegetazione & metri\\
+	$A$ & percentuale abitazione & adimensionale\\
+	$W$ & percentuale acqua presente & adimensionale\\
+	$\gamma$ & quantità di combustibile & \combvar\\
+	$S$ & percentuale infiammabilità & adimensionale\\
+	$P$ & altitudine media & metri\\
+	$D$ & direzione del vento & radianti\\
+	$F$ & velocità del vento & metri/secondo\\
 	\hline
 \end{tabular}
 \caption{Parametri delle singole celle.}
@@ -188,32 +193,32 @@ con le seguenti corrispondenze matematiche:
 	\hline
 	\textbf{Nome Dato} & \textbf{Descrizione} & \textbf{Intervallo valori}\\
 	\hline
-	$G_{ij}$ & Foreste & 0,1,2,255\\
-	$U_{ij}$ & Urbanizzazione & 0,\ldots,100,255\\
-	$W1_{ij}$ & Water1 & 0,\ldots,4,253,255\\
-	$W2_{ij}$ & Water2 & 0,1\\
-	$P_{ij}$ & Altimetria & 0,\ldots,4380\\
+	$G$ & Foreste & 0,1,2,255\\
+	$U$ & Urbanizzazione & 0,\ldots,100,255\\
+	$W1$ & Water1 & 0,\ldots,4,253,255\\
+	$W2$ & Water2 & 0,1\\
+	$P$ & Altimetria & 0,\ldots,4380\\
 	\hline
 \end{tabular}
 \caption{Dati geografici per le singole celle.}
 \label{tab:geo}
 \end{table}
 
-\marginpar{In seguito saranno fatte delle precisazioni su alcune di queste
-corrispondenze.}
+\marginpar{Nel paragrafo \ref{sec:implementation} vengono fatte delle
+precisazioni su alcune di queste corrispondenze.}
 
 \begin{eqnarray}
 H_{ij} &=& \cases{1 + G_{ij}, &se $0 \leq H_{ij} \leq 2$;\cr
-                  0, &se $H_{ij} = 255$.}\\
+                  0, &se $H_{ij} = 255$.}\label{eq:height}\\
 A_{ij} &=& \cases{U_{ij}/100, &se $0 \leq U_{ij} \leq 100$;\cr
-                  0, &se $U_{ij} = 255$.}\\
+                  0, &se $U_{ij} = 255$.}\label{eq:inhabitants}\\
 W_{ij} &=& \cases{0, &se $W1_{ij} = 0$;\cr
                   1, &se $W1_{ij} = 1$;\cr
                   0.75, &se $W1_{ij} = 2$;\cr
                   0.75, &se $W1_{ij} = 3$;\cr
                   0.5, &se $W1_{ij} = 4$;\cr
                   1, &se $W1_{ij} = 253$;\cr
-                  1, &se $W1_{ij} = 255$.}\\
+                  1, &se $W1_{ij} = 255$.}\label{eq:water}\\
 S_{ij} &=& H_{ij} \cdot (1-A_{ij}) \cdot (1-W_{ij})\textrm{,}\\
 P_{ij} &=& P_{ij}\textrm{.}
 \end{eqnarray}
@@ -230,9 +235,9 @@ descritte nella tabella \ref{tab:dynamic}.
 	\hline
 	\textbf{Nome parametro} & \textbf{Descrizione}\\
 	\hline
-	$B_{ij}(t)$ & combustibile disponibile\\
-	$N_{ij}(t)$ & stato (in fiamme o meno)\\
-	$p_{ij}(\epsilon_1, \epsilon_2, t)$ & probabilità di trasmissione\\
+	$B(t)$ & combustibile disponibile\\
+	$N(t)$ & stato (in fiamme o meno)\\
+	$p(\epsilon_1, \epsilon_2, t)$ & probabilità di trasmissione\\
 	\hline
 \end{tabular}
 \caption{Parametri delle singole celle che variano nel tempo.}
@@ -242,9 +247,9 @@ descritte nella tabella \ref{tab:dynamic}.
 Le funzioni in quest'ultima tabella sono definite come segue
 
 \begin{eqnarray}
-p_{ij}(\e_1, \e_2, t) &=& k_0 S_{ij} C(i+\e_1, j+\e_2) d(\e_1, \e_2) f_w f_P\textrm{,}\label{eq:prob}\\
+p_{ij}(\e_1, \e_2, t) &=& k_0 S_{ij} C(i+\e_1, j+\e_2, t) d(\e_1, \e_2) f_w f_P\textrm{,}\label{eq:prob}\\
 (\e_1, \e_2) &\in& \Gamma = \{\,(x, y) \mid x, y \in \{-1, 0, 1\}\,\}\textrm{,}\\
-C(i,j) &=& \sin\left(\pi\frac{B_{ij}}{\gamma_{ij}}\right)\textrm{,}\label{eq:combust}\\
+C(i,j, t) &=& \sin\left(\pi\frac{B_{i+\e_1j+\e_2}(t)}{\gamma_{i+\e_1j+\e_2}}\right)\textrm{,}\label{eq:combust}\\
 d(\e_1,\e_2) &=& \left(1-\frac{1}{2}|\e_1\e_2|\right)\textrm{,}\label{eq:disom}\\
 f_w &=& \exp\left(k_1 F(i+\e_1, j+\e_2)\frac{\begin{array}{l}\e_1\cos(D(i+\e_1,j+\e_2))\\
         \mbox{}+\e_2\sin(D(i+\e_1,j+\e_2))\end{array}}{\sqrt{\e_1^2 + \e_2^2}}\right)\textrm{,}\label{eq:wind}\\
@@ -263,7 +268,7 @@ contributo alla probabilità del vento e della pendenza rispettivamente.
 Invece \marginpar{Da riscrivere il paragrafo su $Q$.}
 
 \begin{equation}
-Q_{ij}(\e_1, \e_2, t) = \cases{1, &se $p_{ij}(\e_1, \e_2) N_{i+\e_1j+\e_2} > \theta$;\cr
+Q_{ij}(\e_1, \e_2, t) = \cases{1, &se $p_{ij}(\e_1, \e_2, t) N_{i+\e_1j+\e_2}(t) > \theta$;\cr
                                0, &altrimenti.}
 \end{equation}
 
@@ -281,9 +286,9 @@ stessa.
 
 \marginpar {Ovviamente l'\eng{input} esogeno può cambiare nel tempo.}
 
-In fine sia $u_{ij}$ l'\eng{input} esogeno che definisce o lo stato di quiete o
-di incendio con i valori 0 e 1 rispettivamente, che all'atto pratico è ottenuta
-attraverso dati sul campo. La dinamica del sistema è la seguente:
+In fine sia $u_{ij}(t)$ l'\eng{input} esogeno che definisce o lo stato di quiete
+o di incendio con i valori 0 e 1 rispettivamente, che all'atto pratico è
+ottenuta attraverso dati sul campo. La dinamica del sistema è la seguente:
 
 \begin{eqnarray}
 N_{ij}(0) &=& u_{ij}(0)\textrm{,}\\
@@ -301,9 +306,10 @@ B_{ij}(t+1) &=& \cases{\max(0, B_{ij}(t)-\beta\tau), &se $N_{ij}(t) > 0$;\cr
 \marginpar{Questa sezione è da riorganizzare e riscrivere.}
 
 Il programma dovrà simulare l'evoluzione dell'incendio dati il modello e i dati
-descritti sopra. Data la grandezza dell'area descritta\footnote{Probabilmente
-questo è il termine sbagliato.} da \cite{laeae}, il programma effetuerà la
-simulaizone solo su una piccola parte di quest'ultima.
+descritti nel paragrafo \ref{sec:model}. Data la grandezza dell'area
+descritta\footnote{Probabilmente questo è il termine sbagliato.} da
+\cite{laeae}, il programma effetuerà la simulaizone solo su una piccola parte di
+quest'ultima.
 
 \begin{requirement}\label{thm:subrect}
 Il simulatore deve poter simulare su dei sotto rettangoli di \cite{laeae} a
@@ -334,10 +340,6 @@ simulzione da un certo punto nel passato\footnote{Di cui convenientemente
 teniamo degli \eng{snapshot}, come descritto nel requisito \ref{thm:snapshot}.}.
 Lo stesso discorso vale per la comparsa di nuovi focolai in punti non
 previsti\footnote{Questa è un eventualità probabile nel caso di incendi dolosi.}.
-
-\marginpar{Ritengo sia meglio fare così rispetto al monitorare per la presenza
-di nuovi \eng{file} durante la simulazione, sia per semplicità che per
-correttezza siccome la simulaizone è \eng{faster-then-real-time}.}
 
 \begin{requirement}
 Il simulatore deve poter essere inizializzato con uno stato iniziale arbitrario.
@@ -380,7 +382,7 @@ Il simulatore deve avere una sua grana interna, necessariamente minore uguale a
 quella dei dati ricevuti in \eng{input}.
 \end{requirement}
 
-\subsection{Dettagli di implementazione}
+\subsection{Dettagli di implementazione}\label{sec:implementation}
 
 Il simulatore girera su un \eng{kernel} Linux \cite{kern}, e sarà,
 probabilmente, invocato da un servizio \eng{web}. Tutti i dati necessari per la
@@ -465,6 +467,24 @@ dove verrano messi gli \eng{snapshot} saranno specificati da linea di comando.
 
 \begin{requirement}
 Il simulatore deve poter leggere gli argomenti da linea di comando.
+\end{requirement}
+
+Le equazioni \ref{eq:height}, \ref{eq:inhabitants} e \ref{eq:water} presentano
+casi di conversioni con i valori 255 e 253, questi son valori che nonostate
+siano legali non sono desiderati nei dati, di conseguenza l'utente deve esssere
+avvisato della presenza di questi valori potenzialmente indesiderati.
+
+\begin{requirement}
+Il simulatore deve poter avvertire l'utente della presenza di dati indesiderati.
+\end{requirement}
+
+Per poter realizare il requisito \ref{thm:faster} il simulatore deve sfruttare
+al meglio tutto l'\eng{hardware} che gli viene messo a disposizione.
+
+\begin{requirement}
+Il simulatore deve poter sfruttare tutta la potenza di calcolo della macchina,
+come ad esempio la parallelizzazione in un singolo \eng{core} (SIMD) e
+\eng{multi-core}.
 \end{requirement}
 
 % TODO: definire bene il formato dei file di output, perché da essi dipende
