@@ -176,6 +176,7 @@ con le seguenti corrispondenze matematiche:
 	$H$ & altezza media della vegetazione & metri\\
 	$A$ & percentuale abitazione & adimensionale\\
 	$W$ & percentuale acqua presente & adimensionale\\
+	% NOTE: a quanto pare \gamma è una costante
 	$\gamma$ & quantità di combustibile & \combvar\\
 	$S$ & percentuale infiammabilità & adimensionale\\
 	$P$ & altitudine media & metri\\
@@ -490,13 +491,7 @@ come ad esempio la parallelizzazione in un singolo \eng{core} (SIMD) e
 % TODO: definire bene il formato dei file di output, perché da essi dipende
 % la possibilità di poter far cominciare la similazione con in input uno stato
 % raggiunto in precedenza.
-
-\vspace{0.5cm}{\huge -- Da qua in poi è tutto da riscrivere --}
-
-\noindent\hrulefill % ----------------------------------------------------------
-
-% $\alpha$ costante di conversione del compustibile (nostra pezza in attesa di Tor Vergata)
-
+\iffalse
 \subsubsection{Formato dei CSV}
 
 \marginpar{Unità di misura dei dati? Tipo dei dati (int o float)?}
@@ -539,6 +534,7 @@ tabella \ref{tab:output}.
 
 Dove $n$ è lo stato della cella, in fiamme o meno, e $b$ è la sua quantità di
 combustibile ancora a disposizione.
+\fi
 
 \section{Isolamento del simulatore dall'esterno}
 
