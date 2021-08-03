@@ -112,6 +112,8 @@
   * Custom memory allocators
     - [gingerbill guide](http://www.gingerbill.org/series/memory-allocation-strategies/)
     - [always bump downwards](https://fitzgeraldnick.com/2019/11/01/always-bump-downwards.html)
+    - https://os.phil-opp.com/allocator-designs/ (didn't read it)
+    - http://dmitrysoshnikov.com/compilers/writing-a-pool-allocator/ (didn't read it)
   * SWAR (SIMD within a register)
   * Avoiding overflows
     - average [list of float](https://stackoverflow.com/a/1934266), [2 int](https://stackoverflow.com/questions/19106350/explanation-of-the-safe-average-of-two-numbers)
