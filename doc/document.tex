@@ -573,13 +573,13 @@ implementati grazie alle funzionalità di PostgreSQL come mostrato nelle figure
 \ref{fig:export} e \ref{fig:import}.
 
 \begin{figure}
-\centering\verb+\copy <table> from 'data.csv' with format csv;+
+\centering\verb+\copy <table> from 'data.csv' with (format csv);+
 \caption{Importazione dei dati nella base.}
 \label{fig:import}
 \end{figure}
 
 \begin{figure}
-\centering\verb+\copy <table> to 'export.csv' with format csv;+
+\centering\verb+\copy <table> to 'export.csv' with (format csv);+
 \caption{Esportazione dei dati dalla base.}
 \label{fig:export}
 \end{figure}
