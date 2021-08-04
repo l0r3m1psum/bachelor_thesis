@@ -105,9 +105,51 @@ Quelli di interesse sono solo direzione e velocità del vento.
 
 \section{Il Modello}\label{sec:model}
 
-Il modello matematico che descrive l'evoluzione dell'incendio in un'area
-forestale è uno di tipo automa cellulare come quello in figura
-\ref{fig:automata}.
+Per descrivere l'evoluzione di un incendio nella foresta il modello si basa su
+tre semplici osservazioni
+
+\begin{enumerate}
+\item un incendio brucia finché c'è del combustibile,
+\item un incendio consuma combustibile nel tempo e
+\item un incendio si può spostare in un'area limitrofa.
+\end{enumerate}
+
+\marginpar{Sempre sulla via del \eng{model-checking} penso sia meglio (per come
+è scritto il modello) non considerare celle rettangolari perché le formule non
+tengono conto della dimensione di queste ultime e ovviamente è più probabile
+che un icendio si trasmetta per il lato lungo di un rettangolo che per quello
+corto.}
+
+Dopo aver diviso un'area rettangolare della foresta in $i \times j$ celle
+quadrate, che in seguito ci permetteranno di descrivere con più precisione le
+caratteristiche delle varie zone della foresta, capiamo che di ogni cella $ij$
+della foresta ci interessano solo due caratteristiche: la quantità di
+combustibile in essa ad un certo istante $B_{ij}(t)$ e la presenza o meno di un
+incendio in essa ad un certo istante $N_{ij}(t)$.
+
+Per modellare il concetto di spostamento dell'incendio in aree limitrofe si è
+scelto di utilizzare un automa cellulare.
+
+Un incendio oltre che avere un singolo punto di innesco ne potrebbe avere vari
+nel tempo, ad esempio nel caso di incendi dolosi. Per questo non basta una
+semplice nozione di stato iniziale ma ci serve un modo per parlare
+dell'\eng{input} esogeno del sistema, che chiameremo $u_{ij}(t)$.
+
+Possiamo formalizzare tutto ciò che abbiamo detto finora con queste equazioni
+
+\begin{eqnarray}
+N_{ij}(0) &=& u_{ij}(0)\textrm{,}\\
+B_{ij}(0) &=& \gamma_{ij}\textrm{,}\\
+N_{ij}(t+1) &=& \cases{\max(V_{ij}(t), u_{ij}(t)), &se $B_{ij}(t) > 0$;\cr
+                       0, &altrimenti.}\\
+B_{ij}(t+1) &=& \cases{\max(0, B_{ij}(t)-\beta\tau), &se $N_{ij}(t) > 0$;\cr
+                       B_{ij}(t), &altrimenti.}
+\end{eqnarray}
+
+dove $\gamma_{ij}$ è la quantità iniziale di combustibile in una cella,
+$V_{ij}(t)$ è la possibilità che un l'incendio si sposti nella cella corrente da
+una delle sue limitrofe (figura \ref{fig:automata}), $\beta$ è la velocità di
+consumo del combustibile e $\tau$ e il passo temporale.
 
 \begin{figure}
 \centering
@@ -143,6 +185,8 @@ forestale è uno di tipo automa cellulare come quello in figura
 \caption{Automa cellulare}
 \label{fig:automata}
 \end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Statica}\label{sec:statics}
 
