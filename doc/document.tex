@@ -125,7 +125,8 @@ quadrate, che in seguito ci permetteranno di descrivere con più precisione le
 caratteristiche delle varie zone della foresta, capiamo che di ogni cella $ij$
 della foresta ci interessano solo due caratteristiche: la quantità di
 combustibile in essa ad un certo istante $B_{ij}(t)$ e la presenza o meno di un
-incendio in essa ad un certo istante $N_{ij}(t)$.
+incendio in essa ad un certo istante $N_{ij}(t)$, che può assumere solo due
+valori 0 per niente incendio e 1 per incendio.
 
 Per modellare il concetto di spostamento dell'incendio in aree limitrofe si è
 scelto di utilizzare un automa cellulare.
@@ -133,7 +134,8 @@ scelto di utilizzare un automa cellulare.
 Un incendio oltre che avere un singolo punto di innesco ne potrebbe avere vari
 nel tempo, ad esempio nel caso di incendi dolosi. Per questo non basta una
 semplice nozione di stato iniziale ma ci serve un modo per parlare
-dell'\eng{input} esogeno del sistema, che chiameremo $u_{ij}(t)$.
+dell'\eng{input} esogeno del sistema, che chiameremo $u_{ij}(t)$, che pò sempre
+assumere solo due valori 0 per niente incendio e 1 per incendio.
 
 Possiamo formalizzare tutto ciò che abbiamo detto finora con queste equazioni
 
@@ -146,7 +148,7 @@ B_{ij}(t+1) &=& \cases{\max(0, B_{ij}(t)-\beta\tau), &se $N_{ij}(t) > 0$;\cr
                        B_{ij}(t), &altrimenti.}
 \end{eqnarray}
 
-dove $\gamma_{ij}$ è la quantità iniziale di combustibile in una cella,
+Dove $\gamma_{ij}$ è la quantità iniziale di combustibile in una cella,
 $V_{ij}(t)$ è la possibilità che un l'incendio si sposti nella cella corrente da
 una delle sue limitrofe (figura \ref{fig:automata}), $\beta$ è la velocità di
 consumo del combustibile e $\tau$ e il passo temporale.
@@ -185,6 +187,23 @@ consumo del combustibile e $\tau$ e il passo temporale.
 \caption{Automa cellulare}
 \label{fig:automata}
 \end{figure}
+
+Ovviamente il cuore di questo modello è la funzione $V_{ij}(t)$, che può sempre
+assumere solo due valori con la stessa semantica di $N_{ij}(t)$ e $u_{ij}(t)$,
+essa è definita nel seguente modo
+
+\begin{eqnarray}
+V_{ij}(t) &=& \max\{\,Q_{ij}(\e_1, \e_2, t) \mid (\e_1, \e_2) \in \Gamma\,\}\textrm{,}\\
+\Gamma &=& \{\,(x, y) \mid x, y \in \{-1, 0, 1\}\,\}\textrm{,}\\
+Q_{ij}(\e_1, \e_2, t) &=& \cases{1, &se $p_{ij}(\e_1, \e_2, t) N_{i+\e_1j+\e_2}(t) > \theta$;\cr
+                               0, &altrimenti.}\\
+p_{ij}(\e_1, \e_2, t) &=& k_0 S_{ij} C(i+\e_1, j+\e_2, t) d(\e_1, \e_2) f_w f_P\textrm{,}\label{eq:prob}\\
+C(i,j, t) &=& \sin\left(\pi\frac{B_{i+\e_1j+\e_2}(t)}{\gamma_{i+\e_1j+\e_2}}\right)\textrm{,}\label{eq:combust}\\
+d(\e_1,\e_2) &=& \left(1-\frac{1}{2}|\e_1\e_2|\right)\textrm{,}\label{eq:disom}\\
+f_w &=& \exp\left(k_1 F(i+\e_1, j+\e_2)\frac{\begin{array}{c}\e_1\cos(D(i+\e_1,j+\e_2))\\
+        +\\\e_2\sin(D(i+\e_1,j+\e_2))\end{array}}{\sqrt{\e_1^2 + \e_2^2}}\right)\textrm{,}\label{eq:wind}\\
+f_P &=& \exp\left(k_2\arctan\left(\frac{P_{ij}-P_{i+\e_1j+\e_2}}{L}\right)\right)\textrm{.}\label{eq:slope}
+\end{eqnarray}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
