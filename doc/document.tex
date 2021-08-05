@@ -14,6 +14,8 @@
 \newcommand{\file}{\textit{file}}
 \newcommand{\e}{\epsilon}
 \newcommand{\combvar}{Kg}
+\newlength{\rulewidth}\setlength{\rulewidth}{0.4pt}
+\newcommand{\myrule}{\noindent\rule{\textwidth}{\rulewidth}}
 
 \newtheorem{requirement}{Requisito}
 
@@ -196,16 +198,134 @@ essa è definita nel seguente modo
 V_{ij}(t) &=& \max\{\,Q_{ij}(\e_1, \e_2, t) \mid (\e_1, \e_2) \in \Gamma\,\}\textrm{,}\\
 \Gamma &=& \{\,(x, y) \mid x, y \in \{-1, 0, 1\}\,\}\textrm{,}\\
 Q_{ij}(\e_1, \e_2, t) &=& \cases{1, &se $p_{ij}(\e_1, \e_2, t) N_{i+\e_1j+\e_2}(t) > \theta$;\cr
-                               0, &altrimenti.}\\
-p_{ij}(\e_1, \e_2, t) &=& k_0 S_{ij} C(i+\e_1, j+\e_2, t) d(\e_1, \e_2) f_w f_P\textrm{,}\label{eq:prob}\\
-C(i,j, t) &=& \sin\left(\pi\frac{B_{i+\e_1j+\e_2}(t)}{\gamma_{i+\e_1j+\e_2}}\right)\textrm{,}\label{eq:combust}\\
-d(\e_1,\e_2) &=& \left(1-\frac{1}{2}|\e_1\e_2|\right)\textrm{,}\label{eq:disom}\\
-f_w &=& \exp\left(k_1 F(i+\e_1, j+\e_2)\frac{\begin{array}{c}\e_1\cos(D(i+\e_1,j+\e_2))\\
-        +\\\e_2\sin(D(i+\e_1,j+\e_2))\end{array}}{\sqrt{\e_1^2 + \e_2^2}}\right)\textrm{,}\label{eq:wind}\\
-f_P &=& \exp\left(k_2\arctan\left(\frac{P_{ij}-P_{i+\e_1j+\e_2}}{L}\right)\right)\textrm{.}\label{eq:slope}
+                               0, &altrimenti.}
 \end{eqnarray}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Dove $p_{ij}(\e_1, \e_2, t)$ è la probabilità che l'incendio si sposti dalla
+cella limitrofa $(i+\e_1, j+\e_2)$ alla cella corrente $(i, j)$.
+
+\myrule
+
+Sospendiamo ora la nostra discussione del modelo per descrivere meglio i dati a
+nostra disposizione.
+
+Il satellite ci mette a disposizione una serie di dati, descritti nella tabella
+\ref{tab:geo}. Questi tuttavia non sono usati così come sono nel modello ma sono
+``rifiniti'' con le seguenti corrispondenze matematiche
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|c|}
+	\hline
+	\textbf{Nome Dato} & \textbf{Descrizione} & \textbf{Intervallo valori}\\
+	\hline
+	$G$ & Foreste & 0,1,2,255\\
+	$U$ & Urbanizzazione & 0,\ldots,100,255\\
+	$W1$ & Water1 & 0,\ldots,4,253,255\\
+	$W2$ & Water2 & 0,1\\
+	$P$ & Altimetria & 0,\ldots,4380\\
+	\hline
+\end{tabular}
+\caption{Dati geografici per le singole celle.}
+\label{tab:geo}
+\end{table}
+
+\marginpar{Nel paragrafo \ref{sec:implementation} vengono fatte delle
+precisazioni su alcune di queste corrispondenze.}
+
+\begin{equation}
+H_{ij} = \cases{1 + G_{ij}, &se $0 \leq H_{ij} \leq 2$;\cr
+                  0, &se $H_{ij} = 255$.}\label{eq:height}
+\end{equation}
+
+è l'altezza media della vegetazione nella cella,
+
+\begin{equation}
+A_{ij} = \cases{U_{ij}/100, &se $0 \leq U_{ij} \leq 100$;\cr
+                0, &se $U_{ij} = 255$.}\label{eq:inhabitants}
+\end{equation}
+
+è la percentuale di abitatato nella cella,
+
+\begin{equation}
+W_{ij} = \cases{0, &se $W1_{ij} = 0$;\cr
+                1, &se $W1_{ij} = 1$;\cr
+                0.75, &se $W1_{ij} = 2$;\cr
+                0.75, &se $W1_{ij} = 3$;\cr
+                0.5, &se $W1_{ij} = 4$;\cr
+                1, &se $W1_{ij} = 253$;\cr
+                1, &se $W1_{ij} = 255$.}\label{eq:water}
+\end{equation}
+
+è la percentuale di acqua presente. Questi ultimi tre valori ci servono per
+calcolare
+
+\begin{equation}
+S_{ij} = H_{ij} \cdot (1-A_{ij}) \cdot (1-W_{ij})\textrm{,}\\
+\end{equation}
+
+che è la percentuale di infiammabilità della cella, da notare che $A_{ij}$ la
+diminuisce pribabilmente perché si considerano come zone abitate quelle col
+cemento.
+
+In fine
+
+\begin{equation}
+P_{ij} = P_{ij}\textrm{,}
+\end{equation}
+
+che  è l'altezza media ed è l'unico valore che non viene cambiato.
+
+
+Mentre delle stazioni meteo sul posto ci daranno dati riduardo la velocità e la
+direzione del vento\dots TODO: NON È ANCORA CHIARO COME FUNZIONANO.
+
+\begin{eqnarray}
+	F_{ij} &=& ??\\
+	D_{ij} &=& ??
+\end{eqnarray}
+
+Sucessivamente nel modello saranno usate solo $S_{ij}$, $P_{ij}$, $F_{ij}$ e
+$D_{ij}$.
+
+\myrule
+
+Ora che sappiamo quali dati abbiamo disposizione, possiamo dare una definizione
+della possibilità di trasmisione dell'incendio $p_{ij}(\e_1, \e_2, t)$.
+
+\begin{equation}
+p_{ij}(\e_1, \e_2, t) = k_0 S_{ij} C_{i+\e_1j+\e_2}(t) d(\e_1, \e_2) f_w f_P\textrm{,}\label{eq:prob}
+\end{equation}
+
+dove $k_0$ è un parametro di ottimizzazione di soglia e
+
+\begin{equation}
+C_{i+\e_1j+\e_2}(t) = \sin\left(\pi\frac{B_{i+\e_1j+\e_2}(t)}{\gamma_{i+\e_1j+\e_2}}\right)\textrm{,}\label{eq:combust}
+\end{equation}
+
+è lo stato di combustione della cella. Largomento di $C_{ij}(t)$ può assumere
+solo valori tra 0 e $\pi$, quindi avra un grafico come quello in figura
+\ref{fig:sin}, \dots
+
+\begin{figure}
+\centering
+\setlength{\unitlength}{1cm}
+\begin{picture}(4.3,3.6)(-2.5,-0.25)
+	\put(-2,0){\vector(1,0){4.4}}
+	\put(2.45,-.05){$x$}
+	\put(0,0){\vector(0,1){3.2}}
+	\put(0,3.35){\makebox(0,0){$y$}}
+	\qbezier(0.0,0.0)(1.2384,0.0)(2.0,2.7622)
+	\qbezier(0.0,0.0)(-1.2384,0.0)(-2.0,2.7622)
+\end{picture}
+\caption{$\sin(x)$}
+\label{fig:sin}
+\end{figure}
+
+\myrule\\
+\myrule\\
+\myrule
+
 
 \subsection{Statica}\label{sec:statics}
 
@@ -322,8 +442,8 @@ p_{ij}(\e_1, \e_2, t) &=& k_0 S_{ij} C(i+\e_1, j+\e_2, t) d(\e_1, \e_2) f_w f_P\
 (\e_1, \e_2) &\in& \Gamma = \{\,(x, y) \mid x, y \in \{-1, 0, 1\}\,\}\textrm{,}\\
 C(i,j, t) &=& \sin\left(\pi\frac{B_{i+\e_1j+\e_2}(t)}{\gamma_{i+\e_1j+\e_2}}\right)\textrm{,}\label{eq:combust}\\
 d(\e_1,\e_2) &=& \left(1-\frac{1}{2}|\e_1\e_2|\right)\textrm{,}\label{eq:disom}\\
-f_w &=& \exp\left(k_1 F(i+\e_1, j+\e_2)\frac{\begin{array}{l}\e_1\cos(D(i+\e_1,j+\e_2))\\
-        \mbox{}+\e_2\sin(D(i+\e_1,j+\e_2))\end{array}}{\sqrt{\e_1^2 + \e_2^2}}\right)\textrm{,}\label{eq:wind}\\
+f_w &=& \exp\left(k_1 F(i+\e_1, j+\e_2)\frac{\begin{array}{c}\e_1\cos(D(i+\e_1,j+\e_2))\\
+        +\\\e_2\sin(D(i+\e_1,j+\e_2))\end{array}}{\sqrt{\e_1^2 + \e_2^2}}\right)\textrm{,}\label{eq:wind}\\
 f_P &=& \exp\left(k_2\arctan\left(\frac{P_{ij}-P_{i+\e_1j+\e_2}}{L}\right)\right)\textrm{.}\label{eq:slope}
 \end{eqnarray}
 
