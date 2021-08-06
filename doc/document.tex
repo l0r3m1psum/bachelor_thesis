@@ -95,7 +95,7 @@ sistema di riferimento ETRS89\footnote{European Terrestrial Reference System}
 
 \paragraph{Dati Geografici}
 
-\marginpar{Nel paragrafo \ref{sec:statics} tutti questi dati sono descritti con
+\marginpar{Nel paragrafo \ref{sec:model} tutti questi dati sono descritti con
 più precisione.}
 
 Essi sono: l'altimetria, il tipo di foresta, il livello di urbanizzazione, il
@@ -115,12 +115,6 @@ tre semplici osservazioni
 \item un incendio consuma combustibile nel tempo e
 \item un incendio si può spostare in un'area limitrofa.
 \end{enumerate}
-
-\marginpar{Sempre sulla via del \eng{model-checking} penso sia meglio (per come
-è scritto il modello) non considerare celle rettangolari perché le formule non
-tengono conto della dimensione di queste ultime e ovviamente è più probabile
-che un icendio si trasmetta per il lato lungo di un rettangolo che per quello
-corto.}
 
 Dopo aver diviso un'area rettangolare della foresta in $i \times j$ celle
 quadrate, che in seguito ci permetteranno di descrivere con più precisione le
@@ -233,28 +227,28 @@ Il satellite ci mette a disposizione una serie di dati, descritti nella tabella
 \marginpar{Nel paragrafo \ref{sec:implementation} vengono fatte delle
 precisazioni su alcune di queste corrispondenze.}
 
-\begin{equation}
+\begin{equation}\label{eq:height}
 H_{ij} = \cases{1 + G_{ij}, &se $0 \leq H_{ij} \leq 2$;\cr
-                  0, &se $H_{ij} = 255$.}\label{eq:height}
+                  0, &se $H_{ij} = 255$.}
 \end{equation}
 
 è l'altezza media della vegetazione nella cella,
 
-\begin{equation}
+\begin{equation}\label{eq:inhabitants}
 A_{ij} = \cases{U_{ij}/100, &se $0 \leq U_{ij} \leq 100$;\cr
-                0, &se $U_{ij} = 255$.}\label{eq:inhabitants}
+                0, &se $U_{ij} = 255$.}
 \end{equation}
 
 è la percentuale di abitatato nella cella,
 
-\begin{equation}
+\begin{equation}\label{eq:water}
 W_{ij} = \cases{0, &se $W1_{ij} = 0$;\cr
                 1, &se $W1_{ij} = 1$;\cr
                 0.75, &se $W1_{ij} = 2$;\cr
                 0.75, &se $W1_{ij} = 3$;\cr
                 0.5, &se $W1_{ij} = 4$;\cr
                 1, &se $W1_{ij} = 253$;\cr
-                1, &se $W1_{ij} = 255$.}\label{eq:water}
+                1, &se $W1_{ij} = 255$.}
 \end{equation}
 
 è la percentuale di acqua presente. Questi ultimi tre valori ci servono per
@@ -276,7 +270,7 @@ P_{ij} = P_{ij}\textrm{,}
 
 che  è l'altezza media ed è l'unico valore che non viene cambiato.
 
-
+% TODO: descrivere il comportamento del vento (gaussiano)
 Mentre delle stazioni meteo sul posto ci daranno dati riduardo la velocità e la
 direzione del vento\dots TODO: NON È ANCORA CHIARO COME FUNZIONANO.
 
@@ -293,39 +287,107 @@ $D_{ij}$.
 Ora che sappiamo quali dati abbiamo disposizione, possiamo dare una definizione
 della possibilità di trasmisione dell'incendio $p_{ij}(\e_1, \e_2, t)$.
 
-\begin{equation}
-p_{ij}(\e_1, \e_2, t) = k_0 S_{ij} C_{i+\e_1j+\e_2}(t) d(\e_1, \e_2) f_w f_P\textrm{,}\label{eq:prob}
+\begin{equation}\label{eq:prob}
+p_{ij}(\e_1, \e_2, t) = k_0 S_{ij} C_{i+\e_1j+\e_2}(t) d(\e_1, \e_2) f_w f_P\textrm{,}
 \end{equation}
 
 dove $k_0$ è un parametro di ottimizzazione di soglia e
 
-\begin{equation}
-C_{i+\e_1j+\e_2}(t) = \sin\left(\pi\frac{B_{i+\e_1j+\e_2}(t)}{\gamma_{i+\e_1j+\e_2}}\right)\textrm{,}\label{eq:combust}
+\begin{equation}\label{eq:combust}
+C_{i+\e_1j+\e_2}(t) = \sin\left(\pi\frac{B_{i+\e_1j+\e_2}(t)}{\gamma_{i+\e_1j+\e_2}}\right)\textrm{,}
 \end{equation}
 
 è lo stato di combustione della cella. Largomento di $C_{ij}(t)$ può assumere
 solo valori tra 0 e $\pi$, quindi avra un grafico come quello in figura
-\ref{fig:sin}, \dots
+\ref{fig:sin}, overro quando metà del carburante è stato consumato allora
+l'incendio avrà la massima potenza.
 
 \begin{figure}
 \centering
 \setlength{\unitlength}{1cm}
-\begin{picture}(4.3,3.6)(-2.5,-0.25)
-	\put(-2,0){\vector(1,0){4.4}}
-	\put(2.45,-.05){$x$}
-	\put(0,0){\vector(0,1){3.2}}
-	\put(0,3.35){\makebox(0,0){$y$}}
-	\qbezier(0.0,0.0)(1.2384,0.0)(2.0,2.7622)
-	\qbezier(0.0,0.0)(-1.2384,0.0)(-2.0,2.7622)
+\begin{picture}(4,3)(0,-0.5)
+	\put(-0.5,-0.25){\vector(1,0){5}}
+	\put(-0.5,-0.6){0}
+	\put(4.5,-0.6){$\pi$}
+
+	\qbezier(0,0)(0.5,2.7)(2,2.7)
+	\qbezier(4,0)(3.5,2.7)(2,2.7)
 \end{picture}
 \caption{$\sin(x)$}
 \label{fig:sin}
 \end{figure}
 
-\myrule\\
-\myrule\\
-\myrule
+\begin{equation}\label{eq:disom}
+d(\e_1, \e_2) = \left(1-\frac{1}{2}|\e_1\e_2|\right)\textrm{,}
+\end{equation}
 
+è il fattore di fattore di disomogeneità al confine delle celle. Esso può
+assumere solo due valori 1 e $1/2$, il primo nelle celle sopra, sotto e ai lati
+della cella corrente, il secondo sulle celle diagonali. Ovvero l'incendio si
+trasmette la metta da una cella diagonale.
+% NOTE: probabilmente un disegno aiuterebbe a spiegarlo più intuitivamente.
+
+% TODO: dare una spiegazione intuitiva della semantica di queste due funzioni.
+\begin{equation}\label{eq:wind}
+f_w = \exp\left(k_1 F_{i+\e_1j+\e_2}\frac{\begin{array}{c}\e_1\cos(D_{i+\e_1j+\e_2})\\
+      +\\\e_2\sin(D_{i+\e_1j+\e_2})\end{array}}{\sqrt{\e_1^2 + \e_2^2}}\right)
+\end{equation}
+
+è il contributo dato dal vento, dove $k_1$ è il parametro di ottimizzazione di
+questo contributo, in fine
+
+\begin{equation}\label{eq:slope}
+f_P = \exp\left(k_2\arctan\left(\frac{P_{ij}-P_{i+\e_1j+\e_2}}{L}\right)\right)
+\end{equation}
+
+è il contributo dato da il dislivello tra le due celle, dove $k_2$ è il
+parametro di ottimizzazione di questo contributo.
+
+Tutti i parametri globali del modello e delle singole celle sono stati messi
+nelle tabelle riassuntive \ref{tab:globals} e \ref{tab:params}.
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|c|}
+	\hline
+	\textbf{Nome parametro} & \textbf{Descrizione} & \textbf{Unità di Misura}\\
+	\hline
+	$\tau$ & passo temporale & secondi\\
+	$L$ & lunghezza della singola cella & metri\\
+	$W$ & ampiezza della singola cella & metri\\
+	$L^*$ & lunghezza area monitorata & metri\textsuperscript{2}\\
+	$W^*$ & ampiezza area monitorata & metri\textsuperscript{2}\\
+	$\beta$ & consumo combustibile & \combvar/secondo\\
+	$\theta$ & probailità propagazione & adimensionale\\
+	$k_0$ & ottimizzazione soglia & adimensionale\\
+	$k_1$ & ottimizzazione vento & adimensionale\\
+	$k_2$ & ottimizzazione pendenza & adimensionale\\
+	\hline
+\end{tabular}
+\caption{Parametri globali del modello.}
+\label{tab:globals}
+\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|c|}
+	\hline
+	\textbf{Nome parametro} & \textbf{Descrizione} & \textbf{Unità di Misura}\\
+	\hline
+	$H$ & altezza media della vegetazione & metri\\
+	$A$ & percentuale abitazione & adimensionale\\
+	$W$ & percentuale acqua presente & adimensionale\\
+	% NOTE: a quanto pare \gamma è una costante
+	$\gamma$ & quantità di combustibile & \combvar\\
+	$S$ & percentuale infiammabilità & adimensionale\\
+	$P$ & altitudine media & metri\\
+	$D$ & direzione del vento & radianti\\
+	$F$ & velocità del vento & metri/secondo\\
+	\hline
+\end{tabular}
+\caption{Parametri delle singole celle.}
+\label{tab:params}
+\end{table}
 
 \subsection{Statica}\label{sec:statics}
 
@@ -489,8 +551,6 @@ N_{ij}(t+1) &=& \cases{\max(V_{ij}(t), u_{ij}(t)), &se $B_{ij}(t) > 0$;\cr
 B_{ij}(t+1) &=& \cases{\max(0, B_{ij}(t)-\beta\tau), &se $N_{ij}(t) > 0$;\cr
                        B_{ij}(t), &altrimenti.}
 \end{eqnarray}
-
-% TODO: descrivere il comportamento del vento (gaussiano)
 
 \section{Il Simulatore}
 
