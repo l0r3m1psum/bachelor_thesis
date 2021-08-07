@@ -61,7 +61,7 @@ informazioni. Queste ultime saranno utilizzate da un modello matematico, che
 verrà realizzato da un simulatore. In fine i vigili del fuoco lo utilizzeranno
 tramite un'interfaccia \eng{web}.
 
-\section{Ambito della Tesi}
+\section{Ambito della Tesi}\label{sec:scope}
 
 La tesi si occuperà esclusivamente dell'implementazione del modello matematico
 fornitoci da Tor Vergata \cite{mod}. Durante il documento saranno elencati tutti
@@ -81,7 +81,7 @@ Il simulatore deve poter essere utilizzato da altri programmi, in particolare da
 \eng{software web}.
 \end{requirement}
 
-\section{Dati a disposizione}
+\section{Dati a disposizione}\label{sec:data}
 
 Il simulatore avrà a disposizioni dati geografici da satellite \cite{cop} e
 meteo da stazioni meteo sul posto, sulla zona di interesse per la simulazione.
@@ -196,12 +196,13 @@ Q_{ij}(\e_1, \e_2, t) &=& \cases{1, &se $p_{ij}(\e_1, \e_2, t) N_{i+\e_1j+\e_2}(
 \end{eqnarray}
 
 Dove $p_{ij}(\e_1, \e_2, t)$ è la probabilità che l'incendio si sposti dalla
-cella limitrofa $(i+\e_1, j+\e_2)$ alla cella corrente $(i, j)$.
+cella limitrofa $(i+\e_1, j+\e_2)$ alla cella corrente $(i, j)$ e $\theta$ è la
+soglia di propagazione dell'incendio.
 
 \myrule
 
 Sospendiamo ora la nostra discussione del modelo per descrivere meglio i dati a
-nostra disposizione.
+nostra disposizione, descritti nel paragrafo \ref{sec:data}.
 
 Il satellite ci mette a disposizione una serie di dati, descritti nella tabella
 \ref{tab:geo}. Questi tuttavia non sono usati così come sono nel modello ma sono
@@ -353,8 +354,7 @@ nelle tabelle riassuntive \ref{tab:globals} e \ref{tab:params}.
 	\textbf{Nome parametro} & \textbf{Descrizione} & \textbf{Unità di Misura}\\
 	\hline
 	$\tau$ & passo temporale & secondi\\
-	$L$ & lunghezza della singola cella & metri\\
-	$W$ & ampiezza della singola cella & metri\\
+	$L$ & lato della singola cella & metri\\
 	$L^*$ & lunghezza area monitorata & metri\textsuperscript{2}\\
 	$W^*$ & ampiezza area monitorata & metri\textsuperscript{2}\\
 	$\beta$ & consumo combustibile & \combvar/secondo\\
