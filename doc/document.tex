@@ -65,7 +65,8 @@ tramite un'interfaccia \eng{web}.
 
 La tesi si occuperà esclusivamente dell'implementazione del modello matematico
 fornitoci da Tor Vergata \cite{mod}. Durante il documento saranno elencati tutti
-i suoi requisiti. Identifichiamo il primo
+i suoi requisiti che saranno etichettati ed enfatizzati per metterli in risalto.
+Identifichiamo il primo
 
 % TODO: add all errors corrected in the model
 
@@ -85,10 +86,10 @@ Il simulatore deve poter essere utilizzato da altri programmi, in particolare da
 
 Il simulatore avrà a disposizioni dati geografici da satellite \cite{cop} e
 meteo da stazioni meteo sul posto, sulla zona di interesse per la simulazione.
-La zona è divisa in rettangoli tutti uguali e ad ognuno di questi rettangoli
-avrà dei dati uniformi.
+La zona è divisa in quadrati tutti uguali e ad ognuno di questi quadrati avrà
+dei dati uniformi.
 
-Per identificare i rettangoli sulla mappa essi verranno forniti con coordinate
+Per identificare i quadrati sulla mappa essi verranno forniti con coordinate
 LAEA\footnote{Proiezione Lambert azimuthal Equal-Area} Europe \cite{laeae} con
 sistema di riferimento ETRS89\footnote{European Terrestrial Reference System}
 \cite{etrs89}.
@@ -116,21 +117,22 @@ tre semplici osservazioni
 \item un incendio si può spostare in un'area limitrofa.
 \end{enumerate}
 
-Dopo aver diviso un'area rettangolare della foresta in $i \times j$ celle
+Dopo aver diviso un'area rettangolare della foresta in $L^* \times W^*$ celle
 quadrate, che in seguito ci permetteranno di descrivere con più precisione le
-caratteristiche delle varie zone della foresta, capiamo che di ogni cella $ij$
-della foresta ci interessano solo due caratteristiche: la quantità di
-combustibile in essa ad un certo istante $B_{ij}(t)$ e la presenza o meno di un
-incendio in essa ad un certo istante $N_{ij}(t)$, che può assumere solo due
-valori 0 per niente incendio e 1 per incendio.
+caratteristiche delle varie zone della foresta, capiamo che di ogni cella, in
+riga $i$ e colonna $j$, della foresta ci interessano solo due caratteristiche:
+la quantità di combustibile in essa ad un certo istante $B_{ij}(t)$ e la
+presenza o meno di un incendio in essa ad un certo istante $N_{ij}(t)$, che può
+assumere solo due valori 0 per niente incendio e 1 per incendio. Queste due
+funzioni rappresenteranno lo \emph{stato} della cella.
 
 Per modellare il concetto di spostamento dell'incendio in aree limitrofe si è
-scelto di utilizzare un automa cellulare.
+scelto di utilizzare un automa cellulare \cite{gol}.
 
 Un incendio oltre che avere un singolo punto di innesco ne potrebbe avere vari
 nel tempo, ad esempio nel caso di incendi dolosi. Per questo non basta una
 semplice nozione di stato iniziale ma ci serve un modo per parlare
-dell'\eng{input} esogeno del sistema, che chiameremo $u_{ij}(t)$, che pò sempre
+dell'\eng{input} esogeno del sistema, che chiameremo $u_{ij}(t)$, che può sempre
 assumere solo due valori 0 per niente incendio e 1 per incendio.
 
 Possiamo formalizzare tutto ciò che abbiamo detto finora con queste equazioni
@@ -138,9 +140,9 @@ Possiamo formalizzare tutto ciò che abbiamo detto finora con queste equazioni
 \begin{eqnarray}
 N_{ij}(0) &=& u_{ij}(0)\textrm{,}\\
 B_{ij}(0) &=& \gamma_{ij}\textrm{,}\\
-N_{ij}(t+1) &=& \cases{\max(V_{ij}(t), u_{ij}(t)), &se $B_{ij}(t) > 0$;\cr
+N_{ij}(t+1) &=& \cases{\max(V_{ij}(t), u_{ij}(t)), &se $\overbrace{B_{ij}(t) > 0}^\textrm{c'è combustibile}$;\cr
                        0, &altrimenti.}\\
-B_{ij}(t+1) &=& \cases{\max(0, B_{ij}(t)-\beta\tau), &se $N_{ij}(t) > 0$;\cr
+B_{ij}(t+1) &=& \cases{\max(0, B_{ij}(t)-\beta\tau), &se $\underbrace{N_{ij}(t) > 0}_\textrm{c'è incendio}$;\cr
                        B_{ij}(t), &altrimenti.}
 \end{eqnarray}
 
@@ -192,7 +194,7 @@ essa è definita nel seguente modo
             V_{ij}(t) &=& \max\{\,Q_{ij}(\e_1, \e_2, t) \mid (\e_1, \e_2) \in \Gamma\,\}\textrm{,}\\
                \Gamma &=& \{\,(x, y) \mid x, y \in \{-1, 0, 1\}\,\}\textrm{,}\\
 Q_{ij}(\e_1, \e_2, t) &=& \cases{1, &se $p_{ij}(\e_1, \e_2, t) N_{i+\e_1j+\e_2}(t) > \theta$;\cr
-                                 0, &altrimenti.}
+                                 0, &altrimenti.}\label{eq:probtest}
 \end{eqnarray}
 
 Dove $p_{ij}(\e_1, \e_2, t)$ è la probabilità che l'incendio si sposti dalla
@@ -202,22 +204,22 @@ soglia di propagazione dell'incendio.
 \myrule
 
 Sospendiamo ora la nostra discussione del modelo per descrivere meglio i dati a
-nostra disposizione, descritti nel paragrafo \ref{sec:data}.
+nostra disposizione, introdotti nel paragrafo \ref{sec:data}.
 
 Il satellite ci mette a disposizione una serie di dati, descritti nella tabella
 \ref{tab:geo}. Questi tuttavia non sono usati così come sono nel modello ma sono
-``rifiniti'' con le seguenti corrispondenze matematiche
+``rifiniti'' con le seguenti corrispondenze matematiche.
 
-\begin{table}
+\begin{table} % TODO: add description of data
 \centering
 \begin{tabular}{|c|l|c|}
 	\hline
-	\textbf{Nome Dato} & \textbf{Descrizione} & \textbf{Intervallo valori}\\
+	\textbf{Simbolo} & \textbf{Nome} & \textbf{Intervallo valori}\\
 	\hline
 	$G$ & Foreste & 0,1,2,255\\
 	$U$ & Urbanizzazione & 0,\ldots,100,255\\
 	$W1$ & Water1 & 0,\ldots,4,253,255\\
-	$W2$ & Water2 & 0,1\\
+	$W2$ & Water2 & 0,1\\ % NOTE: currently unused, find a way to mark it or remove it
 	$P$ & Altimetria & 0,\ldots,4380\\
 	\hline
 \end{tabular}
@@ -229,8 +231,8 @@ Il satellite ci mette a disposizione una serie di dati, descritti nella tabella
 precisazioni su alcune di queste corrispondenze.}
 
 \begin{equation}\label{eq:height}
-H_{ij} = \cases{1 + G_{ij}, &se $0 \leq H_{ij} \leq 2$;\cr
-                  0, &se $H_{ij} = 255$.}
+H_{ij} = \cases{1 + G_{ij}, &se $0 \leq G_{ij} \leq 2$;\cr
+                  0, &se $G_{ij} = 255$.}
 \end{equation}
 
 è l'altezza media della vegetazione nella cella,
@@ -260,7 +262,7 @@ S_{ij} = H_{ij} \cdot (1-A_{ij}) \cdot (1-W_{ij})\textrm{,}\\
 \end{equation}
 
 che è la percentuale di infiammabilità della cella, da notare che $A_{ij}$ la
-diminuisce pribabilmente perché si considerano come zone abitate quelle col
+diminuisce probabilmente perché si considerano come zone abitate quelle col
 cemento.
 
 In fine
@@ -286,12 +288,14 @@ $D_{ij}$.
 \myrule
 
 Ora che sappiamo quali dati abbiamo disposizione, possiamo dare una definizione
-della possibilità di trasmisione dell'incendio $p_{ij}(\e_1, \e_2, t)$.
+della possibilità di trasmisione dell'incendio $p_{ij}(\e_1, \e_2, t)$, della
+funzione \ref{eq:probtest}.
 
 \begin{equation}\label{eq:prob}
 p_{ij}(\e_1, \e_2, t) = k_0 S_{ij} C_{i+\e_1j+\e_2}(t) d(\e_1, \e_2) f_w f_P\textrm{,}
 \end{equation}
 
+% NOTE: $k_0$ è UN parametro o IL parametro?
 dove $k_0$ è un parametro di ottimizzazione di soglia e
 
 \begin{equation}\label{eq:combust}
@@ -306,15 +310,16 @@ l'incendio avrà la massima potenza.
 \begin{figure}
 \centering
 \setlength{\unitlength}{1cm}
-\begin{picture}(4,3)(0,-0.5)
-	\put(-0.5,-0.25){\vector(1,0){5}}
-	\put(-0.5,-0.6){0}
-	\put(4.5,-0.6){$\pi$}
+\newlength{\mylength}\setlength{\mylength}{3\unitlength}
+\begin{picture}(\mylength,\mylength)(0,0)
+	\multiput(.5\mylength,0)(0,.1\mylength){10}{\line(0,1){.05\mylength}}
+	\put(0,0){\vector(1,0){\mylength}} % ascissas
+	\put(0,0){\vector(0,1){\mylength}} % ordinates
 
-	\qbezier(0,0)(0.5,2.7)(2,2.7)
-	\qbezier(4,0)(3.5,2.7)(2,2.7)
+	\qbezier(0,0)(0.3642\mylength,\mylength)(0.5\mylength,\mylength)
+	\qbezier(\mylength,0)(0.6358\mylength,\mylength)(0.5\mylength,\mylength)
 \end{picture}
-\caption{$\sin(x)$}
+\caption{Grafico $\sin(x)$}
 \label{fig:sin}
 \end{figure}
 
@@ -351,7 +356,7 @@ nelle tabelle riassuntive \ref{tab:globals} e \ref{tab:params}.
 \centering
 \begin{tabular}{|c|l|c|}
 	\hline
-	\textbf{Nome parametro} & \textbf{Descrizione} & \textbf{Unità di Misura}\\
+	\textbf{Simbolo} & \textbf{Nome} & \textbf{Unità di Misura}\\
 	\hline
 	$\tau$ & passo temporale & secondi\\
 	$L$ & lato della singola cella & metri\\
@@ -372,7 +377,7 @@ nelle tabelle riassuntive \ref{tab:globals} e \ref{tab:params}.
 \centering
 \begin{tabular}{|c|l|c|}
 	\hline
-	\textbf{Nome parametro} & \textbf{Descrizione} & \textbf{Unità di Misura}\\
+	\textbf{Simbolo} & \textbf{Nome} & \textbf{Unità di Misura}\\
 	\hline
 	$H$ & altezza media della vegetazione & metri\\
 	$A$ & percentuale abitazione & adimensionale\\
@@ -427,7 +432,8 @@ cambiare ad un certo punto della simulazione. Essendo questa
 simulzione da un certo punto nel passato\footnote{Di cui convenientemente
 teniamo degli \eng{snapshot}, come descritto nel requisito \ref{thm:snapshot}.}.
 Lo stesso discorso vale per la comparsa di nuovi focolai in punti non
-previsti\footnote{Questa è un eventualità probabile nel caso di incendi dolosi.}.
+previsti\footnote{Questa è un eventualità probabile nel caso di incendi dolosi.}
+come modellato dalla funzione $u_{ij}(t)$.
 
 \begin{requirement}
 Il simulatore deve poter essere inizializzato con uno stato iniziale arbitrario.
@@ -537,7 +543,7 @@ riassunti nella tabella \ref{tab:config}.
 \centering
 \begin{tabular}{|c|l|}
 	\hline
-	\textbf{Nome parametro} & \textbf{Descrizione}\\
+	\textbf{Simbolo} & \textbf{Nome}\\
 	\hline
 	$h$ & orizonte di simulazione\\
 	$s$ & frequanza \eng{snapshot}\\
@@ -572,7 +578,7 @@ al meglio tutto l'\eng{hardware} che gli viene messo a disposizione.
 \begin{requirement}
 Il simulatore deve poter sfruttare tutta la potenza di calcolo della macchina,
 come ad esempio la parallelizzazione in un singolo \eng{core} (SIMD) e
-\eng{multi-core}.
+\eng{multi-core}, perché il problema è \eng{trivially parallelizable}.
 \end{requirement}
 
 % TODO: definire bene il formato dei file di output, perché da essi dipende
