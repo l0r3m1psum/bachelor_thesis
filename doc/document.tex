@@ -316,6 +316,7 @@ l'incendio avrà la massima potenza.
 	\put(0,0){\vector(1,0){\mylength}} % ascissas
 	\put(0,0){\vector(0,1){\mylength}} % ordinates
 
+	% Magic numbers from: https://stackoverflow.com/questions/29022438/how-to-approximate-a-half-cosine-curve-with-bezier-paths-in-svg
 	\qbezier(0,0)(0.3642\mylength,\mylength)(0.5\mylength,\mylength)
 	\qbezier(\mylength,0)(0.6358\mylength,\mylength)(0.5\mylength,\mylength)
 \end{picture}
@@ -575,10 +576,29 @@ Il simulatore deve poter avvertire l'utente della presenza di dati indesiderati.
 Per poter realizare il requisito \ref{thm:faster} il simulatore deve sfruttare
 al meglio tutto l'\eng{hardware} che gli viene messo a disposizione.
 
-\begin{requirement}
+\begin{requirement}\label{thm:multicore}
 Il simulatore deve poter sfruttare tutta la potenza di calcolo della macchina,
 come ad esempio la parallelizzazione in un singolo \eng{core} (SIMD) e
 \eng{multi-core}, perché il problema è \eng{trivially parallelizable}.
+\end{requirement}
+
+Dato che spesso la dimensione dell'area da simulare sarà considerevole,
+bisognerà tenere conto della dimensione delle \eng{cache} del processore,
+
+\begin{requirement}\label{thm:blocking}
+% https://software.intel.com/content/www/us/en/develop/articles/cache-blocking-techniques.html
+% https://csapp.cs.cmu.edu/public/waside/waside-blocking.pdf
+Il simulatore dovra utilizzare tecniche come il \eng{cache blocking} per
+migliorare la località temporale dei dati usati dal programma.
+\end{requirement}
+
+Per poter realizzare al meglio il requisito \ref{thm:blocking} è necessario
+poter determinare la dimensione della \eng{cache} del processore. Per fare ciò
+\texttt{x86} mette a disposizione l'istruzione \texttt{CPUID}.
+
+\begin{requirement}
+Il simulatore deve poter determinare la dimensione della \eng{cache} del
+processore a tempo di esecuzione.
 \end{requirement}
 
 % TODO: definire bene il formato dei file di output, perché da essi dipende
