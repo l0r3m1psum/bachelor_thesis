@@ -601,6 +601,50 @@ Il simulatore deve poter determinare la dimensione della \eng{cache} del
 processore a tempo di esecuzione.
 \end{requirement}
 
+Come descritto dal requisito \ref{thm:used}, il simulatore deve poter essere
+utilizzato da altri servizi, inoltre è necessario mantenere e trattare tutti i
+dati geografici e meteorologici in maniera uniforme. Per fare ciò useremo una
+base di dati.
+
+\begin{requirement}\label{thm:db}
+Il simulatore deve potersi interfacciare con una base di dati.
+\end{requirement}
+
+Per soddisfare il requisito \ref{thm:db} useremo PostgreSQL 13 \cite{psql}. Dal
+requisito \ref{thm:db}, \ref{thm:csv} e \ref{thm:snapshot} ne derivano i
+seguenti tre
+
+\begin{requirement}
+La base di dati ha bisogno di uno schema.
+\end{requirement}
+
+\begin{requirement}\label{thm:export}
+La base di dati deve poter esportare i dati in formato CSV.
+\end{requirement}
+
+\begin{requirement}\label{thm:import}
+La base di dati deve poter importare i dati dal formato CSV.
+\end{requirement}
+
+I requisiti \ref{thm:export} e \ref{thm:import} possono essere facilmete
+implementati grazie alle funzionalità di PostgreSQL come mostrato nelle figure
+\ref{fig:export} e \ref{fig:import}.
+
+\begin{figure}
+\centering\verb+\copy <table> from 'data.csv' with (format csv);+
+\caption{Importazione dei dati nella base.}
+\label{fig:import}
+\end{figure}
+
+\begin{figure}
+\centering\verb+\copy <table> to 'export.csv' with (format csv);+
+\caption{Esportazione dei dati dalla base.}
+\label{fig:export}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{document}
+
 % TODO: definire bene il formato dei file di output, perché da essi dipende
 % la possibilità di poter far cominciare la similazione con in input uno stato
 % raggiunto in precedenza.
@@ -648,50 +692,6 @@ tabella \ref{tab:output}.
 Dove $n$ è lo stato della cella, in fiamme o meno, e $b$ è la sua quantità di
 combustibile ancora a disposizione.
 \fi
-
-Come descritto dal requisito \ref{thm:used}, il simulatore deve poter essere
-utilizzato da altri servizi, inoltre è necessario mantenere e trattare tutti i
-dati geografici e meteorologici in maniera uniforme. Per fare ciò useremo una
-base di dati.
-
-\begin{requirement}\label{thm:db}
-Il simulatore deve potersi interfacciare con una base di dati.
-\end{requirement}
-
-Per soddisfare il requisito \ref{thm:db} useremo PostgreSQL 13 \cite{psql}. Dal
-requisito \ref{thm:db}, \ref{thm:csv} e \ref{thm:snapshot} ne derivano i
-seguenti tre
-
-\begin{requirement}
-La base di dati ha bisogno di uno schema.
-\end{requirement}
-
-\begin{requirement}\label{thm:export}
-La base di dati deve poter esportare i dati in formato CSV.
-\end{requirement}
-
-\begin{requirement}\label{thm:import}
-La base di dati deve poter importare i dati dal formato CSV.
-\end{requirement}
-
-I requisiti \ref{thm:export} e \ref{thm:import} possono essere facilmete
-implementati grazie alle funzionalità di PostgreSQL come mostrato nelle figure
-\ref{fig:export} e \ref{fig:import}.
-
-\begin{figure}
-\centering\verb+\copy <table> from 'data.csv' with (format csv);+
-\caption{Importazione dei dati nella base.}
-\label{fig:import}
-\end{figure}
-
-\begin{figure}
-\centering\verb+\copy <table> to 'export.csv' with (format csv);+
-\caption{Esportazione dei dati dalla base.}
-\label{fig:export}
-\end{figure}
-
-\bibliographystyle{plain}
-\bibliography{document}
 
 \iffalse % Old stuff for updating the data mid simulation
 I dati saranno quindi presi in \eng{input} da tre \file\ CSV: uno per i dati
