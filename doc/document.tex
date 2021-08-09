@@ -207,8 +207,9 @@ Sospendiamo ora la nostra discussione del modelo per descrivere meglio i dati a
 nostra disposizione, introdotti nel paragrafo \ref{sec:data}.
 
 Il satellite ci mette a disposizione una serie di dati, descritti nella tabella
-\ref{tab:geo}. Questi tuttavia non sono usati così come sono nel modello ma sono
-``rifiniti'' con le seguenti corrispondenze matematiche.
+\ref{tab:geo}, il significato dei valori e definito nell'appendice
+\ref{sec:desc}. Questi tuttavia non sono usati così come sono nel modello ma
+sono ``rifiniti'' con le seguenti corrispondenze matematiche.
 
 \begin{table} % TODO: add description of data
 \centering
@@ -641,6 +642,95 @@ implementati grazie alle funzionalità di PostgreSQL come mostrato nelle figure
 \caption{Esportazione dei dati dalla base.}
 \label{fig:export}
 \end{figure}
+
+\appendix
+
+\section{Descrizione dei dati satellitari}\label{sec:desc}
+
+I valori enumerati nella tabella \ref{tab:geo} sono definiti nelle tabelle
+\ref{tab:forest}, \ref{tab:urbanization}, \ref{tab:water1}, \ref{tab:water2} e
+\ref{tab:altimetry}.
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|}
+\hline
+\textbf{Valore} & \textbf{Classe}\\
+\hline
+0 & Non forestale\\
+1 & Bosco di latifoglie\\
+2 & Foresta di conifere\\
+255 & Area esterna\\
+\hline
+\end{tabular}
+\caption{Foreste}
+\label{tab:forest}
+\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|}
+\hline
+\textbf{Valore} & \textbf{Classe}\\
+\hline
+0 & Zona non impermeabile\\
+1 & Zona impermeabile all'1\%\\
+\vdots & \vdots\\
+100 & Zona impermeabile all'100\%\\
+255 & Area esterna\\
+\hline
+\end{tabular}
+\caption{Urbanizzazione}
+\label{tab:urbanization}
+\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|}
+\hline
+\textbf{Valore} & \textbf{Classe}\\
+\hline
+0 & Terreno asciutto\\
+1 & Acqua permanente\\
+2 & Acqua temporanea\\
+3 & Bagnato permanente\\
+4 & Bagnato temporaneo\\
+253 & Acqua di costa mare\\
+255 & Area esterna\\
+\hline
+\end{tabular}
+\caption{Water 1}
+\label{tab:water1}
+\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|}
+\hline
+\textbf{Valore} & \textbf{Classe}\\
+\hline
+0 & Assenza torrente\\
+1 & Presenza torrente\\
+\hline
+\end{tabular}
+\caption{Water 2}
+\label{tab:water2}
+\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{|c|l|}
+\hline
+\textbf{Valore} & \textbf{Classe}\\
+\hline
+0 & Altezza minima\\
+\vdots & \vdots\\
+4380 & Altezza massima\\
+\hline
+\end{tabular}
+\caption{Altimetria}
+\label{tab:altimetry}
+\end{table}
 
 \bibliographystyle{plain}
 \bibliography{document}
