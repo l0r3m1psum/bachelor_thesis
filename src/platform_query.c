@@ -41,7 +41,9 @@ main(void) {
 
 	{
 		asm volatile (
-			"mov $1, %%ecx\nmov $4, %%eax\ncpuid" :
+			"mov $1, %%ecx\n"
+			"mov $4, %%eax\n"
+			"cpuid" :
 			"=a" (a), "=b" (b), "=c" (c), "=d" (d)
 		);
 		uint32_t res = 0, S = 0;

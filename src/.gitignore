@@ -1,5 +1,6 @@
 csv
 main
+platform_query
 *.o
 *.dSYM
 *.trace
