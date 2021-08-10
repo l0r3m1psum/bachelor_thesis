@@ -213,7 +213,7 @@ Il satellite ci mette a disposizione una serie di dati, descritti nella tabella
 \ref{sec:desc}. Questi tuttavia non sono usati così come sono nel modello ma
 sono ``rifiniti'' con le seguenti corrispondenze matematiche.
 
-\begin{table} % TODO: add description of data
+\begin{table}
 \centering
 \begin{tabular}{|c|l|c|}
 	\hline
@@ -222,7 +222,7 @@ sono ``rifiniti'' con le seguenti corrispondenze matematiche.
 	$G$ & Foreste & 0,1,2,255\\
 	$U$ & Urbanizzazione & 0,\ldots,100,255\\
 	$W1$ & Water1 & 0,\ldots,4,253,255\\
-	$W2$ & \underline{Water2} & 0,1\\ % NOTE: currently unused, find a way to mark it or remove it
+	$W2$ & \underline{Water2} & 0,1\\ % NOTE: currently unused
 	$P$ & Altimetria & 0,\ldots,4380\\
 	\hline
 \end{tabular}
@@ -334,8 +334,38 @@ d(\e_1, \e_2) = \left(1-\frac{1}{2}|\e_1\e_2|\right)\textrm{,}
 è il fattore di fattore di disomogeneità al confine delle celle. Esso può
 assumere solo due valori 1 e $1/2$, il primo nelle celle sopra, sotto e ai lati
 della cella corrente, il secondo sulle celle diagonali. Ovvero l'incendio si
-trasmette la metta da una cella diagonale.
-% NOTE: probabilmente un disegno aiuterebbe a spiegarlo più intuitivamente.
+trasmette la metà da una cella diagonale, come mostrato in figura
+\ref{fig:disom}.
+
+\begin{figure} % TODO: fix nummber positioning
+\centering
+\setlength{\unitlength}{0.7cm}
+\begin{picture}(6,6)
+	\setlength{\piccenter}{3\unitlength}
+	% Grid
+	\thicklines
+	\multiput(0,0)(2,0){4}{\line(0,1){6}} % columns
+	\multiput(0,0)(0,2){4}{\line(1,0){6}} % rows
+
+	\put(1,5){1/2}
+	\put(3,5){1}
+	\put(5,5){1/2}
+	\put(1,3){1}
+	\put(5,3){1}
+	\put(1,1){1/2}
+	\put(3,1){1}
+	\put(5,1){1/2}
+
+	% Black square
+	\setlength{\side}{0.8\unitlength}
+	\linethickness{\side}
+	\setlength{\ypos}{\piccenter}
+	\addtolength{\ypos}{-0.5\side}
+	\put(\piccenter,\ypos){\line(0,0){\side}}
+\end{picture}
+\caption{Disomogeneità al confine tra le celle.}
+\label{fig:disom}
+\end{figure}
 
 \marginpar{Dare una spegazione intuitiva della semantica delle funzioni
 \ref{eq:wind} e \ref{eq:slope}}
@@ -470,7 +500,28 @@ requisito \ref{thm:schema}.
 
 Per come è scritto il modello se eseguito su un'area rettangolare non specifica
 cosa fare sui contorni del rettangolo, ovvero cosa fare quanto intorno ad ogni
-cella non ci sono 8 altre celle. % NOTE: maybe add figure
+cella non ci sono 8 altre celle, come mostrato in figura \ref{fig:corner}.
+
+\begin{figure} % NOTE: maybe add dots on the opposite sides of the black square
+\centering
+\setlength{\unitlength}{0.7cm}
+\begin{picture}(6,6)
+	\setlength{\piccenter}{3\unitlength}
+	% Grid
+	\thicklines
+	\multiput(0,0)(2,0){4}{\line(0,1){6}} % columns
+	\multiput(0,0)(0,2){4}{\line(1,0){6}} % rows
+
+	% Black square
+	\setlength{\side}{0.8\unitlength}
+	\linethickness{\side}
+	\setlength{\ypos}{\unitlength}
+	\addtolength{\ypos}{-0.5\side}
+	\put(1,\ypos){\line(0,0){\side}}
+\end{picture}
+\caption{Contorni dell'area}
+\label{fig:corner}
+\end{figure}
 
 \begin{requirement}\label{thm:boundary}
 Il siumulatore deve gestire la simulazione nei contorni dell'area rettangolare.
@@ -513,7 +564,6 @@ selezionata dovrebbe essere comunque abbastanza grande da non influire sul
 risultato finale e per rimanere il più fedeli al modello possibile, senza
 contare la semplicità di implementazione.
 
-% TODO: 90 deg to the right to avoid the ugly hack
 \begin{figure}
 \centering
 \setlength{\unitlength}{0.7cm}
