@@ -20,7 +20,7 @@ static void
 print_cache_info(uint32_t cache_level) {
 	assert(cache_level < 4);
 	uint32_t a, b, c, d;
-	asm volatile (
+	__asm__ volatile (
 		"mov %0, %%ecx\n"
 		"mov $4, %%eax\n"
 		"cpuid"
@@ -28,7 +28,7 @@ print_cache_info(uint32_t cache_level) {
 		: "r" (cache_level)
 	);
 	uint32_t res = 0, S = 0;
-	asm volatile ("mov %%ebx, %0\nmov %%ecx, %1" : "=r" (res), "=r" (S));
+	__asm__ volatile ("mov %%ebx, %0\nmov %%ecx, %1" : "=r" (res), "=r" (S));
 #define L_maks 0x000007ff /* [11:0] */
 #define P_mask 0x001ff800 /* [21:12] */
 #define W_mask 0xffe00000 /* [31:22] */
@@ -65,7 +65,7 @@ main(void) {
 	{
 		CPUID(1, a, b, c, d);
 		uint32_t res = 0;
-		asm volatile ("mov %%ebx, %0" : "=r" (res));
+		__asm__ volatile ("mov %%ebx, %0" : "=r" (res));
 		/* Extracting %bh */
 		res >>= 8;
 		res &= 0x0000000f;
