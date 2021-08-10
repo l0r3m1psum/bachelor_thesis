@@ -54,6 +54,8 @@
 
 \section{Introduzione}\label{sec:intro}
 
+\marginpar{Da approfondire.}
+
 Questa tesi fa parte di un progetto per fornire ai vigili del fuoco uno
 strumento per prevedere l'espansione di un incendio in un'area forestale. Questo
 sarà fatto utilizzando dei sensori sul campo e dei satelliti per raccogliere le
@@ -335,7 +337,9 @@ della cella corrente, il secondo sulle celle diagonali. Ovvero l'incendio si
 trasmette la metta da una cella diagonale.
 % NOTE: probabilmente un disegno aiuterebbe a spiegarlo più intuitivamente.
 
-% TODO: dare una spiegazione intuitiva della semantica di queste due funzioni.
+\marginpar{Dare una spegazione intuitiva della semantica delle funzioni
+\ref{eq:wind} e \ref{eq:slope}}
+
 \begin{equation}\label{eq:wind}
 f_w = \exp\left(k_1 F_{i+\e_1j+\e_2}\frac{\begin{array}{c}\e_1\cos(D_{i+\e_1j+\e_2})\\
       +\\\e_2\sin(D_{i+\e_1j+\e_2})\end{array}}{\sqrt{\e_1^2 + \e_2^2}}\right)
@@ -445,6 +449,10 @@ Il simulatore deve poter essere inizializzato con uno stato iniziale arbitrario.
 Il simulatore deve poter essere fermato in maniera ``gentile''.
 \end{requirement}
 
+% NOTE: Dell'input va validato solo il fatto che sia un rettangolo (quindi ci
+% servono i punti iniziali) e che siano tutti equidistanti (che si può inferire
+% dai dati stessi senza bisogno di input aggiuntivo)
+
 Per garantire la correttezza dei risultati il simulatore deve poter validare
 ciò che riceve in \eng{input} e per fare ciò deve ricevere delle specifiche sul
 formato dei dati, come la loro grana (i.e. quanto spazio ricopre ogni singolo
@@ -462,7 +470,7 @@ requisito \ref{thm:schema}.
 
 Per come è scritto il modello se eseguito su un'area rettangolare non specifica
 cosa fare sui contorni del rettangolo, ovvero cosa fare quanto intorno ad ogni
-cella non ci sono 8 altre celle.
+cella non ci sono 8 altre celle. % NOTE: maybe add figure
 
 \begin{requirement}\label{thm:boundary}
 Il siumulatore deve gestire la simulazione nei contorni dell'area rettangolare.
