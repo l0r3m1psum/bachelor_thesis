@@ -83,6 +83,7 @@ print_cache_info(cache_info_t info) {
 	printf("Ways of associativity %d\n", info.ways);
 	printf("Number of Sets %d\n", info.sets);
 }
+
 int
 main(void) {
 	printf("%s\n", get_cpu_name().buf);
