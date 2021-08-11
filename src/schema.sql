@@ -9,29 +9,52 @@ create database :db;
 \c :db
 
 -- TODO: should the boxes be or in our piece of earth?
-
 begin;
+
+create domain ufloat8        as float8 not null check (value >= 0);
+create domain uint4          as int4   not null check (value >= 0);
+create domain bool1          as bool   not null;
+create domain angle          as float8 not null check (value between -pi() and pi());
+create domain altimetry      as int2   not null check (value between 0 and 4380);
+create domain forest         as int2   not null check (value between 0 and 2 or value = 255);
+create domain urbanization   as int2   not null check (value between 0 and 255);
+create domain water1         as int2   not null check (value between 0 and 4 or value = 253 or value = 255);
+create domain "carta natura" as int2   not null check (value between 1 and 90);
+
+create type parameters as (
+	p  altimetry,
+	g  forest,
+	u  urbanization,
+	w1 water1,
+	w2 bool1, -- NOTE: currently unused by the model
+	c  "carta natura", -- NOTE: currently unused by the model
+	d  angle, -- "wind direction"
+	f  ufloat8 -- "wind speed"
+);
+
+create type state as (
+	fuel ufloat8,
+	"on fire" bool1
+);
+
+create type "map point" as (
+	x uint4,
+	y uint4
+);
+
 create table map (
-	x                int4   check (x >= 0),
-	y                int4   check (x >= 0),
-	primary key (x, y),
-	altimetry        int2   not null check (altimetry between 0 and 4380),
-	forest           int2   not null check (forest between 0 and 2 or forest = 255),
-	urbanization     int2   not null check (urbanization between 0 and 255),
-	water1           int2   not null check (water1 between 0 and 4 or water1 = 253 or water1 = 255),
-	water2           bool   not null,
-	"carta natura"   int2   not null check ("carta natura" between 1 and 90),
-	"wind direction" float8 not null check ("wind direction" between -pi() and pi()),
-	"wind speed"     float8 not null check ("wind speed" >= 0)
+	id   int4           generated always as identity primary key,
+	p1   "map point"    not null,
+	p2   "map point"    not null,
+	data parameters[][] not null check (array_ndims(data) = 2)
 );
 
 create table results (
-	ts    timestamp, -- 8 bytes
-	x     int4  check (x >= 0),
-	y     int4  check (x >= 0),
-	primary key (ts, x, y),
-	fuel  float8 not null check (fuel >= 0),
-	state bool   not null,
+	id   int4        generated always as identity primary key,
+	ts   timestamp   unique not null default current_timestamp,
+	p1   "map point" not null,
+	p2   "map point" not null,
+	data state[][]   not null check (array_ndims(data) = 2) -- array_length(anyarray, int)
 );
 
 commit;
