@@ -8,6 +8,8 @@ drop database if exists :db;
 create database :db;
 \c :db
 
+-- DOC: https://www.postgresql.org/docs/13/rowtypes.html
+
 -- TODO: should the boxes be or in our piece of earth?
 begin;
 
@@ -54,7 +56,9 @@ create table results (
 	ts   timestamp   unique not null default current_timestamp,
 	p1   "map point" not null,
 	p2   "map point" not null,
-	data state[][]   not null check (array_ndims(data) = 2) -- array_length(anyarray, int)
+	data state[][]   not null check (array_ndims(data) = 2),
+	constraint "points order" check ((p1).x < (p2).x and (p1).y < (p2).y),
+	constraint "right dimension" check (((p2).x - (p1).x) * ((p2).y - (p1).y) = array_length(data,1) * array_length(data, 2))
 );
 
 commit;
