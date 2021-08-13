@@ -75,9 +75,9 @@ create table simualtions (
 
 -- TODO: add seq ordering trigger and data's area must be equal to its simulation rectangle area.
 create table results (
-	simualtion int4 references simualtions(id),
+	sim int4 references simualtions(id),
 	seq int2,
-	primary key (simualtion, seq),
+	primary key (sim, seq),
 	data state[][]   not null check (array_ndims(data) = 2)
 );
 
@@ -104,6 +104,30 @@ create trigger "rectangle inside trigger" before insert or update
 	for each row
 	execute function "rectangle inside function"();
 
+create function "same area function"() returns trigger as $$
+declare
+	"sim rect" "map rectangle" := row(0, 0, 1, 1);
+	"area res" int4 := 0;
+	"area sim" int4 := 0;
+begin
+	"sim rect" := (select rect from simualtions where id = new.sim);
+	"area sim" := (("sim rect").x2 - ("sim rect").x1 + 1) * (("sim rect").y2 - ("sim rect").y1 + 1);
+	"area res" := array_length(new.data,1) * array_length(new.data, 2);
+
+	if "area sim" = "area res" then
+		return new;
+	else
+		raise exception 'a result data must have the same area of its'
+		' simulation, and % is not equal to %', "area sim", "area res";
+	end if;
+end;
+$$ language plpgsql;
+
+create trigger "same area trigger" before insert or update
+	on results
+	for each row
+	execute function "same area function"();
+
 --------------------------------------------------------------------------------
 
 insert into maps(name, rect, data) values (
@@ -120,5 +144,17 @@ insert into simualtions(name, rect, map, horizon) values
 	('test simualtion1', row(0, 0, 2, 2), 1, 10),
 	('test simualtion2', row(0, 0, 2, 2), 1, 10),
 	('test simualtion3', row(0, 0, 2, 2), 1, 10);
+
+insert into results(sim, seq, data) values
+	(1, 0, cast(array[
+		array[row(0, false), row(0, false), row(0, false)],
+		array[row(0, false), row(0, false), row(0, false)],
+		array[row(0, false), row(0, false), row(0, false)]
+	] as state[][])),
+	(1, 1, cast(array[
+		array[row(0, false), row(0, false), row(0, false)],
+		array[row(0, false), row(0, false), row(0, false)],
+		array[row(0, false), row(0, false), row(0, false)]
+	] as state[][]));
 
 commit;
