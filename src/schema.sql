@@ -73,7 +73,6 @@ create table simualtions (
 	started timestamp not null default current_timestamp
 );
 
--- TODO: add seq ordering trigger and data's area must be equal to its simulation rectangle area.
 create table results (
 	sim int4 references simualtions(id),
 	seq int2,
@@ -147,6 +146,8 @@ create trigger "number sequence trigger" before insert
 	on results
 	for each row
 	execute function "number sequence function"();
+
+-- TODO: add trigger "number sequence for update"
 
 --------------------------------------------------------------------------------
 
