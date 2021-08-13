@@ -12,12 +12,16 @@ create database :db;
 
 -- TODO: should the rectangles be or in our piece of earth?
 begin;
--- Types and domains for the map rectangle
-create domain uint4 as int4 not null check (value >= 0);
-create type "uint4 pair" as (x uint4, y uint4);
-create domain "map point" as "uint4 pair" not null check ((value).x >= 0 and (value).y >= 0);
-create type "map point pair" as (p1 "map point", p2 "map point");
-create domain "map rectangle" as "map point pair" not null check ((value).p1.x < (value).p2.x and (value).p1.y < (value).p2.y);
+
+create type "map rectangle implementation" as (x1 int4, y1 int4, x2 int4, y2 int4);
+create domain "map rectangle" as "map rectangle implementation" not null check (
+	    ((value).x1 is not null and (value).x1 >= 0)
+	and ((value).y1 is not null and (value).y1 >= 0)
+	and ((value).x2 is not null and (value).x2 >= 0)
+	and ((value).y2 is not null and (value).y2 >= 0)
+	and ((value).x1 < (value).x2)
+	and ((value).x2 < (value).y2)
+);
 
 create type "parameters implementation" as (
 	altimetry  int2,
@@ -42,7 +46,7 @@ create domain parameters as "parameters implementation" not null check (
 
 create type "state implementation" as (fuel float8, "on fire" bool);
 create domain state as "state implementation" not null check (
-	((value).fuel is not null and (value).fuel >= 0)
+	    ((value).fuel      is not null and (value).fuel >= 0)
 	and ((value)."on fire" is not null)
 );
 
@@ -53,25 +57,28 @@ create table maps (
 	name str             unique,
 	rect "map rectangle",
 	data parameters[][]  not null check (array_ndims(data) = 2)
+	constraint "right dimension" check (
+		((rect).x2 - (rect).x1) * ((rect).y2 - (rect).y1)
+		= array_length(data,1) * array_length(data, 2)
+	)
 );
 
+-- TODO: add trigger for simualtions' rect inside maps' rect
 create table simualtions (
 	id int4 generated always as identity primary key,
 	name str unique,
-	p1 "map point" not null,
-	p2 "map point" not null,
+	rect "map rectangle",
 	map int4 not null references maps(id),
 	horizon float8,
 	-- etc.
 	started timestamp not null default current_timestamp
-	constraint "points order" check ((p1).x < (p2).x and (p1).y < (p2).y)
-	-- constraint "right dimension" check (((p2).x - (p1).x) * ((p2).y - (p1).y) = array_length(data,1) * array_length(data, 2))
 );
 
+-- TODO: add seq ordering trigger and data's area must be equal to its simulation rectangle area.
 create table results (
 	simualtion int4 references simualtions(id),
-	order__ int2,
-	primary key (simualtion, order__),
+	seq int2,
+	primary key (simualtion, seq),
 	data state[][]   not null check (array_ndims(data) = 2)
 );
 
