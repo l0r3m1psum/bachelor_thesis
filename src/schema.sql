@@ -128,6 +128,26 @@ create trigger "same area trigger" before insert or update
 	for each row
 	execute function "same area function"();
 
+create function "number sequence function"() returns trigger as $$
+declare
+	"current max" int4 := 0;
+begin
+	"current max" := (select coalesce(max(seq), -1) from results where sim = new.sim);
+
+	if new.seq = "current max" + 1 then
+		return new;
+	else
+		raise exception 'the sequence of results must increase by one on every'
+		'entry, and % is not the soccessor of %', new.seq, "current max";
+	end if;
+end;
+$$ language plpgsql;
+
+create trigger "number sequence trigger" before insert
+	on results
+	for each row
+	execute function "number sequence function"();
+
 --------------------------------------------------------------------------------
 
 insert into maps(name, rect, data) values (
