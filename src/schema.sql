@@ -147,7 +147,18 @@ create trigger "number sequence trigger" before insert
 	for each row
 	execute function "number sequence function"();
 
--- TODO: add trigger "number sequence for update"
+create function "deny update seq function"() returns trigger as $$
+begin
+	if new.seq <> old.seq then
+		raise exception 'the sequence number cannot be modified';
+	end if;
+end;
+$$ language plpgsql;
+
+create trigger "deny update seq trigger" before update
+	on results
+	for each row
+	execute function "deny update seq function"();
 
 --------------------------------------------------------------------------------
 
