@@ -80,6 +80,8 @@ create table results (
 	data state[][]   not null check (array_ndims(data) = 2)
 );
 
+--------------------------------------------------------------------------------
+
 create function "rectangle inside function"() returns trigger as $$
 declare
 	"map rect" "map rectangle" := row(0, 0, 1, 1);
@@ -151,6 +153,8 @@ create function "deny update seq function"() returns trigger as $$
 begin
 	if new.seq <> old.seq then
 		raise exception 'the sequence number cannot be modified';
+	else
+		return new;
 	end if;
 end;
 $$ language plpgsql;
@@ -159,6 +163,19 @@ create trigger "deny update seq trigger" before update
 	on results
 	for each row
 	execute function "deny update seq function"();
+
+create function "check delete function"() returns trigger as $$
+declare
+	last int4;
+begin
+	last := (select max(seq) from results where sim = old.sim);
+	if old.seq = last then
+		return old;
+	else
+		raise exception 'only the last result in the sequence can be deleted';
+	end if;
+end;
+$$ language plpgsql;
 
 --------------------------------------------------------------------------------
 
@@ -188,5 +205,7 @@ insert into results(sim, seq, data) values
 		array[row(0, false), row(0, false), row(0, false)],
 		array[row(0, false), row(0, false), row(0, false)]
 	] as state[][]));
+
+delete from results where sim = 1 and seq = 1;
 
 commit;
