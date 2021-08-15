@@ -65,6 +65,15 @@ create function rectArea(rect "map rectangle") returns int4 as $$
 select ((rect).x2 - (rect).x1 + 1) * ((rect).y2 - (rect).y1 + 1)
 $$ language sql;
 
+create function rectInsideAnother(r1 "map rectangle", r2 "map rectangle") returns bool as $$
+select (r1).x1 >= (r2).x1
+	and (r1).x2 <= (r2).x2
+	and (r1).y1 >= (r2).y1
+	and (r1).y2 <= (r2).y2
+$$ language sql;
+
+comment on function rectInsideAnother is 'Checks is r1 is inside r2.';
+
 --------------------------------------------------------------------------------
 
 create table maps (
@@ -97,6 +106,10 @@ create table results (
 create function "rectangle inside function"() returns trigger as $$
 declare
 	"map rect" "map rectangle" := row(0, 0, 1, 1);
+	x1 int4;
+	y1 int4;
+	x2 int4;
+	y2 int4;
 begin
 	assert TG_WHEN = 'BEFORE' and TG_LEVEL = 'ROW';
 
@@ -104,7 +117,12 @@ begin
 		if TG_OP = 'INSERT' then
 			return new;
 		elsif TG_OP = 'UPDATE' then
-			-- TODO: controllare che tutti le simulazioni associate con questa mappa siano ancora contenute
+			for x1, y1, x2, y2 in select rect from simualtions where map = new.id loop
+				if not rectInsideAnother(row(x1, y1, x2, y2), new.rect) then
+					raise exception 'all simulation on this map must be inside it';
+				end if;
+			end loop;
+			return new;
 		elsif TG_OP = 'DELETE' then
 			return old;
 		else
@@ -113,12 +131,8 @@ begin
 	elsif TG_RELNAME = 'simualtions' then
 		if TG_OP = 'INSERT' then
 			"map rect" := (select rect from maps where id = new.map);
-			-- TODO: create a function to check one rectangle inside another
 
-			if      (new.rect).x1 >= ("map rect").x1
-				and (new.rect).x2 <= ("map rect").x2
-				and (new.rect).y1 >= ("map rect").y1
-				and (new.rect).y2 <= ("map rect").y2 then
+			if rectInsideAnother(new.rect, "map rect") then
 				return new;
 			else
 				raise exception 'a simulation rectangle must be inside its map'
@@ -127,10 +141,7 @@ begin
 		elsif TG_OP = 'UPDATE' then
 			"map rect" := (select rect from maps where id = new.map);
 
-			if      (new.rect).x1 >= ("map rect").x1
-				and (new.rect).x2 <= ("map rect").x2
-				and (new.rect).y1 >= ("map rect").y1
-				and (new.rect).y2 <= ("map rect").y2 then
+			if rectInsideAnother(new.rect, "map rect") then
 				return new;
 			else
 				raise exception 'a simulation rectangle must be inside its map'
@@ -192,6 +203,7 @@ begin
 		if TG_OP = 'INSERT' then
 			return new;
 		elsif TG_OP = 'UPDATE' then
+			-- TODO: look into this
 			if new."map rect" <> old."map rect" then
 				raise exception 'the "map rect" cannot be modified';
 			else
@@ -206,7 +218,7 @@ begin
 		if TG_OP = 'INSERT' then
 			return new;
 		elsif TG_OP = 'UPDATE' then
-			if matrixArea(new.parameters) <> matrixArea(old.parameters) then
+			if matrixArea(new.data) <> matrixArea(old.data) then
 				raise exception 'the area must remain equal';
 			else
 				return new;
@@ -310,5 +322,7 @@ insert into results(sim, seq, data) values
 	] as state[][]));
 
 delete from results where sim = 1 and seq = 1;
+
+-- update maps set rect = row(0, 0, 3, 3) where id = 1;
 
 commit;
