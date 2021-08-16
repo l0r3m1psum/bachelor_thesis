@@ -92,7 +92,7 @@ create table simualtions (
 	name str unique,
 	rect "map rectangle",
 	map int4 not null references maps(id),
-	horizon float8,
+	horizon int4 check(horizon > 0),
 	-- etc.
 	started timestamp not null default current_timestamp
 );
