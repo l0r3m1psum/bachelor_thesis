@@ -7,6 +7,7 @@
 drop database if exists :db;
 create database :db;
 \c :db
+-- set client_min_messages = debug;
 
 -- DOC: https://www.postgresql.org/docs/13/rowtypes.html
 
@@ -65,14 +66,14 @@ create function rectArea(rect "map rectangle") returns int4 as $$
 select ((rect).x2 - (rect).x1 + 1) * ((rect).y2 - (rect).y1 + 1)
 $$ language sql;
 
-create function rectInsideAnother(r1 "map rectangle", r2 "map rectangle") returns bool as $$
+create function rectInside(r1 "map rectangle", r2 "map rectangle") returns bool as $$
 select (r1).x1 >= (r2).x1
 	and (r1).x2 <= (r2).x2
 	and (r1).y1 >= (r2).y1
 	and (r1).y2 <= (r2).y2
 $$ language sql;
 
-comment on function rectInsideAnother is 'Checks is r1 is inside r2.';
+comment on function rectInside is 'Checks is r1 is inside r2.';
 
 --------------------------------------------------------------------------------
 
@@ -101,198 +102,7 @@ create table results (
 	data state[][]   not null check (array_ndims(data) = 2)
 );
 
---------------------------------------------------------------------------------
-
-create function "rectangle inside function"() returns trigger as $$
-declare
-	"map rect" "map rectangle" := row(0, 0, 1, 1);
-	x1 int4;
-	y1 int4;
-	x2 int4;
-	y2 int4;
-begin
-	assert TG_WHEN = 'BEFORE' and TG_LEVEL = 'ROW';
-
-	if TG_RELNAME = 'maps' then
-		if TG_OP = 'INSERT' then
-			return new;
-		elsif TG_OP = 'UPDATE' then
-			for x1, y1, x2, y2 in select rect from simualtions where map = new.id loop
-				if not rectInsideAnother(row(x1, y1, x2, y2), new.rect) then
-					raise exception 'all simulation on this map must be inside it';
-				end if;
-			end loop;
-			return new;
-		elsif TG_OP = 'DELETE' then
-			return old;
-		else
-			raise exception 'not implemented for operation %', TG_OP;
-		end if;
-	elsif TG_RELNAME = 'simualtions' then
-		if TG_OP = 'INSERT' then
-			"map rect" := (select rect from maps where id = new.map);
-
-			if rectInsideAnother(new.rect, "map rect") then
-				return new;
-			else
-				raise exception 'a simulation rectangle must be inside its map'
-				'rectangle, and % is not inside %', new.rect, "map rect";
-			end if;
-		elsif TG_OP = 'UPDATE' then
-			"map rect" := (select rect from maps where id = new.map);
-
-			if rectInsideAnother(new.rect, "map rect") then
-				return new;
-			else
-				raise exception 'a simulation rectangle must be inside its map'
-				'rectangle, and % is not inside %', new.rect, "map rect";
-			end if;
-		elsif TG_OP = 'DELETE' then
-			return old;
-		else
-			raise exception 'not implemented for operation %', TG_OP;
-		end if;
-	else
-		raise exception 'not implemented for table %', TG_RELNAME;
-	end if;
-end;
-$$ language plpgsql;
-
-create trigger "rectangle inside" before insert or update or delete
-	on maps
-	for each row
-	execute function "rectangle inside function"();
-
-create trigger "rectangle inside" before insert or update or delete
-	on simualtions
-	for each row
-	execute function "rectangle inside function"();
-
-create function "same area function"() returns trigger as $$
-declare
-	"sim rect" "map rectangle" := row(0, 0, 1, 1);
-	"area res" int4;
-	"area sim" int4;
-begin
-	assert TG_WHEN = 'BEFORE' and TG_LEVEL = 'ROW';
-
-	if TG_RELNAME = 'results' then
-		if TG_OP = 'INSERT' then
-			"sim rect" := (select rect from simualtions where id = new.sim);
-			"area sim" := rectArea("sim rect");
-			"area res" := matrixArea(new.data);
-
-			if "area sim" = "area res" then
-				return new;
-			else
-				raise exception 'a result data must have the same area of its'
-				' simulation, and % is not equal to %', "area sim", "area res";
-			end if;
-		elsif TG_OP = 'UPDATE' then
-			if matrixArea(new.rect) <> matrixArea(old.rect) then
-				raise exception 'the area must remain equal';
-			else
-				return new;
-			end if;
-		elsif TG_OP = 'DELETE' then
-			return old;
-		else
-			raise exception 'not implemented for operation %', TG_OP;
-		end if;
-	elsif TG_RELNAME = 'simualtions' then
-		if TG_OP = 'INSERT' then
-			return new;
-		elsif TG_OP = 'UPDATE' then
-			-- TODO: look into this
-			if new."map rect" <> old."map rect" then
-				raise exception 'the "map rect" cannot be modified';
-			else
-				return new;
-			end if;
-		elsif TG_OP = 'DELETE' then
-			return old;
-		else
-			raise exception 'not implemented for operation %', TG_OP;
-		end if;
-	elsif TG_RELNAME = 'maps' then
-		if TG_OP = 'INSERT' then
-			return new;
-		elsif TG_OP = 'UPDATE' then
-			if matrixArea(new.data) <> matrixArea(old.data) then
-				raise exception 'the area must remain equal';
-			else
-				return new;
-			end if;
-		elsif TG_OP = 'DELETE' then
-			return old;
-		else
-			raise exception 'not implemented for operation %', TG_OP;
-		end if;
-	else
-		raise exception 'not implemented for table %', TG_RELNAME;
-	end if;
-end;
-$$ language plpgsql;
-
-create trigger "same area" before insert or update or delete
-	on results
-	for each row
-	execute function "same area function"();
-
-create trigger "same area" before insert or update or delete
-	on simualtions
-	for each row
-	execute function "same area function"();
-
-create trigger "same area" before insert or update or delete
-	on maps
-	for each row
-	execute function "same area function"();
-
-create function "number sequence function"() returns trigger as $$
-declare
-	"current max" int4;
-begin
-	assert TG_WHEN = 'BEFORE' and TG_LEVEL = 'ROW' and TG_RELNAME = 'results';
-	if TG_OP = 'INSERT' then
-		"current max" := (select coalesce(max(seq), -1) from results where sim = new.sim);
-
-		if new.seq = "current max" + 1 then
-			return new;
-		else
-			raise exception 'the sequence of results must increase by one on every'
-			'entry, and % is not the soccessor of %', new.seq, "current max";
-		end if;
-	elsif TG_OP = 'UPDATE' then
-		if new.seq <> old.seq then
-			raise exception 'the sequence number cannot be modified';
-		else
-			return new;
-		end if;
-	elsif TG_OP = 'DELETE' then
-		"current max" := (select max(seq) from results where sim = old.sim);
-
-		if old.seq = "current max" then
-			return old;
-		else
-			raise exception 'only the last result in the sequence can be deleted';
-		end if;
-	else
-		raise exception 'not implemented for operation %', TG_OP;
-	end if;
-end;
-$$ language plpgsql;
-
-comment on function "number sequence function" is 'Mantains the invariant that'
-' the seq column of each simulation must be a successor (+1) of its predecessor'
-'(in the Peano natural numbers sense).';
-
-create trigger "number sequence" before insert or update or delete
-	on results
-	for each row
-	execute function "number sequence function"();
-
---------------------------------------------------------------------------------
+\include triggers.sql
 
 insert into maps(name, rect, data) values (
 	'test map',
@@ -323,6 +133,8 @@ insert into results(sim, seq, data) values
 
 delete from results where sim = 1 and seq = 1;
 
--- update maps set rect = row(0, 0, 3, 3) where id = 1;
+update maps set rect = row(0, 0, 3, 3) where id = 1;
+update maps set data[1][1] = row(2, 1, 1, 1, true, 1, 1, 1) where id = 1;
+update results set data[1][1] = row(0, true) where sim = 1;
 
 commit;
