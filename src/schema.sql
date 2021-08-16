@@ -14,6 +14,8 @@ create database :db;
 -- TODO: should the rectangles be or in our piece of earth?
 begin;
 
+-- TYPES and DOMAINS -----------------------------------------------------------
+
 create type "map rectangle implementation" as (x1 int4, y1 int4, x2 int4, y2 int4);
 create domain "map rectangle" as "map rectangle implementation" not null check (
 	    ((value).x1 is not null and (value).x1 >= 0)
@@ -53,7 +55,7 @@ create domain state as "state implementation" not null check (
 
 create domain str as text   not null; -- TODO add check to avoid absurd characters like emoji and the non printable ones
 
---------------------------------------------------------------------------------
+-- FUNCTIONS -------------------------------------------------------------------
 
 -- TODO: use an appropiate return type to avoid overflow exception
 create function matrixArea(matrix anyelement) returns int4 as $$
@@ -75,7 +77,7 @@ $$ language sql;
 
 comment on function rectInside is 'Checks is r1 is inside r2.';
 
---------------------------------------------------------------------------------
+-- TABLES ----------------------------------------------------------------------
 
 create table maps (
 	id   int4            generated always as identity primary key,
@@ -102,7 +104,11 @@ create table results (
 	data state[][]   not null check (array_ndims(data) = 2)
 );
 
+-- TRIGGERS --------------------------------------------------------------------
+
 \include triggers.sql
+
+-- TESTING ---------------------------------------------------------------------
 
 insert into maps(name, rect, data) values (
 	'test map',
@@ -136,5 +142,13 @@ delete from results where sim = 1 and seq = 1;
 update maps set rect = row(0, 0, 3, 3) where id = 1;
 update maps set data[1][1] = row(2, 1, 1, 1, true, 1, 1, 1) where id = 1;
 update results set data[1][1] = row(0, true) where sim = 1;
+
+delete from results;
+delete from simualtions;
+delete from maps;
+
+select * from maps;
+select * from simualtions;
+select * from results;
 
 commit;
