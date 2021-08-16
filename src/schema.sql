@@ -152,3 +152,5 @@ select * from simualtions;
 select * from results;
 
 commit;
+
+vacuum full;
