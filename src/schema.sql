@@ -153,4 +153,4 @@ select * from results;
 
 commit;
 
-vacuum full;
+vacuum (full, analyze);
