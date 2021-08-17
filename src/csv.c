@@ -127,6 +127,7 @@ csv_strerr(csv_err_t err) {
 
 #ifdef TEST
 #include <stdalign.h>
+#include <inttypes.h>
 
 static void
 print_csv(csv_t *it, uint64_t col_num) {
@@ -140,7 +141,7 @@ print_csv(csv_t *it, uint64_t col_num) {
 				exit(EXIT_FAILURE);
 			}
 
-			printf("printing row %llu in col %llu: \"%s\"\n",
+			printf("printing row %" PRIu64 " in col %" PRIu64 ": \"%s\"\n",
 				it->row_idx, it->col_idx, it->field_start);
 		}
 	}

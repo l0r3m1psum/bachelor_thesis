@@ -1,6 +1,7 @@
 #include "csv.h"
 #include <stdalign.h>
 #include <string.h> /* strerror */
+#include <inttypes.h>
 
 int
 main(int argc, char *argv[]) {
@@ -29,7 +30,7 @@ main(int argc, char *argv[]) {
 				return 1;
 			}
 
-			printf("printing row %llu in col %llu: \"%s\"\n",
+			printf("printing row %" PRIu64 " in col %" PRIu64 ": \"%s\"\n",
 				it->row_idx, it->col_idx, it->field_start);
 		}
 	}

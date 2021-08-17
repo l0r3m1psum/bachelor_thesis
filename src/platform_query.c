@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <inttypes.h>
 
 /* https://softpixel.com/~cwright/programming/simd/cpuid.php
  * https://wiki.osdev.org/Inline_Assembly
@@ -77,11 +78,11 @@ get_cache_info(uint32_t cache_level) {
 
 static void
 print_cache_info(cache_info_t info) {
-	printf("Cache Size: %d\n", (info.ways) * (info.partitions) * (info.line_size) * (info.sets));
-	printf("System Coherency Line Size %d\n", info.line_size);
-	printf("Physical Line partitions %d\n", info.partitions);
-	printf("Ways of associativity %d\n", info.ways);
-	printf("Number of Sets %d\n", info.sets);
+	printf("Cache Size: %" PRIu32 "\n", (info.ways) * (info.partitions) * (info.line_size) * (info.sets));
+	printf("System Coherency Line Size %" PRIu32 "\n", info.line_size);
+	printf("Physical Line partitions %" PRIu32 "\n", info.partitions);
+	printf("Ways of associativity %" PRIu32 "\n", info.ways);
+	printf("Number of Sets %" PRIu32 "\n", info.sets);
 }
 
 int
@@ -96,7 +97,7 @@ main(void) {
 		/* Extracting %bh */
 		res >>= 8;
 		res &= 0x0000000f;
-		printf("cache line size: %d\n", res*8);
+		printf("cache line size: %" PRIu32 "\n", res*8);
 	}
 
 	for (uint32_t i = 0; i < 4; i++) {
