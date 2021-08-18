@@ -53,18 +53,18 @@ with "sane geo" as (
 	from "sane geo" natural join "sane meteo"
 ), "min max count geo" as (
 	select
-		min(x) as x1,
-		min(y) as y1,
-		max(x) as x2,
-		max(y) as y2,
+		min(x)/10 as x1,
+		min(y)/10 as y1,
+		max(x)/10 as x2,
+		max(y)/10 as y2,
 		count(*) as count
 	from "sane geo"
 ), "min max count meteo" as (
 	select
-		min(x) as x1,
-		min(y) as y1,
-		max(x) as x2,
-		max(y) as y2,
+		min(x)/10 as x1,
+		min(y)/10 as y1,
+		max(x)/10 as x2,
+		max(y)/10 as y2,
 		count(*) as count
 	from "sane meteo"
 ), dimensions as (
@@ -72,8 +72,22 @@ with "sane geo" as (
 	from "min max count geo" natural join "min max count meteo"
 ), result as (
 	select
-		(select cast(row(x1, y1, x2, y2) as "map rectangle") from dimensions)as rect,
-		cast(array(select row(p, g, u, w1, w2, c, s, d)::parameters from "all parameters" order by x asc, y desc) as parameters[][]) as data
-) insert into maps(name, rect, data) -- TODO: make result.data a 2D array
+		(select cast(row(x1, y1, x2, y2) as "map rectangle") from dimensions) as rect,
+		cast(array(
+			select array_agg(row(p, g, u, w1, w2, c, s, d)::parameters)
+			from "all parameters"
+			group by y) as parameters[][]) as data
+) insert into maps(name, rect, data)
 	select 'turano', r.rect, r.data from result as r;
+-- TODO: le coordinate sono tutte spaziate di 10 metri l'una dall'altra, questo
+--       rompe la formula per calcolare l'area. Quindi bisogna salvare la grana
+--       dei dati in maps e bisogna scegliere come rappresentare i dati nei rect
+--       o come coordinate vere (1:1) o scalate dalla grana, (come ho fatto
+--       sopra) il primo metodo richiede l'aggiunta di un parametro alla
+--       funzione che calcola l'area dei rettangoli, e potrebbe rendere più
+--       facile la modifica erronea dei dati (e.g. spostare un rettangolo di 0.5
+--       unità di grana).
+-- NOTE: un nome miggliore per la grana sarebbe tipo "unità di misura" o simile
+select name, rect, data[1][1] from maps;
+
 vacuum full;
