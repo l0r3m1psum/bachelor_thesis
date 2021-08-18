@@ -84,7 +84,7 @@ create table maps (
 	name str             unique,
 	rect "map rectangle",
 	data parameters[][]  not null check (array_ndims(data) = 2)
-	constraint "right dimension" check (rectArea(rect) = matrixArea(data))
+	constraint "right area" check (rectArea(rect) = matrixArea(data))
 );
 
 create table simualtions (
