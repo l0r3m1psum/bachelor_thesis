@@ -70,7 +70,7 @@ with "sane geo" as (
 ), dimensions as (
 	select *
 	from "min max count geo" natural join "min max count meteo"
-), result as (
+), res as (
 	select
 		(select cast(row(x1, y1, x2, y2) as "map rectangle") from dimensions) as rect,
 		cast(array(
@@ -78,7 +78,8 @@ with "sane geo" as (
 			from "all parameters"
 			group by y) as parameters[][]) as data
 ) insert into maps(name, rect, data)
-	select 'turano', r.rect, r.data from result as r;
+	select 'turano', r.rect, r.data from res as r;
+-- TODO: assicurarsi che gli elementi in res.data siano ordinati correttamente
 -- TODO: le coordinate sono tutte spaziate di 10 metri l'una dall'altra, questo
 --       rompe la formula per calcolare l'area. Quindi bisogna salvare la grana
 --       dei dati in maps e bisogna scegliere come rappresentare i dati nei rect
