@@ -70,13 +70,15 @@ with "sane geo" as (
 ), dimensions as (
 	select *
 	from "min max count geo" natural join "min max count meteo"
+), "ordered records" as (
+	select y, array_agg(cast(row(p, g, u, w1, w2, c, s, d) as parameters)) as params
+	from "all parameters"
+	group by y
+	order by y desc
 ), res as (
 	select
 		(select cast(row(x1, y1, x2, y2) as "map rectangle") from dimensions) as rect,
-		cast(array(
-			select array_agg(row(p, g, u, w1, w2, c, s, d)::parameters)
-			from "all parameters"
-			group by y) as parameters[][]) as data
+		cast(array(select params from "ordered records") as parameters[][]) as data
 ) insert into maps(name, rect, data)
 	select 'turano', r.rect, r.data from res as r;
 -- TODO: assicurarsi che gli elementi in res.data siano ordinati correttamente
