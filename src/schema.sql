@@ -82,6 +82,7 @@ comment on function rectInside is 'Checks is r1 is inside r2.';
 create table maps (
 	id   int4            generated always as identity primary key,
 	name str             unique,
+	unit int2 not null check (unit > 0),
 	rect "map rectangle",
 	data parameters[][]  not null check (array_ndims(data) = 2)
 	constraint "right area" check (rectArea(rect) = matrixArea(data))
@@ -110,8 +111,9 @@ create table results (
 
 -- TESTING ---------------------------------------------------------------------
 
-insert into maps(name, rect, data) values (
+insert into maps(name, unit, rect, data) values (
 	'test map',
+	1,
 	row(0, 0, 2, 2),
 	cast(array[
 		array[row(1, 1, 1, 1, true, 1, 1, 1), row(1, 1, 1, 1, true, 1, 1, 1), row(1, 1, 1, 1, true, 1, 1, 1)],

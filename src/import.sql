@@ -79,18 +79,9 @@ with "sane geo" as (
 	select
 		(select cast(row(x1, y1, x2, y2) as "map rectangle") from dimensions) as rect,
 		cast(array(select params from "ordered records") as parameters[][]) as data
-) insert into maps(name, rect, data)
-	select 'turano', r.rect, r.data from res as r;
--- TODO: assicurarsi che gli elementi in res.data siano ordinati correttamente
--- TODO: le coordinate sono tutte spaziate di 10 metri l'una dall'altra, questo
---       rompe la formula per calcolare l'area. Quindi bisogna salvare la grana
---       dei dati in maps e bisogna scegliere come rappresentare i dati nei rect
---       o come coordinate vere (1:1) o scalate dalla grana, (come ho fatto
---       sopra) il primo metodo richiede l'aggiunta di un parametro alla
---       funzione che calcola l'area dei rettangoli, e potrebbe rendere più
---       facile la modifica erronea dei dati (e.g. spostare un rettangolo di 0.5
---       unità di grana).
--- NOTE: un nome miggliore per la grana sarebbe tipo "unità di misura" o simile
+) insert into maps(name, unit, rect, data)
+	select 'turano', 10, r.rect, r.data from res as r;
+
 select name, rect, data[1][1] from maps;
 
 vacuum full;
