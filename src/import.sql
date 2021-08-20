@@ -6,6 +6,8 @@
 
 \c test
 
+\set tmpfile '/tmp/postgresqltempfile'
+
 create temporary table geography (
 	x text not null,
 	y text not null,
@@ -17,7 +19,11 @@ create temporary table geography (
 	c text not null -- carta natura
 );
 
-\copy geography from '../res/turano_geografia.csv' with (format csv);
+\t
+\o :tmpfile
+select '\copy geography from ' || :'geo' || ' with (format csv);';
+\o
+\i :tmpfile
 
 create temporary table meteorology (
 	x text not null,
@@ -26,7 +32,10 @@ create temporary table meteorology (
 	d text not null -- direction
 );
 
-\copy meteorology from '../res/turano_meteo.csv' with (format csv);
+\o :tmpfile
+select '\copy meteorology from ' || :'meteo' || ' with (format csv);';
+\o
+\i :tmpfile
 
 with "sane geo" as (
 	select
