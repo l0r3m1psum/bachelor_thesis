@@ -11,27 +11,33 @@ cell"
 	parameter Real k1 = 1;
 	parameter Real k2 = 1;
 	parameter Real L = 1 "lenght of the side of the cell";
+	// NOTE: the number in the center is ignored because of how the offset are
+	// used in the loop
 	parameter Real[3,3] gamma = {
 		{1, 1, 1},
 		{1, 1, 1},
 		{1, 1, 1}
-	}, D = {
+	} "fuel quantity",
+	D = {
 		{1, 1, 1},
 		{1, 1, 1},
 		{1, 1, 1}
-	}, P = {
+	} "wind direction",
+	P = {
 		{1, 1, 1},
 		{1, 1, 1},
 		{1, 1, 1}
-	}, F = {
+	} "medium height",
+	F = {
 		{1, 1, 1},
 		{1, 1, 1},
 		{1, 1, 1}
-	}, S = {
+	} "wind speed",
+	S = {
 		{1, 1, 1},
 		{1, 1, 1},
 		{1, 1, 1}
-	};
+	} "inflammability percentage";
 
 	Boolean N "state";
 	Real B "fuel";
