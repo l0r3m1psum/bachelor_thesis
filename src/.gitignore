@@ -4,3 +4,7 @@ platform_query
 *.o
 *.dSYM
 *.trace
+Fire
+*.json
+*.xml
+*.mat

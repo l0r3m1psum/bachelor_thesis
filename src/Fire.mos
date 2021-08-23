@@ -1,0 +1,43 @@
+echo(false);
+modelName := "Fire";
+modelType := parseString(modelName);
+if not loadModel(Modelica)
+	or not loadFile(modelName + ".mo") then
+	print(getErrorString());
+	exit(1);
+end if;
+print(checkModel(modelType));
+echo(true);
+simulate(
+	Fire,
+	stopTime=200,
+	cflags="-O3 -march=native -mtune=native -fPIC"
+);
+echo(false);
+/*
+if not plot(
+	{cell.ws, cell.wd, cell.A[1], cell.A[2],
+	cell.A[3], cell.A[4], cell.A[5], cell.A[6], cell.A[7], cell.A[8]},
+	externalWindow=true) then
+	print(getErrorString());
+end if;
+*/
+files := {
+	"_01exo", "_02nls", "_03lsy", "_04set", "_05evt", "_06inz", "_07dly",
+	"_08bnd", "_09alg", "_10asr", "_11mix", "_12jac", "_13opt", "_14lnz",
+	"_15syn", "_16dae", "_17inl", "_functions", "_records"
+};
+for i in 1:size(files, 1) loop
+	file := modelName + files[i];
+	remove(file + ".c");
+	remove(file + ".h");
+	remove(file + ".o");
+end for;
+remove(modelName + ".c");
+remove(modelName + ".o");
+remove(modelName + "_literals.h");
+remove(modelName + "_model.h");
+remove(modelName + "_includes.h");
+remove(modelName + ".makefile");
+remove(modelName + ".libs");
+remove(modelName + ".log");
