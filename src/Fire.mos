@@ -10,7 +10,7 @@ print(checkModel(modelType));
 echo(true);
 simulate(
 	Fire,
-	stopTime=200,
+	stopTime=800,
 	cflags="-O3 -march=native -mtune=native -fPIC"
 );
 echo(false);

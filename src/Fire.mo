@@ -6,7 +6,7 @@ cell"
 	parameter Real initialFuel = 10;
 	parameter Real tau = 1;
 	parameter Real theta = 0.8;
-	parameter Real beta = 1;
+	parameter Real beta = 0.5;
 	parameter Real k0 = 1;
 	parameter Real k1 = 1;
 	parameter Real k2 = 1;
@@ -34,15 +34,16 @@ cell"
 		{1, 1, 1}
 	} "wind speed",
 	S = {
-		{1, 1, 1},
-		{1, 1, 1},
-		{1, 1, 1}
+		{70, 70, 70},
+		{70, 70, 70},
+		{70, 70, 70}
 	} "inflammability percentage";
 
 	Boolean N "state";
 	Real B "fuel";
 
-	input Boolean[8] Nij "state of an adjacent cell";
+	input Boolean[8] Nij "state of an adjacent cells";
+	input Real[3, 3] Bij "fuel of an adjacent cells";
 	input Boolean u "exogenous input";
 protected
 	constant Integer Gamma[8, 2] = {
@@ -67,17 +68,19 @@ algorithm
 		for index in 1:8 loop
 			e1 := Gamma[i, 1];
 			e2 := Gamma[i, 2];
-			C := sin(K.pi*B/gamma[i,j]);
+			C := sin(K.pi*Bij[i+e1,j+e2]/gamma[i+e1,j+e2]);
 			d := (1 - 0.5 * abs(e1*e2));
-			fw := exp(k1*F[i,j]*(e1*cos(D[i,j])+e2*sin(D[i,j]))
-					/sqrt(e1*e1 + e2*e2));
+			fw := exp(
+				k1*F[i+e1,j+e2]*(e1*cos(D[i+e1,j+e2])+e2*sin(D[i+e1,j+e2]))
+				/sqrt(e1*e1 + e2*e2)
+			);
 			fP := exp(k2*atan((P[i,j]-P[i+e1,j+e2])/L));
 			p[index] := k0 * S[i,j] * C * d * fw * fP;
 		end for;
 		// checking if the fire transmission happened
 		V := max(p[i]*(if Nij[i] then 1 else 0) > theta for i in 1:8);
 		// evolving the model
-		N := if pre(B) > 0 then max(V, u) else false;
+		N := if pre(B) > 0 then (V or u) else false;
 		B := if pre(N) then max(0, pre(B) - beta*tau) else pre(B);
 	end when;
 end Cell;
@@ -86,5 +89,6 @@ model Fire
 	Cell centralCell;
 equation
 	centralCell.u = false;
-	centralCell.Nij = {false, false, false, false, false, false, false, false};
+	centralCell.Nij = {true, true, false, false, false, false, false, false};
+	centralCell.Bij = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
 end Fire;
