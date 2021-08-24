@@ -7,6 +7,9 @@ if not loadModel(Modelica)
 	exit(1);
 end if;
 print(checkModel(modelType));
+if not setDebugFlags("initialization,frontEndUnitCheck") then
+	print(getErrorString());
+end if;
 echo(true);
 simulate(
 	Fire,
@@ -15,7 +18,7 @@ simulate(
 );
 echo(false);
 if not plot(
-	{centralCell.N, centralCell.B},
+	{c.N, c.B},
 	externalWindow=true) then
 	print(getErrorString());
 end if;
