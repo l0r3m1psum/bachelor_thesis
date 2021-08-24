@@ -5,7 +5,7 @@ cell"
 	parameter Boolean initialState = false;
 	parameter Real initialFuel = 10;
 	parameter Real tau = 1;
-	parameter Real theta = 0.8;
+	parameter Real theta = 0.2;
 	parameter Real beta = 0.5;
 	parameter Real k0 = 1;
 	parameter Real k1 = 1;
@@ -45,7 +45,7 @@ cell"
 	input Boolean[8] Nij "state of an adjacent cells";
 	input Real[3, 3] Bij "fuel of an adjacent cells";
 	input Boolean u "exogenous input";
-protected
+// protected
 	constant Integer Gamma[8, 2] = {
 		{-1,-1},{-1,0},{-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1}
 	} "directions array";
@@ -66,8 +66,8 @@ algorithm
 	elsewhen sample(0, tau) then
 		// calculating the fire transmission probability
 		for index in 1:8 loop
-			e1 := Gamma[i, 1];
-			e2 := Gamma[i, 2];
+			e1 := Gamma[index, 1];
+			e2 := Gamma[index, 2];
 			C := sin(K.pi*Bij[i+e1,j+e2]/gamma[i+e1,j+e2]);
 			d := (1 - 0.5 * abs(e1*e2));
 			fw := exp(
