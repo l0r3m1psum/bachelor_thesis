@@ -90,5 +90,5 @@ model Fire
 equation
 	centralCell.u = false;
 	centralCell.Nij = {true, true, false, false, false, false, false, false};
-	centralCell.Bij = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
+	centralCell.Bij = {{0.5, 0.5, 0.5}, {0.5, 0.5, 0.5}, {0.5, 0.5, 0.5}};
 end Fire;
