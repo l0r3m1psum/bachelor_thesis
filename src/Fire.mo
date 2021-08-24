@@ -1,49 +1,50 @@
 block Cell "Simulate the behaviour of the cell in the center of the other 8
 cell"
 	import K = Modelica.Constants;
+	import SI = Modelica.SIunits;
 
 	parameter Boolean initialState = false;
-	parameter Real initialFuel = 10;
-	parameter Real tau = 1;
+	parameter SI.Mass initialFuel = 10;
+	parameter SI.Time tau = 1;
 	parameter Real theta = 0.2;
 	parameter Real beta = 0.5;
 	parameter Real k0 = 1;
 	parameter Real k1 = 1;
 	parameter Real k2 = 1;
-	parameter Real L = 1 "lenght of the side of the cell";
+	parameter SI.Length L = 1 "lenght of the side of the cell";
 	// NOTE: the number in the center is ignored because of how the offset are
 	// used in the loop
-	parameter Real[3,3] gamma = {
+	parameter SI.Mass[3,3] gamma = {
 		{1, 1, 1},
 		{1, 1, 1},
 		{1, 1, 1}
-	} "fuel quantity",
-	D = {
+	} "converted fuel quantity";
+	parameter SI.Height[3,3] P = {
 		{1, 1, 1},
 		{1, 1, 1},
 		{1, 1, 1}
-	} "wind direction",
-	P = {
+	} "medium height";
+	parameter SI.Velocity[3,3] F = {
 		{1, 1, 1},
 		{1, 1, 1},
 		{1, 1, 1}
-	} "medium height",
-	F = {
+	} "wind speed";
+	parameter SI.Angle[3,3] D = {
 		{1, 1, 1},
 		{1, 1, 1},
 		{1, 1, 1}
-	} "wind speed",
-	S = {
+	} "wind direction";
+	parameter Real[3,3] S = {
 		{70, 70, 70},
 		{70, 70, 70},
 		{70, 70, 70}
 	} "inflammability percentage";
 
 	Boolean N "state";
-	Real B "fuel";
+	SI.Mass B "fuel";
 
 	input Boolean[8] Nij "state of an adjacent cells";
-	input Real[3, 3] Bij "fuel of an adjacent cells";
+	input SI.Mass[3, 3] Bij "fuel of an adjacent cells";
 	input Boolean u "exogenous input";
 // protected
 	constant Integer Gamma[8, 2] = {
@@ -55,7 +56,7 @@ cell"
 	Real[8] p "fire transmission probability from another cell";
 	Real C "Combustion state of the cell";
 	Real d "disomogeneity factor of cells border";
-	Real fw "wind cotribution";
+	SI.AngularVelocity fw "wind cotribution";
 	Real fP "slope cotribution";
 	Integer e1 "x offset", e2 "y offset";
 	Boolean V "fire transmission by and adjacent cell";
@@ -86,9 +87,9 @@ algorithm
 end Cell;
 
 model Fire
-	Cell centralCell;
+	Cell c;
 equation
-	centralCell.u = false;
-	centralCell.Nij = {true, true, false, false, false, false, false, false};
-	centralCell.Bij = {{0.5, 0.5, 0.5}, {0.5, 0.5, 0.5}, {0.5, 0.5, 0.5}};
+	c.u = false;
+	c.Nij = {true, true, false, false, false, false, false, false};
+	c.Bij = {{0.5, 0.5, 0.5}, {0.5, 0.5, 0.5}, {0.5, 0.5, 0.5}};
 end Fire;
