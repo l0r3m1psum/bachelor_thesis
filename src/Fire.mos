@@ -19,6 +19,9 @@ if not plot(
 	externalWindow=true) then
 	print(getErrorString());
 end if;
+if not plotAll(externalWindow=true) then
+	print(getErrorString());
+end if;
 files := {
 	"_01exo", "_02nls", "_03lsy", "_04set", "_05evt", "_06inz", "_07dly",
 	"_08bnd", "_09alg", "_10asr", "_11mix", "_12jac", "_13opt", "_14lnz",
