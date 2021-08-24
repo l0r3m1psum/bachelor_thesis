@@ -7,7 +7,7 @@ cell"
 	parameter SI.Mass initialFuel = 10;
 	parameter SI.Time tau = 1;
 	parameter Real theta = 0.2;
-	parameter Real beta = 0.5;
+	parameter SI.MassFlowRate beta = 0.5; // TODO: questa deve essere derivata
 	parameter Real k0 = 1;
 	parameter Real k1 = 1;
 	parameter Real k2 = 1;
