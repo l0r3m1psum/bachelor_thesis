@@ -45,6 +45,7 @@ cell"
 	constant Integer i = 2 "center abscissa";
 	constant Integer j = 2 "center ordinate";
 
+	SI.MassFlowRate beta "burning speed";
 	Real[8] p "fire transmission probability from another cell";
 	Real C "Combustion state of the cell";
 	Real d "disomogeneity factor of cells border";
@@ -54,6 +55,7 @@ cell"
 	Boolean V "fire transmission by and adjacent cell";
 algorithm
 	when initial() then
+		beta := 0.5;
 		N := initialState;
 		B := initialFuel;
 	elsewhen sample(0, tau) then
