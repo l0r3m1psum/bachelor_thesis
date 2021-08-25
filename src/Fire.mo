@@ -24,16 +24,6 @@ cell"
 		{1, 1, 1},
 		{1, 1, 1}
 	} "medium height";
-	parameter SI.Velocity[3,3] F = {
-		{1, 1, 1},
-		{1, 1, 1},
-		{1, 1, 1}
-	} "wind speed";
-	parameter SI.Angle[3,3] D = {
-		{1, 1, 1},
-		{1, 1, 1},
-		{1, 1, 1}
-	} "wind direction";
 	parameter Real[3,3] S = {
 		{70, 70, 70},
 		{70, 70, 70},
@@ -45,6 +35,8 @@ cell"
 
 	input Boolean[8] Nij "state of an adjacent cells";
 	input SI.Mass[3, 3] Bij "fuel of an adjacent cells";
+	input SI.Velocity[3,3] F "wind speed";
+	input SI.Angle[3,3] D "wind direction";
 	input Boolean u "exogenous input";
 // protected
 	constant Integer Gamma[8, 2] = {
@@ -87,9 +79,16 @@ algorithm
 end Cell;
 
 model Fire
+	import Modelica.Blocks.Noise.NormalNoise;
+	import Modelica.Blocks.Noise.GlobalSeed;
 	Cell c;
+	NormalNoise n1(samplePeriod=0.1, sigma=5, mu=0);
+	NormalNoise n2(samplePeriod=0.1, sigma=0.4, mu=0);
+	inner GlobalSeed globalSeed annotation(HideResult=true);
 equation
 	c.u = false;
 	c.Nij = {true, true, false, false, false, false, false, false};
 	c.Bij = {{0.5, 0.5, 0.5}, {0.5, 0.5, 0.5}, {0.5, 0.5, 0.5}};
+	c.F = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}} + fill(n2.y, 3, 3);
+	c.D = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}} + fill(n1.y, 3, 3);
 end Fire;
