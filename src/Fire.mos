@@ -14,7 +14,7 @@ echo(true);
 simulate(
 	Fire,
 	stopTime=800,
-	cflags="-O3 -march=native -mtune=native -fPIC"
+	cflags="-O3 -march=native -mtune=native -fPIC -L/usr/local/Cellar/openblas/0.3.17/lib/"
 );
 echo(false);
 if not plot(
