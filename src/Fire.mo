@@ -7,7 +7,6 @@ cell"
 	parameter SI.Mass initialFuel = 10;
 	parameter SI.Time tau = 1;
 	parameter Real theta = 0.2;
-	parameter SI.MassFlowRate beta = 0.5; // TODO: questa deve essere derivata
 	parameter Real k0 = 1;
 	parameter Real k1 = 1;
 	parameter Real k2 = 1;
@@ -30,14 +29,14 @@ cell"
 		{70, 70, 70}
 	} "inflammability percentage";
 
-	Boolean N "state";
-	SI.Mass B "fuel";
+	discrete Boolean N "state";
+	discrete SI.Mass B "fuel";
 
-	input Boolean[8] Nij "state of an adjacent cells";
+	discrete input Boolean[8] Nij "state of an adjacent cells";
 	input SI.Mass[3, 3] Bij "fuel of an adjacent cells";
 	input SI.Velocity[3,3] F "wind speed";
 	input SI.Angle[3,3] D "wind direction";
-	input Boolean u "exogenous input";
+	discrete input Boolean u "exogenous input";
 // protected
 	constant Integer Gamma[8, 2] = {
 		{-1,-1},{-1,0},{-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1}
@@ -46,16 +45,19 @@ cell"
 	constant Integer j = 2 "center ordinate";
 
 	SI.MassFlowRate beta "burning speed";
-	Real[8] p "fire transmission probability from another cell";
-	Real C "Combustion state of the cell";
-	Real d "disomogeneity factor of cells border";
-	SI.AngularVelocity fw "wind cotribution";
-	Real fP "slope cotribution";
-	Integer e1 "x offset", e2 "y offset";
-	Boolean V "fire transmission by and adjacent cell";
+	discrete Real[8] p "fire transmission probability from another cell";
+	discrete Real C "Combustion state of the cell";
+	discrete Real d "disomogeneity factor of cells border";
+	discrete SI.AngularVelocity fw "wind cotribution";
+	discrete Real fP "slope cotribution";
+	discrete Integer e1 "x offset", e2 "y offset";
+	discrete Boolean V "fire transmission by and adjacent cell";
+equation
+	beta = 60*(1 + F[1, 1]/10);
 algorithm
 	when initial() then
-		beta := 0.5;
+		// to avoid warnings
+		p := zeros(8); V := false; e2 := 0; e1 := 0; fP := 0; fw := 0; d := 0; C := 0;
 		N := initialState;
 		B := initialFuel;
 	elsewhen sample(0, tau) then
