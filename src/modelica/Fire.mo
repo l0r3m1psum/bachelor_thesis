@@ -11,13 +11,8 @@ cell"
 	parameter Real k1 = 1;
 	parameter Real k2 = 1;
 	parameter SI.Length L = 1 "lenght of the side of the cell";
-	// NOTE: the number in the center is ignored because of how the offset are
-	// used in the loop
-	parameter SI.Mass[3,3] gamma = {
-		{1, 1, 1},
-		{1, 1, 1},
-		{1, 1, 1}
-	} "converted fuel quantity";
+	parameter Real alpha = 1 "our patch from the model";
+	// NOTE: the P[2, 2] is ignored because of how the offset are used in the loop
 	parameter SI.Height[3,3] P = {
 		{1, 1, 1},
 		{1, 1, 1},
@@ -45,6 +40,7 @@ cell"
 	constant Integer j = 2 "center ordinate";
 
 	SI.MassFlowRate beta "burning speed";
+	Real gamma[3, 3] "initial fuel quantity";
 	discrete Real[8] p "fire transmission probability from another cell";
 	discrete Real C "Combustion state of the cell";
 	discrete Real d "disomogeneity factor of cells border";
@@ -54,12 +50,13 @@ cell"
 	discrete Boolean V "fire transmission by and adjacent cell";
 equation
 	beta = 60*(1 + F[1, 1]/10);
+	gamma = L*alpha*S;
 algorithm
 	when initial() then
 		// to avoid warnings
 		p := zeros(8); V := false; e2 := 0; e1 := 0; fP := 0; fw := 0; d := 0; C := 0;
 		N := initialState;
-		B := initialFuel;
+		B := gamma[2, 2];
 	elsewhen sample(0, tau) then
 		// calculating the fire transmission probability
 		for index in 1:8 loop
