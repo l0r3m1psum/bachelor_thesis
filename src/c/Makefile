@@ -7,9 +7,9 @@ RELEASE = -O3 -flto -DNDEBUG
 CC = clang
 CFLAGS = $(WARNINGS) $(DEBUG) -std=c17 -march=native -mtune=native -g
 
-all: main.c csv.c
-	$(CC) $(CFLAGS) csv.c main.c -o main
+all: main.c csv.c simulator.c
+	$(CC) $(CFLAGS) simulator.c csv.c main.c -o main
 clean:
-	rm -f main.o csv.o
+	rm -f main.o csv.o simulator.o simulator csv
 profile: main
 	xcrun xctrace record --template "Time Profiler" --output $(*).trace --launch -- $*
