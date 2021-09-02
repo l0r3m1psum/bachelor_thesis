@@ -2,10 +2,12 @@
 
 #include <math.h>
 
-static int8_t Gamma[8][2] = {
+static const int8_t Gamma[8][2] = {
 	{0, 1}, {1, 0}, {1, 1}, {0, -1}, {-1, 0}, {-1, -1}, {1, -1}, {-1, 1}
 }; /* All offsets around a cell */
 static_assert(sizeof Gamma == 16, "bad size");
+
+static const float pi = 3.14159265359f;
 
 inline static float
 maxf(float a, float b) {
@@ -21,12 +23,12 @@ maxf(float a, float b) {
  */
 inline static float
 rngf(uint32_t *xn) {
-	const uint32_t m = 1 << 31, a = 37769685, c = 12345, max = m - 1;
+	const uint32_t m = 1u << 31, a = 37769685, c = 12345, max = m - 1;
 	*xn = (a * (*xn) + c) % m;
 	const float u1 = (float) (*xn)/max;
 	*xn = (a * (*xn) + c) % m;
 	const float u2 = (float) (*xn)/max;
-	const float res = sqrtf(-2.0f*logf(u1))*cosf(2*M_PI*u2)/2.5;
+	const float res = sqrtf(-2.0f*logf(u1))*cosf(2*pi*u2)/2.5f;
 	return res;
 }
 
@@ -66,8 +68,8 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					const int8_t e2 = Gamma[loop1][1];
 					const uint64_t ie1je2 = (i+e1) + (j+e2)*s->Wstar;
 					// Calculating probability
-					const float C = sinf(M_PI*s->old_state[ie1je2].B/s->gamma[ie1je2]);
-					const float d = (1 - 0.5*fabsf((float) e1*e2));
+					const float C = sinf(pi*s->old_state[ie1je2].B/s->gamma[ie1je2]);
+					const float d = (1 - 0.5f*fabsf((float) e1*e2));
 					const float fw = expf(
 						s->k1*s->params[ie1je2].F
 						*(e1*cosf(s->params[ie1je2].D) + e2*sinf(s->params[ie1je2].D))
@@ -139,7 +141,7 @@ int main(int argc, char const *argv[]) {
 	for (uint64_t i = 0; i < area; i++) {
 		s.old_state[i] = (state_t){.B = 0.5, .N = false};
 		s.new_state[i] = (state_t){0};
-		s.params[i] = (params_t){.P = 1, .S = 0.7, .F = 1, .D = M_PI};
+		s.params[i] = (params_t){.P = 1, .S = 0.7, .F = 1, .D = pi};
 		s.gamma[i] = 10;
 	}
 
