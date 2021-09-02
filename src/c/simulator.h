@@ -23,8 +23,8 @@ struct {
 static_assert(sizeof (params_t) == 16, "bad size");
 
 struct {
-	state_t *old_state;
-	state_t *new_state;
+	state_t * restrict old_state;
+	state_t * restrict new_state;
 	params_t * const params;
 	float * const gamma; /* all initial fuels */
 	const uint64_t Wstar; /* number of cells along the x axis */
