@@ -1,6 +1,7 @@
 csv
 main
 platform_query
+simulator
 *.o
 *.dSYM
 *.trace
