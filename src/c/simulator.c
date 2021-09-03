@@ -39,16 +39,6 @@ rngf(uint32_t *xn) {
 	return res;
 }
 
-/* TODO: completare tutti i check e metterlo nell'assert di simulation_run. */
-static bool
-validate_simulation(simulation_t *s) {
-	const bool all_pointer_present = s->old_state && s->new_state && s->params && s->gamma;
-	const bool at_least_3by3 = s->Wstar >= 3 && s->Lstar >= 3;
-	const bool between_0and1 = s->theta >= 0 && s->theta <= 1;
-	const bool res = all_pointer_present && at_least_3by3 && between_0and1;
-	return res;
-}
-
 /* NOTE: non so se il simulatore ha un bug o io non so scegliere bene i
  * parametri.
  */
@@ -57,6 +47,9 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	assert(s && dump);
 	assert(s->old_state && s->new_state && s->params && s->gamma);
 	assert(s->tau > 0 && s->theta > 0 && s->L > 0);
+	assert(s->Wstar >= 3 && s->Lstar >= 3);
+	assert(s->theta >= 0 && s->theta <= 1);
+	/* TODO: completare tutti i check */
 
 	uint32_t rng_state = s->seed;
 	for (uint64_t loop0 = 0; loop0 < s->h; loop0++) {
