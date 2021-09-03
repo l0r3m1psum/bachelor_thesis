@@ -11,7 +11,7 @@ static_assert(sizeof Gamma == 16, "bad size");
 static bool should_stop = false;
 
 void
-simulation_SIGTER_handler(int sig) {
+simulation_SIGINT_handler(int sig) {
 	(void) sig;
 	should_stop = true;
 }
@@ -99,7 +99,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 			(void) dump(s);
 		}
 		if (should_stop) {
-			syslog(LOG_INFO, "exiting the simulation prematurely due to SIGTERM");
+			syslog(LOG_INFO, "exiting the simulation prematurely due to SIGINT");
 			return;
 		}
 		state_t *tmp = s->old_state;

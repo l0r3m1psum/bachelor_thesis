@@ -97,21 +97,21 @@ main(int argc, char *argv[]) {
 		syslog(LOG_INFO, "setting up interuption hanling");
 		sigset_t set = {0};
 		struct sigaction action = {
-			.sa_handler = simulation_SIGTER_handler,
+			.sa_handler = simulation_SIGINT_handler,
 			.sa_mask = (sigset_t){0},
 			.sa_flags = SA_RESTART
 		};
 		if (sigfillset(&set) == -1) {
 			syslog(LOG_WARNING, "unable to fill sigset");
 		}
-		if (sigdelset(&set, SIGTERM) == -1) {
-			syslog(LOG_WARNING, "unable to delete SIGTERM from sigset");
+		if (sigdelset(&set, SIGINT) == -1) {
+			syslog(LOG_WARNING, "unable to delete SIGINT from sigset");
 		}
 		if (sigprocmask(SIG_SETMASK, &set, NULL) == -1) {
 			syslog(LOG_WARNING, "unable to set the sigprocmask");
 		}
-		if (sigaction(SIGTERM, &action, NULL) == -1) {
-			syslog(LOG_WARNING, "unable to set SIGTERM handler");
+		if (sigaction(SIGINT, &action, NULL) == -1) {
+			syslog(LOG_WARNING, "unable to set SIGINT handler");
 		}
 	}
 

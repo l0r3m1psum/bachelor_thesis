@@ -51,6 +51,6 @@ void
 simulation_run(simulation_t *s, bool (*dump)(simulation_t *));
 
 void
-simulation_SIGTER_handler(int sig);
+simulation_SIGINT_handler(int sig);
 
 #endif /* SIMULATOR_INCLUDE */
