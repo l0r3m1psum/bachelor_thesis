@@ -6,7 +6,7 @@
 
 static const char field_sep = ',';
 
-static bool
+static inline bool
 try_insert_num(const char *str, uint64_t where, csv_num *nums, const csv_type *types) {
 	char *endptr = NULL;
 	if (types[where] == CSV_INT64) {
