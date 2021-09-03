@@ -37,10 +37,39 @@
 #include <syslog.h>
 #include <unistd.h> /* sleep */
 
-#define GENERAL_PARAMETERS_NO 11
-static const csv_type types[GENERAL_PARAMETERS_NO] = {
-	CSV_INT64, CSV_INT64, CSV_INT64, CSV_INT64, CSV_INT64,
-	CSV_DOUBLE, CSV_DOUBLE, CSV_DOUBLE, CSV_DOUBLE, CSV_DOUBLE, CSV_DOUBLE
+/* type,    name,   csv_type,  csv_num, fmt, ord, macro */
+#define GENERAL_PARAMS(X) \
+X(uint64_t, Wstar, CSV_INT64,  integ, PRIu64, 0) \
+X(uint64_t, Lstar, CSV_INT64,  integ, PRIu64, 1) \
+X(uint64_t, h,     CSV_INT64,  integ, PRIu64, 2) \
+X(uint64_t, s,     CSV_INT64,  integ, PRIu64, 3) \
+X(uint32_t, seed,  CSV_INT64,  integ, PRIu64, 4) \
+X(float,    tau,   CSV_DOUBLE, doubl, .2lf,   5) \
+X(float,    theta, CSV_DOUBLE, doubl, .2lf,   6) \
+X(float,    k0,    CSV_DOUBLE, doubl, .2lf,   7) \
+X(float,    k1,    CSV_DOUBLE, doubl, .2lf,   8) \
+X(float,    k2,    CSV_DOUBLE, doubl, .2lf,   9) \
+X(float,    L,     CSV_DOUBLE, doubl, .2lf,   10)
+
+/* used to check GENERAL_PARAMS */
+#define CHECK0(x) ((x) < 3)
+#define CHECK1(x) ((x) < 3)
+#define CHECK2(x) ((x) < 0)
+#define CHECK3(x) ((x) < 0)
+#define CHECK4(x) ((x) < 0)
+#define CHECK5(x) ((x) < 0)
+#define CHECK6(x) ((x) < 0 || (x) > 1)
+#define CHECK7(x) (false)
+#define CHECK8(x) (false)
+#define CHECK9(x) (false)
+#define CHECK10(x) ((x) < 0)
+
+#define GENERAL_PARAMS_NO 11
+/* NOTE: this should probably be moved inside the only block where it's used */
+static const csv_type types[GENERAL_PARAMS_NO] = {
+#define GET_TYPE(type, name, csv_type, csv_num, fmt, ord) csv_type,
+	GENERAL_PARAMS(GET_TYPE)
+#undef GET_TYPE
 };
 
 static FILE *
@@ -83,27 +112,32 @@ main(const int argc, const char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+#define DECLARE_AND_INITIALIZE(type, name, csv_type, csv_num, fmt, ord) type name = 0;
+	GENERAL_PARAMS(DECLARE_AND_INITIALIZE)
+#undef DECLARE_AND_INITIALIZE
+
 	{
-		const char * restrict general_parameters = argv[1];
-		const char * restrict cells_parameters = argv[2];
-		const char * restrict initial_state = argv[3];
-		const char * restrict out_dir = argv[5];
+		const char * const restrict general_params = argv[1];
+		const char * const restrict cells_params = argv[2];
+		const char * const restrict initial_state = argv[3];
+		const char * const restrict out_dir = argv[5];
 
 		FILE *fp = NULL;
 		char *row = NULL;
 		size_t linecap = 0;
 		ssize_t len = 0;
 
-		fp = open_or_fail(general_parameters);
+		fp = open_or_fail(general_params);
 		errno = 0;
-		syslog(LOG_INFO, "reading general parameters file: '%s'", general_parameters);
+		syslog(LOG_INFO, "reading general parameters file: '%s'", general_params);
 		while ((len = getline(&row, &linecap, fp)) != -1) {
+			/* NOTE: debug code for skipping coments */
 			if (row[0] == '#') {
 				continue;
 			}
-			csv_num nums[GENERAL_PARAMETERS_NO] = {0};
-			if (!csv_read(row, GENERAL_PARAMETERS_NO, nums, types)) {
-				syslog(LOG_ERR, "unable ro read general parameters from file '%s'", general_parameters);
+			csv_num nums[GENERAL_PARAMS_NO] = {0};
+			if (!csv_read(row, GENERAL_PARAMS_NO, nums, types)) {
+				syslog(LOG_ERR, "unable ro read general parameters from file '%s'", general_params);
 				return EXIT_FAILURE;
 			}
 			syslog(LOG_DEBUG,
@@ -111,14 +145,28 @@ main(const int argc, const char *argv[]) {
 				nums[0].integ, nums[1].integ, nums[2].integ, nums[3].integ, nums[4].integ,
 				nums[5].doubl, nums[6].doubl, nums[7].doubl, nums[8].doubl, nums[9].doubl, nums[10].doubl
 			);
-			/* TODO: check numbers and put them in variables */
+			/* NOTE: I could add another macro to GENERAL_PARAMS to give a more
+			 * meningful error message */
+#define CHECK(type, name, csv_type, csv_num, fmt, ord) \
+			if (CHECK##ord(nums[ord].csv_num)) { \
+				syslog(LOG_ERR, #name " is not valid"); \
+				return EXIT_FAILURE; \
+			}
+			GENERAL_PARAMS(CHECK)
+#undef CHECK
+#define ASSIGN_ALL(type, name, csv_type, csv_num, fmt, ord) name = (type) nums[ord].csv_num;
+			GENERAL_PARAMS(ASSIGN_ALL)
+#undef ASSIGN_ALL
 			break;
 		}
-		/* TODO: check errno */
-		try_close(fp, general_parameters);
+		if (errno) {
+			syslog(LOG_ERR, "error while getting line from '%s': %s", general_params, strerror(errno));
+			return EXIT_FAILURE;
+		}
+		try_close(fp, general_params);
 
-		fp = open_or_fail(cells_parameters);
-		try_close(fp, cells_parameters);
+		fp = open_or_fail(cells_params);
+		try_close(fp, cells_params);
 
 		fp = open_or_fail(initial_state);
 		try_close(fp, initial_state);
@@ -145,7 +193,7 @@ main(const int argc, const char *argv[]) {
 	}
 
 	const uint64_t width = 10, height = 10, area = width * height;
-	simulation_t s = {
+	simulation_t sim = {
 		.Wstar = width,
 		.Lstar = height,
 		.h = 30,
@@ -163,33 +211,33 @@ main(const int argc, const char *argv[]) {
 		.gamma = malloc(sizeof (float) * area)
 	};
 
-	if (!(s.old_state && s.new_state && s.params && s.gamma)) {
+	if (!(sim.old_state && sim.new_state && sim.params && sim.gamma)) {
 		syslog(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	for (uint64_t i = 0; i < area; i++) {
-		s.old_state[i] = (state_t){.B = 0.5f, .N = false};
-		s.new_state[i] = (state_t){0};
-		s.params[i] = (params_t){.P = 1, .S = 0.7f, .F = 1, .D = pi};
-		s.gamma[i] = 10;
+		sim.old_state[i] = (state_t){.B = 0.5f, .N = false};
+		sim.new_state[i] = (state_t){0};
+		sim.params[i] = (params_t){.P = 1, .S = 0.7f, .F = 1, .D = pi};
+		sim.gamma[i] = 10;
 	}
 
-	for (uint64_t i = 0; i < s.Lstar; i++) {
-		for (uint64_t j = 0; j < s.Wstar-1; j++) {
+	for (uint64_t i = 0; i < sim.Lstar; i++) {
+		for (uint64_t j = 0; j < sim.Wstar-1; j++) {
 			if (3 <= i && i <= 5 && 3 <= j && j <= 5) {
-				uint64_t ij = i + j*s.Wstar;
-				s.old_state[ij] = (state_t){ .B = 10, .N = true };
+				uint64_t ij = i + j*sim.Wstar;
+				sim.old_state[ij] = (state_t){ .B = 10, .N = true };
 			}
 		}
 	}
 
-	simulation_run(&s, dump);
+	simulation_run(&sim, dump);
 
-	free(s.old_state);
-	free(s.new_state);
-	free(s.params);
-	free(s.gamma);
+	free(sim.old_state);
+	free(sim.new_state);
+	free(sim.params);
+	free(sim.gamma);
 
 	closelog();
 
