@@ -33,6 +33,7 @@
 #include <syslog.h>
 #include <stdlib.h>
 #include <unistd.h> /* sleep */
+#include <errno.h>
 
 static int
 old_main(int argc, char *argv[]) {
@@ -90,14 +91,32 @@ dump(simulation_t *s) {
 }
 
 int
-main(int argc, char *argv[]) {
+main(const int argc, const char *argv[]) {
 	openlog(argv[0], LOG_PERROR, 0);
+
+	if (argc != 5) {
+		syslog(LOG_ERR, "wrong number of arguments, expected 4, received %d", argc-1);
+		return EXIT_FAILURE;
+	}
+
+	{
+		const char * restrict general_parameters = argv[1];
+		const char * restrict cells_parameters = argv[2];
+		const char * restrict initial_state = argv[3];
+		const char * restrict out_dir = argv[5];
+
+		FILE *fp = fopen(general_parameters, "r");
+		if (!fp) {
+			syslog(LOG_ERR, "unable to open '%s': %s", general_parameters, strerror(errno));
+			return EXIT_FAILURE;
+		}
+	}
 
 	{
 		syslog(LOG_INFO, "setting up interuption hanling");
 		sigset_t set = {0};
 		if (sigfillset(&set) == -1) {
-			syslog(LOG_WARNING, "unable to fill sigset");
+			syslog(LOG_WARNING, "unable to fill sigset: %s", strerror(errno));
 		}
 		struct sigaction action = {
 			.sa_handler = simulation_SIGINT_handler,
@@ -105,7 +124,7 @@ main(int argc, char *argv[]) {
 			.sa_flags = SA_RESTART
 		};
 		if (sigaction(SIGINT, &action, NULL) == -1) {
-			syslog(LOG_WARNING, "unable to set SIGINT handler");
+			syslog(LOG_WARNING, "unable to set %s handler: %s", sys_siglist[SIGINT], strerror(errno));
 		}
 	}
 
@@ -129,6 +148,7 @@ main(int argc, char *argv[]) {
 	};
 
 	if (!(s.old_state && s.new_state && s.params && s.gamma)) {
+		syslog(LOG_ERR, "unable to allocate memory: %s", strerror(errno));
 		return EXIT_FAILURE;
 	}
 
