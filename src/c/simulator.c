@@ -41,6 +41,10 @@ rngf(uint32_t *xn) {
 
 /* NOTE: non so se il simulatore ha un bug o io non so scegliere bene i
  * parametri.
+ *
+ * NOTE: Ottimizzazione: tutti i parametri che non dipendono da old_state o da
+ * funzioni casuali possono essere precalcolate. Quindi d, fw e fP (a meno del
+ * parametro di perturbazione) possono essere precalcolate.
  */
 void
 simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
