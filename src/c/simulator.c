@@ -8,12 +8,11 @@ static const int8_t Gamma[8][2] = {
 }; /* All offsets around a cell */
 static_assert(sizeof Gamma == 16, "bad size");
 
-static const float pi = 3.14159265359f;
-
 static bool should_stop = false;
 
 void
 simulation_SIGTER_handler(int sig) {
+	(void) sig;
 	should_stop = true;
 }
 
@@ -135,7 +134,7 @@ int main(int argc, char const *argv[]) {
 		.s = 1,
 		.seed = 123,
 		.tau = 1,
-		.theta = 0.4,
+		.theta = 0.4f,
 		.k0 = 1,
 		.k1 = 1,
 		.k2 = 1,
@@ -151,9 +150,9 @@ int main(int argc, char const *argv[]) {
 	}
 
 	for (uint64_t i = 0; i < area; i++) {
-		s.old_state[i] = (state_t){.B = 0.5, .N = false};
+		s.old_state[i] = (state_t){.B = 0.5f, .N = false};
 		s.new_state[i] = (state_t){0};
-		s.params[i] = (params_t){.P = 1, .S = 0.7, .F = 1, .D = pi};
+		s.params[i] = (params_t){.P = 1, .S = 0.7f, .F = 1, .D = pi};
 		s.gamma[i] = 10;
 	}
 

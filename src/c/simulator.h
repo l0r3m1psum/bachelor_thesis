@@ -1,3 +1,6 @@
+#ifndef SIMULATOR_INCLUDE
+#define SIMULATOR_INCLUDE
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
@@ -42,8 +45,12 @@ struct {
 } typedef simulation_t;
 static_assert(sizeof (simulation_t) == 96, "bad size");
 
+#define pi 3.14159265359f
+
 void
 simulation_run(simulation_t *s, bool (*dump)(simulation_t *));
 
 void
 simulation_SIGTER_handler(int sig);
+
+#endif /* SIMULATOR_INCLUDE */
