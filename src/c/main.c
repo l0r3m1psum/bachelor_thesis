@@ -26,54 +26,38 @@
 
 #include "csv.h"
 #include "simulator.h"
-#include <stdalign.h>
-#include <string.h> /* strerror */
-#include <inttypes.h> /* PRI macros */
-#include <signal.h>
-#include <syslog.h>
-#include <stdlib.h>
-#include <unistd.h> /* sleep */
+
 #include <errno.h>
+#include <inttypes.h>
+#include <signal.h>
+#include <stdalign.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h> /* strerror */
+#include <syslog.h>
+#include <unistd.h> /* sleep */
 
-static int
-old_main(int argc, char *argv[]) {
-	if (argc < 2) {
-		fprintf(stderr, "error: missing file name argument\n");
-		return 1;
-	}
-	FILE *fp = fopen(argv[1], "r");
+#define GENERAL_PARAMETERS_NO 11
+static const csv_type types[GENERAL_PARAMETERS_NO] = {
+	CSV_INT64, CSV_INT64, CSV_INT64, CSV_INT64, CSV_INT64,
+	CSV_DOUBLE, CSV_DOUBLE, CSV_DOUBLE, CSV_DOUBLE, CSV_DOUBLE, CSV_DOUBLE
+};
+
+static FILE *
+open_or_fail(const char *fname) {
+	FILE *fp = fopen(fname, "r");
 	if (!fp) {
-		perror("fopen");
-		return 1;
+		syslog(LOG_ERR, "unable to open '%s': %s", fname, strerror(errno));
+		exit(EXIT_FAILURE);
 	}
-	alignas(64) csv_t csv = {0};
-	uint64_t col_num = 8;
-	csv_init(fp, col_num, &csv);
+	return fp;
+}
 
-	csv_t *it = &csv;
-	int err = 0;
-	int i = 0;
-	while (csv_nextrow(it, &err) && i++ < 5) {
-		for (size_t i = 0; i < col_num; i++) {
-			csv_err_t csv_err = csv_nextfield(it);
-			if (csv_err != CSV_ERR_OK) {
-				fprintf(stderr, "csv_nextfield: %s\n", csv_strerr(csv_err));
-				csv_close(it);
-				return 1;
-			}
-
-			printf("printing row %" PRIu64 " in col %" PRIu64 ": \"%s\"\n",
-				it->row_idx, it->col_idx, it->field_start);
-		}
+static void
+try_close(FILE *fp, const char *fname) {
+	if (fclose(fp) != 0) {
+		syslog(LOG_WARNING, "unable to close file '%s': %s", fname, strerror(errno));
 	}
-	if (err != 0) {
-		fprintf(stderr, "csv_nextrow: %s\n", strerror(err));
-		csv_close(it);
-		return 1;
-	}
-	puts("finished successfully!");
-	csv_close(it);
-	return 0;
 }
 
 static bool
@@ -105,11 +89,43 @@ main(const int argc, const char *argv[]) {
 		const char * restrict initial_state = argv[3];
 		const char * restrict out_dir = argv[5];
 
-		FILE *fp = fopen(general_parameters, "r");
-		if (!fp) {
-			syslog(LOG_ERR, "unable to open '%s': %s", general_parameters, strerror(errno));
-			return EXIT_FAILURE;
+		FILE *fp = NULL;
+		char *row = NULL;
+		size_t linecap = 0;
+		ssize_t len = 0;
+
+		fp = open_or_fail(general_parameters);
+		errno = 0;
+		syslog(LOG_INFO, "reading general parameters file: '%s'", general_parameters);
+		while ((len = getline(&row, &linecap, fp)) != -1) {
+			if (row[0] == '#') {
+				continue;
+			}
+			csv_num nums[GENERAL_PARAMETERS_NO] = {0};
+			if (!csv_read(row, GENERAL_PARAMETERS_NO, nums, types)) {
+				syslog(LOG_ERR, "unable ro read general parameters from file '%s'", general_parameters);
+				return EXIT_FAILURE;
+			}
+			syslog(LOG_DEBUG,
+				"general parameters: %"PRIu64",%"PRIu64",%"PRIu64",%"PRIu64",%"PRIu64",%.2lf,%.2lf,%.2lf,%.2lf,%.2lf,%.2lf",
+				nums[0].integ, nums[1].integ, nums[2].integ, nums[3].integ, nums[4].integ,
+				nums[5].doubl, nums[6].doubl, nums[7].doubl, nums[8].doubl, nums[9].doubl, nums[10].doubl
+			);
+			/* TODO: check numbers and put them in variables */
+			break;
 		}
+		/* TODO: check errno */
+		try_close(fp, general_parameters);
+
+		fp = open_or_fail(cells_parameters);
+		try_close(fp, cells_parameters);
+
+		fp = open_or_fail(initial_state);
+		try_close(fp, initial_state);
+
+		/* TODO: test that out_dir is a directory and that I can write in it */
+		free(row);
+		return 0;
 	}
 
 	{
