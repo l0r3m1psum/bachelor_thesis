@@ -1,6 +1,7 @@
 #include "simulator.h"
 
 #include <math.h>
+#include <syslog.h>
 
 static const int8_t Gamma[8][2] = {
 	{0, 1}, {1, 0}, {1, 1}, {0, -1}, {-1, 0}, {-1, -1}, {1, -1}, {-1, 1}
@@ -8,6 +9,13 @@ static const int8_t Gamma[8][2] = {
 static_assert(sizeof Gamma == 16, "bad size");
 
 static const float pi = 3.14159265359f;
+
+static bool should_stop = false;
+
+void
+simulation_SIGTER_handler(int sig) {
+	should_stop = true;
+}
 
 inline static float
 maxf(float a, float b) {
@@ -90,6 +98,10 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		}
 		if (s->h % s->s == 0) {
 			(void) dump(s);
+		}
+		if (should_stop) {
+			syslog(LOG_INFO, "exiting the simulatio prematurely due to SIGTERM");
+			return;
 		}
 		state_t *tmp = s->old_state;
 		s->old_state = s->new_state;

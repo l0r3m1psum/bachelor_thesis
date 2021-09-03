@@ -44,3 +44,6 @@ static_assert(sizeof (simulation_t) == 96, "bad size");
 
 void
 simulation_run(simulation_t *s, bool (*dump)(simulation_t *));
+
+void
+simulation_SIGTER_handler(int sig);
