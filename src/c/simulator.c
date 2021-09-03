@@ -99,7 +99,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 			(void) dump(s);
 		}
 		if (should_stop) {
-			syslog(LOG_INFO, "exiting the simulatio prematurely due to SIGTERM");
+			syslog(LOG_INFO, "exiting the simulation prematurely due to SIGTERM");
 			return;
 		}
 		state_t *tmp = s->old_state;
