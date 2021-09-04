@@ -38,7 +38,7 @@
 #include <unistd.h> /* sleep */
 #include <sys/stat.h>
 
-/* type,    name,   csv_type,  csv_num, fmt, ord, macro */
+/* type,    name,   csv_type,  csv_num, fmt, ord */
 #define GENERAL_PARAMS(X) \
 X(uint64_t, Wstar, CSV_INT64,  integ, PRIu64, 0) \
 X(uint64_t, Lstar, CSV_INT64,  integ, PRIu64, 1) \
@@ -147,7 +147,8 @@ main(const int argc, const char *argv[]) {
 				nums[5].doubl, nums[6].doubl, nums[7].doubl, nums[8].doubl, nums[9].doubl, nums[10].doubl
 			);
 			/* NOTE: I could add another macro to GENERAL_PARAMS to give a more
-			 * meningful error message */
+			 * meningful error message
+			 */
 #define CHECK(type, name, csv_type, csv_num, fmt, ord) \
 			if (CHECK##ord(nums[ord].csv_num)) { \
 				syslog(LOG_ERR, #name " is not valid"); \
@@ -171,9 +172,11 @@ main(const int argc, const char *argv[]) {
 		try_close(fp, general_params);
 
 		fp = open_or_fail(cells_params);
+		/* TODO: implement */
 		try_close(fp, cells_params);
 
 		fp = open_or_fail(initial_state);
+		/* TODO: implement */
 		try_close(fp, initial_state);
 
 		struct stat buf = {0};
@@ -207,23 +210,15 @@ main(const int argc, const char *argv[]) {
 		}
 	}
 
-	const uint64_t width = 10, height = 10, area = width * height;
+	const uint64_t area = Wstar * Lstar;
 	simulation_t sim = {
-		.Wstar = width,
-		.Lstar = height,
-		.h = 30,
-		.s = 1,
-		.seed = 123,
-		.tau = 1,
-		.theta = 0.4f,
-		.k0 = 1,
-		.k1 = 1,
-		.k2 = 1,
-		.L = 1,
+#define MAKE_STRUCT(type, name, csv_type, csv_num, fmt, ord) .name = name,
+		GENERAL_PARAMS(MAKE_STRUCT)
+#undef MAKE_STRUCT
 		.old_state = malloc(sizeof (state_t) * area),
 		.new_state = malloc(sizeof (state_t) * area),
 		.params = malloc(sizeof (params_t) * area),
-		.gamma = malloc(sizeof (float) * area)
+		.gamma = malloc(sizeof (float) * area),
 	};
 
 	if (!(sim.old_state && sim.new_state && sim.params && sim.gamma)) {
