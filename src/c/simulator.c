@@ -55,6 +55,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	assert(s->theta >= 0 && s->theta <= 1);
 	/* TODO: completare tutti i check */
 
+	syslog(LOG_INFO, "starting simulation");
 	uint32_t rng_state = s->seed;
 	for (uint64_t loop0 = 0; loop0 < s->h; loop0++) {
 		/* Skipping the border */
@@ -106,6 +107,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		s->old_state = s->new_state;
 		s->new_state = tmp;
 	}
+	syslog(LOG_INFO, "finished simulation");
 }
 
 #ifdef TEST
