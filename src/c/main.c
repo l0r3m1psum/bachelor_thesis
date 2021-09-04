@@ -36,6 +36,7 @@
 #include <string.h> /* strerror */
 #include <syslog.h>
 #include <unistd.h> /* sleep */
+#include <sys/stat.h>
 
 /* type,    name,   csv_type,  csv_num, fmt, ord, macro */
 #define GENERAL_PARAMS(X) \
@@ -175,7 +176,17 @@ main(const int argc, const char *argv[]) {
 		fp = open_or_fail(initial_state);
 		try_close(fp, initial_state);
 
-		/* TODO: test that out_dir is a directory and that I can write in it */
+		struct stat buf = {0};
+		if(stat(out_dir, &buf) == -1) {
+			syslog(LOG_ERR, "unable to use stat on '%s': %s", out_dir, strerror(errno));
+			return EXIT_FAILURE;
+		}
+		if (!S_ISDIR(buf.st_mode)) {
+			syslog(LOG_ERR, "'%s' is not a directory", out_dir);
+			return EXIT_FAILURE;
+		}
+		/* TODO: test that I can write in out_dir */
+
 		free(row);
 		return 0;
 	}
