@@ -154,6 +154,10 @@ main(const int argc, const char *argv[]) {
 			}
 			GENERAL_PARAMS(CHECK)
 #undef CHECK
+			if (s > h) {
+				syslog(LOG_ERR, "s cannot be greater then h");
+				return EXIT_FAILURE;
+			}
 #define ASSIGN_ALL(type, name, csv_type, csv_num, fmt, ord) name = (type) nums[ord].csv_num;
 			GENERAL_PARAMS(ASSIGN_ALL)
 #undef ASSIGN_ALL
