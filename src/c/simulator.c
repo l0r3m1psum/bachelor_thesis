@@ -45,6 +45,8 @@ rngf(uint32_t *xn) {
  * NOTE: Ottimizzazione: tutti i parametri che non dipendono da old_state o da
  * funzioni casuali possono essere precalcolate. Quindi d, fw e fP (a meno del
  * parametro di perturbazione) possono essere precalcolate.
+ *
+ * TODO: gamma dovrebbe trovarsi in params_t
  */
 void
 simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
