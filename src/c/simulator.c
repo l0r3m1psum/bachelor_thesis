@@ -70,7 +70,10 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 				for (uint64_t loop1 = 0; loop1 < n_dir && !V; loop1++) {
 					const int8_t e1 = Gamma[loop1][0];
 					const int8_t e2 = Gamma[loop1][1];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-conversion"
 					const uint64_t ie1je2 = (i+e1) + (j+e2)*s->Wstar;
+#pragma clang diagnostic pop
 					// Calculating probability
 					const float C = sinf(pi*s->old_state[ie1je2].B/s->gamma[ie1je2]);
 					const float d = (1 - 0.5f*fabsf((float) e1*e2));
