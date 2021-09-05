@@ -165,3 +165,17 @@
   * [int overflows](https://stackoverflow.com/a/1514309)
   * [X macros](https://en.wikipedia.org/wiki/X_Macro)
 
+# Other cool stuff
+  * [vyukov queue](https://int08h.com/post/ode-to-a-vyukov-queue/)
+
+## Asynchronous loggers
+  * [mini async log c](https://github.com/RafaGago/mini-async-log-c)
+  * [WoodyLogger](http://nasacj.net/?p=544)
+
+## Macro stuff
+
+  * [X-macro](https://stackoverflow.com/questions/6635851/real-world-use-of-x-macros)
+  * [defer for C]()https://news.ycombinator.com/item?id=22613950
+  * [DEFER and OBSTRUCT macros](https://stackoverflow.com/questions/29962560/understanding-defer-and-obstruct-macros)
+  * [delay macro expansion](https://stackoverflow.com/questions/6671344/delaying-macro-expansion)
+  * [comma in macro](https://stackoverflow.com/questions/13842468/comma-in-c-c-macro)
