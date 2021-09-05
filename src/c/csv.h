@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* NOTE: maybe I should add an "_t" to csv_type and csv_num */
+
 enum {
 	CSV_INT64,
 	CSV_DOUBLE
