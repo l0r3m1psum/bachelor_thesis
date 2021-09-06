@@ -211,6 +211,7 @@ read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, con
 			continue;
 		}
 		if (!csv_read(row, len, nums, types)) {
+			free(row);
 			syslog(LOG_ERR, "unable ro read cells parameters from file '%s' at line %"PRIu64, fname, lineno);
 			exit(EXIT_FAILURE);
 		}
@@ -234,17 +235,33 @@ read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, con
 static bool
 dump(simulation_t *s) {
 	/* TODO: log additiona information like the file where it is beeing dumped. */
+	/* ora assumendo di avere unfd che rappresenta una firectory dovrei fare una
+	 * cosa del genere:
+	 */
+
+	char fnamebuf[] = {'r', 'e', 's', 'u', 'l', 't', '0', '0', '0', '\0'};
+	const int fd = openat(AT_FDCWD, fnamebuf, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+	if (fd == -1) {
+		syslog(LOG_WARNING, "unable to open file '%s': %s", fnamebuf, strerror(errno));
+		return false;
+	}
+	FILE *fp = fdopen(fd, "w");
+	if (!fp) {
+		syslog(LOG_WARNING, "unable to convert file descriptor in stream: %s", strerror(errno));
+		if (close(fd) == -1) {
+			syslog(LOG_WARNING, "unable to close file descriptor: %s", strerror(errno));
+		}
+		return false;
+	}
 	syslog(LOG_INFO, "starting to dump the state of the simulation");
 	for (uint64_t i = 0; i < s->Lstar; i++) {
 		for (uint64_t j = 0; j < s->Wstar-1; j++) {
 			const uint64_t ij = i + j*s->Wstar;
-			printf("%d,", s->new_state[ij].N);
+			fprintf(fp, "%f,%d\n", s->new_state[ij].B, s->new_state[ij].N);
 		}
-		printf("%d\n", s->new_state[i + (s->Wstar-1)*s->Wstar].N);
 	}
-	putchar('\n');
-	sleep(2);
 	syslog(LOG_INFO, "finished to dump the state of the simulation");
+	fclose(fp);
 	return true;
 }
 
@@ -293,11 +310,13 @@ main(const int argc, const char *argv[]) {
 		}
 
 		/* TODO: test that I can write in out_dir */
+#if 0
 		int out_dir_fd = open(out_dir, O_RDWR|O_DIRECTORY);
 		if (out_dir_fd == -1) {
 			syslog(LOG_ERR, "cannot open directory '%s': %s", out_dir, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
+#endif
 	}
 
 	{
