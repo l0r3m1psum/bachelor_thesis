@@ -36,7 +36,7 @@
 #include <string.h> /* strerror */
 #include <syslog.h>
 #include <unistd.h> /* sleep */
-#include <sys/stat.h>
+#include <fcntl.h> /* open, openat */
 
 /* Here are defined a series of tables used by X-macros with the following form:
  * type, name, csv_type, csv_num, fmt, ord. TODO: finish documentation
@@ -293,16 +293,12 @@ main(const int argc, const char *argv[]) {
 			read_data(initial_state, &sim2, nums, INITIAL_STATE_NO, initial_state_types, insert_initial_state);
 		}
 
-		struct stat buf = {0};
-		if(stat(out_dir, &buf) == -1) {
-			syslog(LOG_ERR, "unable to use stat on '%s': %s", out_dir, strerror(errno));
-			return EXIT_FAILURE;
-		}
-		if (!S_ISDIR(buf.st_mode)) {
-			syslog(LOG_ERR, "'%s' is not a directory", out_dir);
-			return EXIT_FAILURE;
-		}
 		/* TODO: test that I can write in out_dir */
+		int out_dir_fd = open(out_dir, O_RDWR|O_DIRECTORY);
+		if (out_dir_fd == -1) {
+			syslog(LOG_ERR, "cannot open directory '%s': %s", out_dir, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	{
