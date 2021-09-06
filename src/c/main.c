@@ -257,7 +257,7 @@ main(const int argc, const char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	simulation_t sim2 = {0};
+	simulation_t sim = {0};
 
 	{
 		const char * const restrict general_params = argv[1];
@@ -267,16 +267,16 @@ main(const int argc, const char *argv[]) {
 
 		{
 			csv_num nums[GENERAL_PARAMS_NO] = {0};
-			read_data(general_params, &sim2, nums, GENERAL_PARAMS_NO, general_params_types, insert_general_params);
+			read_data(general_params, &sim, nums, GENERAL_PARAMS_NO, general_params_types, insert_general_params);
 		}
 
-		const uint64_t area = sim2.Wstar * sim2.Lstar;
-		sim2.old_state = malloc(sizeof (state_t) * area);
-		sim2.new_state = malloc(sizeof (state_t) * area);
-		sim2.params = malloc(sizeof (params_t) * area);
-		sim2.gamma = malloc(sizeof (float) * area);
+		const uint64_t area = sim.Wstar * sim.Lstar;
+		sim.old_state = malloc(sizeof (state_t) * area);
+		sim.new_state = malloc(sizeof (state_t) * area);
+		sim.params = malloc(sizeof (params_t) * area);
+		sim.gamma = malloc(sizeof (float) * area);
 
-		if (!(sim2.old_state && sim2.new_state && sim2.params && sim2.gamma)) {
+		if (!(sim.old_state && sim.new_state && sim.params && sim.gamma)) {
 			const uint64_t total = (sizeof (state_t) * 2 + sizeof (params_t) + sizeof (float)) * area;
 			syslog(LOG_ERR, "unable to allocate %"PRIu64" bytes of memory: %s", total, strerror(errno));
 			return EXIT_FAILURE;
@@ -284,12 +284,12 @@ main(const int argc, const char *argv[]) {
 
 		{
 			csv_num nums[CELLS_PARAMS_NO] = {0};
-			read_data(cells_params, &sim2, nums, CELLS_PARAMS_NO, cells_params_types, insert_cells_params);
+			read_data(cells_params, &sim, nums, CELLS_PARAMS_NO, cells_params_types, insert_cells_params);
 		}
 
 		{
 			csv_num nums[INITIAL_STATE_NO] = {0};
-			read_data(initial_state, &sim2, nums, INITIAL_STATE_NO, initial_state_types, insert_initial_state);
+			read_data(initial_state, &sim, nums, INITIAL_STATE_NO, initial_state_types, insert_initial_state);
 		}
 
 		/* TODO: test that I can write in out_dir */
@@ -316,12 +316,12 @@ main(const int argc, const char *argv[]) {
 		}
 	}
 
-	simulation_run(&sim2, dump);
+	simulation_run(&sim, dump);
 
-	free(sim2.old_state);
-	free(sim2.new_state);
-	free(sim2.params);
-	free(sim2.gamma);
+	free(sim.old_state);
+	free(sim.new_state);
+	free(sim.params);
+	free(sim.gamma);
 
 	closelog();
 
