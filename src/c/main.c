@@ -199,7 +199,7 @@ read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, con
 		syslog(LOG_ERR, "unable to open '%s': %s", fname, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	char *row = NULL;
+	char *row = NULL; /* NOTE: this pointer can be moved out of this function to avoid multiple unnecessary reallocations */
 	size_t linecap = 0;
 	ssize_t linelen = 0;
 	errno = 0;
