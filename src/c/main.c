@@ -186,7 +186,8 @@ INSERTER_FUNC(insert_initial_state) {
 #define ASSIGN_ALL(type, name, csv_type, csv_num, fmt, ord) const type name = (type) nums[ord].csv_num;
 	INITIAL_STATE(ASSIGN_ALL)
 #undef ASSIGN_ALL
-	sim->old_state[index] = (state_t){.N = N, .B = B};
+	/* FIXME: .B dovrebbe essere inizializzato a gamma, e quindi non va importato dal csv */
+	sim->old_state[index] = (state_t){.N = N, .B = sim->gamma[index]};
 }
 
 /* NOTE: maybe a should pass a file pointer directly for testing purposes */
