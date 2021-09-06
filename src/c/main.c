@@ -235,11 +235,15 @@ read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, con
 static bool
 dump(simulation_t *s) {
 	/* TODO: log additiona information like the file where it is beeing dumped. */
-	/* ora assumendo di avere unfd che rappresenta una firectory dovrei fare una
-	 * cosa del genere:
-	 */
-
-	char fnamebuf[] = {'r', 'e', 's', 'u', 'l', 't', '0', '0', '0', '\0'};
+	/* TODO: use a real directory's fd for openat */
+	static uint64_t counter = 0;
+	const uint64_t size = 1 << 7;
+	char fnamebuf[size];
+	if (snprintf(fnamebuf, size, "result%03"PRIu64, counter) > size-1) {
+		syslog(LOG_WARNING, "more than 999 dump occurred, this one was skipped");
+		return false;
+	}
+	counter++;
 	const int fd = openat(AT_FDCWD, fnamebuf, O_WRONLY|O_CREAT|O_TRUNC, 0644);
 	if (fd == -1) {
 		syslog(LOG_WARNING, "unable to open file '%s': %s", fnamebuf, strerror(errno));
