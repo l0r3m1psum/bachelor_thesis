@@ -11,5 +11,6 @@ all: main.c csv.c simulator.c
 	$(CC) $(CFLAGS) simulator.c csv.c main.c -o main
 clean:
 	rm -f main.o csv.o simulator.o simulator csv
-profile: main
-	xcrun xctrace record --template "Time Profiler" --output $(*).trace --launch -- $*
+profile:
+	xcrun xctrace record --template "Time Profiler" --output main.trace --launch -- \
+	main ../../res/general_params.csv ../../res/cell_params.csv ../../res/initial_state.csv ../../res/
