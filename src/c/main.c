@@ -93,10 +93,9 @@ X(bool, N, CSV_INT64, integ, PRIu64, 1)
 #define CHECK_INITIAL_STATE0(x) ((x) < 0)
 #define CHECK_INITIAL_STATE1(x) ((x) != 0 && (x) != 1)
 
-/* TODO: add file and line to the log error, add to the arguments of the macro */
-#define CHECK_ALL(WHICH, type, name, csv_type, csv_num, fmt, ord) \
+#define CHECK_ALL(WHICH, fname, lineno, type, name, csv_type, csv_num, fmt, ord) \
 if (CHECK_##WHICH##ord(nums[ord].csv_num)) { \
-	syslog(LOG_ERR, #name " is not valid"); \
+	syslog(LOG_ERR, "invalid "#name" value in file '%s' at line %"PRIu64, fname, lineno); \
 	exit(EXIT_FAILURE); \
 }
 
@@ -127,7 +126,7 @@ INSERTER_FUNC(insert_general_params) {
 		syslog(LOG_ERR, "too many rows in file '%s'", fname);
 		exit(EXIT_FAILURE);
 	}
-#define CHECK(type, name, csv_type, csv_num, fmt, ord) CHECK_ALL(GENERAL_PARAMS, type, name, csv_type, csv_num, fmt, ord)
+#define CHECK(type, name, csv_type, csv_num, fmt, ord) CHECK_ALL(GENERAL_PARAMS, fname, lineno, type, name, csv_type, csv_num, fmt, ord)
 	GENERAL_PARAMS(CHECK)
 #undef CHECK
 	if (nums[3].integ /*s*/ > nums[2].integ /*h*/) {
@@ -145,7 +144,7 @@ INSERTER_FUNC(insert_cells_params) {
 		syslog(LOG_ERR, "too many rows in file '%s'", fname);
 		exit(EXIT_FAILURE);
 	}
-#define CHECK(type, name, csv_type, csv_num, fmt, ord) CHECK_ALL(CELLS_PARAMS, type, name, csv_type, csv_num, fmt, ord)
+#define CHECK(type, name, csv_type, csv_num, fmt, ord) CHECK_ALL(CELLS_PARAMS, fname, lineno, type, name, csv_type, csv_num, fmt, ord)
 	CELLS_PARAMS(CHECK)
 #undef CHECK
 #define ASSIGN_ALL(type, name, csv_type, csv_num, fmt, ord) const type name = (type) nums[ord].csv_num;
@@ -181,7 +180,7 @@ INSERTER_FUNC(insert_initial_state) {
 		syslog(LOG_ERR, "too many rows in file '%s'", fname);
 		exit(EXIT_FAILURE);
 	}
-#define CHECK(type, name, csv_type, csv_num, fmt, ord) CHECK_ALL(INITIAL_STATE, type, name, csv_type, csv_num, fmt, ord)
+#define CHECK(type, name, csv_type, csv_num, fmt, ord) CHECK_ALL(INITIAL_STATE, fname, lineno, type, name, csv_type, csv_num, fmt, ord)
 	INITIAL_STATE(CHECK)
 #undef CHECK
 #define ASSIGN_ALL(type, name, csv_type, csv_num, fmt, ord) const type name = (type) nums[ord].csv_num;
