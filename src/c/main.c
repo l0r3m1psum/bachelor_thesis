@@ -263,6 +263,7 @@ dump(simulation_t *s) {
 	for (uint64_t i = 0; i < s->Lstar; i++) {
 		for (uint64_t j = 0; j < s->Wstar-1; j++) {
 			const uint64_t ij = i + j*s->Wstar;
+			assert(s->new_state[ij].B >= 0);
 			fprintf(fp, "%f,%d\n", s->new_state[ij].B, s->new_state[ij].N);
 		}
 	}
@@ -295,7 +296,7 @@ main(const int argc, const char *argv[]) {
 
 		const uint64_t area = sim.Wstar * sim.Lstar;
 		sim.old_state = malloc(sizeof (state_t) * area);
-		sim.new_state = malloc(sizeof (state_t) * area);
+		sim.new_state = calloc(sizeof (state_t) * area, 1); /* to avoid weired values on boundaries */
 		sim.params = malloc(sizeof (params_t) * area);
 		sim.gamma = malloc(sizeof (float) * area);
 

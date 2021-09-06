@@ -66,6 +66,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 				const uint64_t ij = i + j*s->Wstar;
 				const float beta = 60*(1 + s->params[ij].F/10); /* burning rate */
 				const float old_B = s->old_state[ij].B;
+				assert(old_B >= 0);
 				const bool old_N = s->old_state[ij].N;
 
 				const uint64_t n_dir = sizeof Gamma / sizeof Gamma[0];
@@ -96,6 +97,8 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 				/* NOTE: in this eqation u has been purposely removed */
 				s->new_state[ij].N = old_B > 0 ? V : false;
 				s->new_state[ij].B = old_N > 0 ? maxf(0, old_B - beta*s->tau) : old_B;
+				assert(s->new_state[ij-1].B >= 0);
+				assert(s->old_state[ij-1].B >= 0);
 			}
 		}
 		if (s->h % s->s == 0) {
