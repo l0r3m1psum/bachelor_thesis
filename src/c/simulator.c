@@ -99,6 +99,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 				s->new_state[ij].B = old_N > 0 ? maxf(0, old_B - beta*s->tau) : old_B;
 				assert(s->new_state[ij-1].B >= 0);
 				assert(s->old_state[ij-1].B >= 0);
+				assert(s->new_state[ij].B <= s->old_state[ij].B);
 			}
 		}
 		if (s->h % s->s == 0) {
