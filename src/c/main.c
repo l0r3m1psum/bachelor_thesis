@@ -229,22 +229,24 @@ read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, con
 	free(row);
 }
 
+static int out_dir_fd;
+
 /* NOTE: in this function UBsan can detect a problem, but it's just a conflict
  * with Asan.
  */
 static bool
 dump(simulation_t *s) {
 	/* TODO: log additiona information like the file where it is beeing dumped. */
-	/* TODO: use a real directory's fd for openat */
 	static uint64_t counter = 0;
 	const uint64_t size = 1 << 7;
 	char fnamebuf[size];
 	if (snprintf(fnamebuf, size, "result%03"PRIu64, counter) > size-1) {
+		/* NOTE: this arbitrary limit in probably to tiny */
 		syslog(LOG_WARNING, "more than 999 dump occurred, this one was skipped");
 		return false;
 	}
 	counter++;
-	const int fd = openat(AT_FDCWD, fnamebuf, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+	const int fd = openat(out_dir_fd, fnamebuf, O_WRONLY|O_CREAT|O_TRUNC, 0644);
 	if (fd == -1) {
 		syslog(LOG_WARNING, "unable to open file '%s': %s", fnamebuf, strerror(errno));
 		return false;
@@ -314,13 +316,11 @@ main(const int argc, const char *argv[]) {
 		}
 
 		/* TODO: test that I can write in out_dir */
-#if 0
-		int out_dir_fd = open(out_dir, O_RDWR|O_DIRECTORY);
+		out_dir_fd = open(out_dir, O_RDONLY|O_DIRECTORY);
 		if (out_dir_fd == -1) {
 			syslog(LOG_ERR, "cannot open directory '%s': %s", out_dir, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
-#endif
 	}
 
 	{
