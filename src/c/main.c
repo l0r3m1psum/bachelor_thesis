@@ -228,8 +228,8 @@ read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, con
 	free(row);
 }
 
-/* NOTE: in this function UBsan dedects a problem but it's just a conflict with
- * Asan.
+/* NOTE: in this function UBsan can detect a problem, but it's just a conflict
+ * with Asan.
  */
 static bool
 dump(simulation_t *s) {
