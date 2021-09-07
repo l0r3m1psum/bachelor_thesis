@@ -253,13 +253,9 @@ static bool
 dump(simulation_t *s) {
 	/* TODO: log additiona information like the file where it is beeing dumped. */
 	static uint64_t counter = 0;
-	const uint64_t size = 1 << 7;
+	const uint64_t size = 1 << 7; /* 20 is the maximum number of digits in a uint64_t so a 128 char buffer is more than enough */
 	char fnamebuf[size];
-	if ((uint64_t) snprintf(fnamebuf, size, "result%03"PRIu64, counter) > size-1) {
-		/* NOTE: this arbitrary limit in probably to tiny */
-		syslog(LOG_WARNING, "more than 999 dump occurred, this one was skipped");
-		return false;
-	}
+	(void) snprintf(fnamebuf, size, "result%03"PRIu64, counter)
 	counter++;
 	const int fd = openat(out_dir_fd, fnamebuf, O_WRONLY|O_CREAT|O_TRUNC, 0644);
 	if (fd == -1) {
