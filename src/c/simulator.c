@@ -102,7 +102,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 				assert(s->new_state[ij].B <= s->old_state[ij].B);
 			}
 		}
-		if (s->h % s->s == 0) {
+		if ((loop0 % s->s) == 0) {
 			(void) dump(s);
 		}
 		if (should_stop) {
