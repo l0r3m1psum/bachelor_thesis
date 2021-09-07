@@ -46,13 +46,11 @@ rngf(uint32_t *xn) {
  * NOTE: Ottimizzazione: tutti i parametri che non dipendono da old_state o da
  * funzioni casuali possono essere precalcolate. Quindi d, fw e fP (a meno del
  * parametro di perturbazione) possono essere precalcolate.
- *
- * TODO: gamma dovrebbe trovarsi in params_t
  */
 void
 simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	assert(s && dump);
-	assert(s->old_state && s->new_state && s->params && s->gamma);
+	assert(s->old_state && s->new_state && s->params);
 	assert(s->tau > 0 && s->theta > 0 && s->L > 0);
 	assert(s->Wstar >= 3 && s->Lstar >= 3);
 	assert(s->theta >= 0 && s->theta <= 1);
@@ -80,7 +78,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					const uint64_t ie1je2 = (i+e1) + (j+e2)*s->Wstar;
 #pragma clang diagnostic pop
 					// Calculating probability
-					const float C = sinf(pi*s->old_state[ie1je2].B/s->gamma[ie1je2]);
+					const float C = sinf(pi*s->old_state[ie1je2].B/s->params[ie1je2].gamma);
 					const float d = (1 - 0.5f*fabsf((float) e1*e2));
 					const float fw = expf(
 						s->k1*s->params[ie1je2].F
@@ -155,18 +153,16 @@ int main(int argc, char const *argv[]) {
 		.old_state = malloc(sizeof (state_t) * area),
 		.new_state = malloc(sizeof (state_t) * area),
 		.params = malloc(sizeof (params_t) * area),
-		.gamma = malloc(sizeof (float) * area)
 	};
 
-	if (!(s.old_state && s.new_state && s.params && s.gamma)) {
+	if (!(s.old_state && s.new_state && s.params)) {
 		return EXIT_FAILURE;
 	}
 
 	for (uint64_t i = 0; i < area; i++) {
-		s.old_state[i] = (state_t){.B = 0.5f, .N = false};
+		s.old_state[i] = (state_t){.B = 0.5f, .N = false, .gamma = 10};
 		s.new_state[i] = (state_t){0};
 		s.params[i] = (params_t){.P = 1, .S = 0.7f, .F = 1, .D = pi};
-		s.gamma[i] = 10;
 	}
 
 	for (uint64_t i = 0; i < s.Lstar; i++) {
@@ -183,7 +179,6 @@ int main(int argc, char const *argv[]) {
 	free(s.old_state);
 	free(s.new_state);
 	free(s.params);
-	free(s.gamma);
 
 	return EXIT_SUCCESS;
 }

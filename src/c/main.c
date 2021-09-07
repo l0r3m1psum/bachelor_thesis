@@ -71,6 +71,7 @@ X(bool,     water2,       CSV_INT64,  integ, d,      4) \
 X(uint8_t,  naturemap,    CSV_INT64,  integ, PRIu8,  5) \
 X(float,    wind_dir,     CSV_DOUBLE, doubl, .2lf,   6) \
 X(float,    wind_speed,   CSV_DOUBLE, doubl, .2lf,   7)
+/* NOTE: gamma is not here because it is calculated */
 
 #define CHECK_CELLS_PARAMS0(x) ((x) < 0 || (x) > 4380)
 #define CHECK_CELLS_PARAMS1(x) ((x) < 0 ||(x) > 255)
@@ -168,8 +169,8 @@ INSERTER_FUNC(insert_cells_params) {
 	/* constructing the matrix in row-major form */
 	sim->params[index] = (params_t){
 		.S = S, .P = altimetry, .F = wind_speed, .D = wind_dir,
+		.gamma = sim->L*1*S, /* NOTE: where 1 is alpha i.e. our patch to the model */
 	};
-	sim->gamma[index] = sim->L*1*S; /* NOTE: where 1 is alpha i.e. our patch to the model */
 }
 
 static void
@@ -184,7 +185,7 @@ INSERTER_FUNC(insert_initial_state) {
 #define ASSIGN_ALL(type, name, csv_type, csv_num, fmt, ord) const type name = (type) nums[ord].csv_num;
 	INITIAL_STATE(ASSIGN_ALL)
 #undef ASSIGN_ALL
-	const float gamma = sim->gamma[index];
+	const float gamma = sim->params[index].gamma;
 	if (nums[0].doubl /*N*/ > gamma) {
 		syslog(LOG_WARNING, "B is greater then %f in file '%s' on line %"PRIu64
 			" using %f instead",
@@ -308,9 +309,8 @@ main(const int argc, const char *argv[]) {
 		sim.old_state = malloc(sizeof (state_t) * area);
 		sim.new_state = calloc(sizeof (state_t) * area, 1); /* to avoid weired values on boundaries */
 		sim.params = malloc(sizeof (params_t) * area);
-		sim.gamma = malloc(sizeof (float) * area);
 
-		if (!(sim.old_state && sim.new_state && sim.params && sim.gamma)) {
+		if (!(sim.old_state && sim.new_state && sim.params)) {
 			const uint64_t total = (sizeof (state_t) * 2 + sizeof (params_t)
 				+ sizeof (float)) * area;
 			syslog(LOG_ERR, "unable to allocate %"PRIu64" bytes of memory: %s",
@@ -371,7 +371,6 @@ main(const int argc, const char *argv[]) {
 	free(sim.old_state);
 	free(sim.new_state);
 	free(sim.params);
-	free(sim.gamma);
 
 	closelog();
 

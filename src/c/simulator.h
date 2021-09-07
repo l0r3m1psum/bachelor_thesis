@@ -22,14 +22,14 @@ struct {
 	float S; /* inflammability percentage */
 	float F; /* wind speed */
 	float D; /* wind direction */
+	float gamma; /* initial fuel */
 } typedef params_t;
-static_assert(sizeof (params_t) == 16, "bad size");
+static_assert(sizeof (params_t) == 20, "bad size");
 
 struct {
 	state_t * restrict old_state;
 	state_t * restrict new_state;
 	params_t *params;
-	float *gamma; /* all initial fuels */
 	uint64_t Wstar; /* number of cells along the x axis */
 	uint64_t Lstar; /* number of cells along the y axis */
 	uint64_t h; /* horizon */
@@ -43,7 +43,7 @@ struct {
 	float k2; /* slope optimization */
 	float L; /* length of the sides of the cells in meters */
 } typedef simulation_t;
-static_assert(sizeof (simulation_t) == 96, "bad size");
+static_assert(sizeof (simulation_t) == 88, "bad size");
 
 #define pi 3.14159265359f
 
