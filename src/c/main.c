@@ -30,12 +30,11 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <signal.h>
-#include <stdalign.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> /* strerror */
 #include <syslog.h>
-#include <unistd.h> /* sleep */
+#include <unistd.h> /* close */
 #include <fcntl.h> /* open, openat */
 
 /* Here are defined a series of tables used by X-macros with the following form:
@@ -186,8 +185,16 @@ INSERTER_FUNC(insert_initial_state) {
 #define ASSIGN_ALL(type, name, csv_type, csv_num, fmt, ord) const type name = (type) nums[ord].csv_num;
 	INITIAL_STATE(ASSIGN_ALL)
 #undef ASSIGN_ALL
-	/* FIXME: .B dovrebbe essere inizializzato a gamma, e quindi non va importato dal csv */
-	sim->old_state[index] = (state_t){.N = N, .B = sim->gamma[index]};
+	const float gamma = sim->gamma[index];
+	if (nums[0].doubl /*N*/ > gamma) {
+		syslog(LOG_WARNING, "B is greater then %f in file '%s' on line %"PRIu64
+			" using %f instead",
+			gamma, fname, lineno, gamma);
+		sim->old_state[index] = (state_t){.N = N, .B = gamma};
+	} else {
+		sim->old_state[index] = (state_t){.N = N, .B = B};
+	}
+
 }
 
 /* NOTE: maybe a should pass a file pointer directly for testing purposes */
