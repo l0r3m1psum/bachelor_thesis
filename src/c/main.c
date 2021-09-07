@@ -248,9 +248,11 @@ static int out_dir_fd;
  */
 static bool
 dump(simulation_t *s) {
-	/* TODO: log additiona information like the file where it is beeing dumped. */
 	static uint64_t counter = 0;
-	const uint64_t size = 1 << 7; /* 20 is the maximum number of digits in a uint64_t so a 128 char buffer is more than enough */
+	/* 20 is the maximum number of digits in a uint64_t so a 128 char buffer is
+	 * more than enough
+	 */
+	const uint64_t size = 1 << 7;
 	char fnamebuf[size];
 	(void) snprintf(fnamebuf, size, "result%03"PRIu64, counter);
 	counter++;
@@ -311,8 +313,8 @@ main(const int argc, const char *argv[]) {
 		sim.params = malloc(sizeof (params_t) * area);
 
 		if (!(sim.old_state && sim.new_state && sim.params)) {
-			const uint64_t total = (sizeof (state_t) * 2 + sizeof (params_t)
-				+ sizeof (float)) * area;
+			const uint64_t total = (sizeof (state_t) * 2 + sizeof (params_t))
+				* area;
 			syslog(LOG_ERR, "unable to allocate %"PRIu64" bytes of memory: %s",
 				total, strerror(errno));
 			return EXIT_FAILURE;
