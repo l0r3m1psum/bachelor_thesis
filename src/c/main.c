@@ -251,7 +251,7 @@ dump(simulation_t *s) {
 	static uint64_t counter = 0;
 	const uint64_t size = 1 << 7; /* 20 is the maximum number of digits in a uint64_t so a 128 char buffer is more than enough */
 	char fnamebuf[size];
-	(void) snprintf(fnamebuf, size, "result%03"PRIu64, counter)
+	(void) snprintf(fnamebuf, size, "result%03"PRIu64, counter);
 	counter++;
 	const int fd = openat(out_dir_fd, fnamebuf, O_WRONLY|O_CREAT|O_TRUNC, 0644);
 	if (fd == -1) {
