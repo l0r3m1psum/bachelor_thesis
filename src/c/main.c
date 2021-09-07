@@ -198,28 +198,27 @@ INSERTER_FUNC(insert_initial_state) {
 
 /* NOTE: maybe I should pass a FILE pointer directly for testing purposes */
 static inline uint64_t
-read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, const csv_type *types,
+read_data(const char *fname, char *buf, simulation_t *sim, csv_num *nums, uint64_t len, const csv_type *types,
 	void (*insert_data)(simulation_t *, csv_num *, uint64_t index, uint64_t lineno, const char *fname)) {
 	FILE *fp = fopen(fname, "r");
 	if (!fp) {
 		syslog(LOG_ERR, "unable to open '%s': %s", fname, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-	char *row = NULL; /* NOTE: this pointer can be moved out of this function to avoid multiple unnecessary reallocations */
 	size_t linecap = 0;
 	ssize_t linelen = 0;
 	errno = 0;
 	uint64_t index = 0;
 	syslog(LOG_INFO, "reading file: '%s'", fname);
 	for (uint64_t lineno = 1;
-		(linelen = getline(&row, &linecap, fp)) != -1;
+		(linelen = getline(&buf, &linecap, fp)) != -1;
 		lineno++) {
 		/* debug code for skipping coments */
-		if (row[0] == '#') {
+		if (buf[0] == '#') {
 			continue;
 		}
-		if (!csv_read(row, len, nums, types)) {
-			free(row);
+		if (!csv_read(buf, len, nums, types)) {
+			free(buf);
 			syslog(LOG_ERR, "unable ro read cells parameters from file '%s' at "
 				"line %"PRIu64, fname, lineno);
 			exit(EXIT_FAILURE);
@@ -228,7 +227,7 @@ read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, con
 		index++;
 	}
 	if (errno) {
-		free(row);
+		free(buf);
 		syslog(LOG_ERR, "error while getting line from '%s': %s", fname,
 			strerror(errno));
 		exit(EXIT_FAILURE);
@@ -237,7 +236,6 @@ read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, con
 		syslog(LOG_WARNING, "unable to close file '%s': %s", fname,
 			strerror(errno));
 	}
-	free(row);
 	return index;
 }
 
@@ -300,10 +298,11 @@ main(const int argc, const char *argv[]) {
 		const char * const restrict cells_params = argv[2];
 		const char * const restrict initial_state = argv[3];
 		const char * const restrict out_dir = argv[4];
+		char *row = NULL;
 
 		{
 			csv_num nums[GENERAL_PARAMS_NO] = {0};
-			(void) read_data(general_params, &sim, nums, GENERAL_PARAMS_NO,
+			(void) read_data(general_params, row, &sim, nums, GENERAL_PARAMS_NO,
 				general_params_types, insert_general_params);
 		}
 
@@ -323,7 +322,7 @@ main(const int argc, const char *argv[]) {
 		{
 			csv_num nums[CELLS_PARAMS_NO] = {0};
 			uint64_t res = 0;
-			if ((res = read_data(cells_params, &sim, nums, CELLS_PARAMS_NO,
+			if ((res = read_data(cells_params, row, &sim, nums, CELLS_PARAMS_NO,
 				cells_params_types, insert_cells_params)) != area) {
 				syslog(LOG_ERR, "not enough records in file '%s' only %"PRIu64,
 					cells_params, res);
@@ -334,13 +333,15 @@ main(const int argc, const char *argv[]) {
 		{
 			csv_num nums[INITIAL_STATE_NO] = {0};
 			uint64_t res = 0;
-			if ((res = read_data(initial_state, &sim, nums, INITIAL_STATE_NO,
+			if ((res = read_data(initial_state, row, &sim, nums, INITIAL_STATE_NO,
 				initial_state_types, insert_initial_state)) != area) {
 				syslog(LOG_ERR, "not enough records in file '%s' only %"PRIu64,
 					cells_params, res);
 				return EXIT_FAILURE;
 			}
 		}
+
+		free(row);
 
 		/* TODO: test that I can write in out_dir */
 		out_dir_fd = open(out_dir, O_RDONLY|O_DIRECTORY);
