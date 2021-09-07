@@ -150,13 +150,16 @@ INSERTER_FUNC(insert_cells_params) {
 	CELLS_PARAMS(ASSIGN_ALL)
 #undef ASSIGN_ALL
 	if (forest == 255) {
-		syslog(LOG_WARNING, "forest on line %"PRIu64" has undesired value: %"PRIu16, lineno, forest);
+		syslog(LOG_WARNING, "forest on line %"PRIu64" has undesired value: %"
+			PRIu16, lineno, forest);
 	}
 	if (urbanization == 255) {
-		syslog(LOG_WARNING, "urbanization on line %"PRIu64" has undesired value: %"PRIu16, lineno, urbanization);
+		syslog(LOG_WARNING, "urbanization on line %"PRIu64" has undesired "
+			"value: %"PRIu16, lineno, urbanization);
 	}
 	const uint8_t H = forest + 1; /* intentionally overflowing this unsigned integer */
-	const float A = (0 <= urbanization && urbanization <= 100) ? ((float) urbanization / 100) : 0;
+	const float A = (0 <= urbanization && urbanization <= 100)
+		? ((float) urbanization / 100) : 0;
 	const float W =
 		water1 == 0   ? 0    :
 		water1 == 1   ? 1    :
@@ -194,11 +197,10 @@ INSERTER_FUNC(insert_initial_state) {
 	} else {
 		sim->old_state[index] = (state_t){.N = N, .B = B};
 	}
-
 }
 
 /* NOTE: maybe a should pass a file pointer directly for testing purposes */
-static inline void
+static inline uint64_t
 read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, const csv_type *types,
 	void (*insert_data)(simulation_t *, csv_num *, uint64_t index, uint64_t lineno, const char *fname)) {
 	FILE *fp = fopen(fname, "r");
@@ -210,8 +212,9 @@ read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, con
 	size_t linecap = 0;
 	ssize_t linelen = 0;
 	errno = 0;
+	uint64_t index = 0;
 	syslog(LOG_INFO, "reading file: '%s'", fname);
-	for (uint64_t lineno = 1, index = 0;
+	for (uint64_t lineno = 1;
 		(linelen = getline(&row, &linecap, fp)) != -1;
 		lineno++) {
 		/* debug code for skipping coments */
@@ -220,7 +223,8 @@ read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, con
 		}
 		if (!csv_read(row, len, nums, types)) {
 			free(row);
-			syslog(LOG_ERR, "unable ro read cells parameters from file '%s' at line %"PRIu64, fname, lineno);
+			syslog(LOG_ERR, "unable ro read cells parameters from file '%s' at "
+				"line %"PRIu64, fname, lineno);
 			exit(EXIT_FAILURE);
 		}
 		insert_data(sim, nums, index, lineno, fname);
@@ -228,13 +232,16 @@ read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, con
 	}
 	if (errno) {
 		free(row);
-		syslog(LOG_ERR, "error while getting line from '%s': %s", fname, strerror(errno));
+		syslog(LOG_ERR, "error while getting line from '%s': %s", fname,
+			strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 	if (fclose(fp) != 0) {
-		syslog(LOG_WARNING, "unable to close file '%s': %s", fname, strerror(errno));
+		syslog(LOG_WARNING, "unable to close file '%s': %s", fname,
+			strerror(errno));
 	}
 	free(row);
+	return index;
 }
 
 static int out_dir_fd;
@@ -248,7 +255,7 @@ dump(simulation_t *s) {
 	static uint64_t counter = 0;
 	const uint64_t size = 1 << 7;
 	char fnamebuf[size];
-	if (snprintf(fnamebuf, size, "result%03"PRIu64, counter) > size-1) {
+	if ((uint64_t) snprintf(fnamebuf, size, "result%03"PRIu64, counter) > size-1) {
 		/* NOTE: this arbitrary limit in probably to tiny */
 		syslog(LOG_WARNING, "more than 999 dump occurred, this one was skipped");
 		return false;
@@ -256,14 +263,17 @@ dump(simulation_t *s) {
 	counter++;
 	const int fd = openat(out_dir_fd, fnamebuf, O_WRONLY|O_CREAT|O_TRUNC, 0644);
 	if (fd == -1) {
-		syslog(LOG_WARNING, "unable to open file '%s': %s", fnamebuf, strerror(errno));
+		syslog(LOG_WARNING, "unable to open file '%s': %s", fnamebuf,
+			strerror(errno));
 		return false;
 	}
 	FILE *fp = fdopen(fd, "w");
 	if (!fp) {
-		syslog(LOG_WARNING, "unable to convert file descriptor in stream: %s", strerror(errno));
+		syslog(LOG_WARNING, "unable to convert file descriptor in stream: %s",
+			strerror(errno));
 		if (close(fd) == -1) {
-			syslog(LOG_WARNING, "unable to close file descriptor: %s", strerror(errno));
+			syslog(LOG_WARNING, "unable to close file descriptor: %s",
+				strerror(errno));
 		}
 		return false;
 	}
@@ -285,7 +295,8 @@ main(const int argc, const char *argv[]) {
 	openlog(argv[0], LOG_PERROR, 0);
 
 	if (argc != 5) {
-		syslog(LOG_ERR, "wrong number of arguments, expected 4, received %d", argc-1);
+		syslog(LOG_ERR, "wrong number of arguments, expected 4, received %d",
+			argc-1);
 		return EXIT_FAILURE;
 	}
 
@@ -299,7 +310,8 @@ main(const int argc, const char *argv[]) {
 
 		{
 			csv_num nums[GENERAL_PARAMS_NO] = {0};
-			read_data(general_params, &sim, nums, GENERAL_PARAMS_NO, general_params_types, insert_general_params);
+			(void) read_data(general_params, &sim, nums, GENERAL_PARAMS_NO,
+				general_params_types, insert_general_params);
 		}
 
 		const uint64_t area = sim.Wstar * sim.Lstar;
@@ -309,25 +321,40 @@ main(const int argc, const char *argv[]) {
 		sim.gamma = malloc(sizeof (float) * area);
 
 		if (!(sim.old_state && sim.new_state && sim.params && sim.gamma)) {
-			const uint64_t total = (sizeof (state_t) * 2 + sizeof (params_t) + sizeof (float)) * area;
-			syslog(LOG_ERR, "unable to allocate %"PRIu64" bytes of memory: %s", total, strerror(errno));
+			const uint64_t total = (sizeof (state_t) * 2 + sizeof (params_t)
+				+ sizeof (float)) * area;
+			syslog(LOG_ERR, "unable to allocate %"PRIu64" bytes of memory: %s",
+				total, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
 		{
 			csv_num nums[CELLS_PARAMS_NO] = {0};
-			read_data(cells_params, &sim, nums, CELLS_PARAMS_NO, cells_params_types, insert_cells_params);
+			uint64_t res = 0;
+			if ((res = read_data(cells_params, &sim, nums, CELLS_PARAMS_NO,
+				cells_params_types, insert_cells_params)) != area) {
+				syslog(LOG_ERR, "not enough records in file '%s' only %"PRIu64,
+					cells_params, res);
+				return EXIT_FAILURE;
+			}
 		}
 
 		{
 			csv_num nums[INITIAL_STATE_NO] = {0};
-			read_data(initial_state, &sim, nums, INITIAL_STATE_NO, initial_state_types, insert_initial_state);
+			uint64_t res = 0;
+			if ((res = read_data(initial_state, &sim, nums, INITIAL_STATE_NO,
+				initial_state_types, insert_initial_state)) != area) {
+				syslog(LOG_ERR, "not enough records in file '%s' only %"PRIu64,
+					cells_params, res);
+				return EXIT_FAILURE;
+			}
 		}
 
 		/* TODO: test that I can write in out_dir */
 		out_dir_fd = open(out_dir, O_RDONLY|O_DIRECTORY);
 		if (out_dir_fd == -1) {
-			syslog(LOG_ERR, "cannot open directory '%s': %s", out_dir, strerror(errno));
+			syslog(LOG_ERR, "cannot open directory '%s': %s", out_dir,
+				strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -344,7 +371,8 @@ main(const int argc, const char *argv[]) {
 			.sa_flags = SA_RESTART
 		};
 		if (sigaction(SIGINT, &action, NULL) == -1) {
-			syslog(LOG_WARNING, "unable to set %s handler: %s", sys_siglist[SIGINT], strerror(errno));
+			syslog(LOG_WARNING, "unable to set %s handler: %s",
+				sys_siglist[SIGINT], strerror(errno));
 		}
 	}
 
