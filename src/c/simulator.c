@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <syslog.h>
+#include <inttypes.h>
 
 static const int8_t Gamma[8][2] = {
 	{0, 1}, {1, 0}, {1, 1}, {0, -1}, {-1, 0}, {-1, -1}, {1, -1}, {-1, 1}
@@ -103,7 +104,11 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 			}
 		}
 		if ((loop0 % s->s) == 0) {
+			syslog(LOG_INFO, "starting to dump the state of the simulation: %"
+				PRIu64, loop0/s->s);
 			(void) dump(s);
+			syslog(LOG_INFO, "finished to dump the state of the simulation: %"
+				PRIu64, loop0/s->s);
 		}
 		if (should_stop) {
 			syslog(LOG_INFO, "exiting the simulation prematurely due to SIGINT");

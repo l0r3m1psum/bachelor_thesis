@@ -277,7 +277,6 @@ dump(simulation_t *s) {
 		}
 		return false;
 	}
-	syslog(LOG_INFO, "starting to dump the state of the simulation");
 	for (uint64_t i = 0; i < s->Lstar; i++) {
 		for (uint64_t j = 0; j < s->Wstar-1; j++) {
 			const uint64_t ij = i + j*s->Wstar;
@@ -285,7 +284,6 @@ dump(simulation_t *s) {
 			fprintf(fp, "%f,%d\n", s->new_state[ij].B, s->new_state[ij].N);
 		}
 	}
-	syslog(LOG_INFO, "finished to dump the state of the simulation");
 	fclose(fp);
 	return true;
 }
