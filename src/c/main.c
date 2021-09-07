@@ -37,10 +37,6 @@
 #include <unistd.h> /* close */
 #include <fcntl.h> /* open, openat */
 
-/* Here are defined a series of tables used by X-macros with the following form:
- * type, name, csv_type, csv_num, fmt, ord. TODO: finish documentation
- */
-
 #define GENERAL_PARAMS(X) \
 X(uint64_t, Wstar, CSV_INT64,  integ, PRIu64, 0) \
 X(uint64_t, Lstar, CSV_INT64,  integ, PRIu64, 1) \
@@ -199,7 +195,7 @@ INSERTER_FUNC(insert_initial_state) {
 	}
 }
 
-/* NOTE: maybe a should pass a file pointer directly for testing purposes */
+/* NOTE: maybe I should pass a FILE pointer directly for testing purposes */
 static inline uint64_t
 read_data(const char *fname, simulation_t *sim, csv_num *nums, uint64_t len, const csv_type *types,
 	void (*insert_data)(simulation_t *, csv_num *, uint64_t index, uint64_t lineno, const char *fname)) {
