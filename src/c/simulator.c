@@ -119,7 +119,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 				assert(s->new_state[ij].B <= s->old_state[ij].B);
 			}
 		}
-		if ((loop0 % s->s) == 0) {
+		if ((loop0+1) % s->s == 0) {
 			syslog(LOG_INFO, "starting to dump the state of the simulation: %"
 				PRIu64, loop0/s->s);
 			(void) dump(s);
