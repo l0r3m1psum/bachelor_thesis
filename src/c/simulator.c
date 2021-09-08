@@ -55,6 +55,12 @@ sim_index(uint64_t i, uint64_t j, simulation_t *s) {
 /* NOTE: Ottimizzazione: tutti i parametri che non dipendono da old_state o da
  * funzioni casuali possono essere precalcolate. Quindi d, fw e fP (a meno del
  * parametro di perturbazione) possono essere precalcolate.
+ *
+ * NOTE: Ottimizzatione: Considerare "log" asincrono per salvare lo stato del
+ * simulatore. Questo potrebbe essere realizzato tramite un ring buffer nel
+ * quale il simulatore produce una sequenza di stati e il logger, con i suoi
+ * thread, li consuma (i.e. li salva sul disco). Qui l'hypertreading dovrebbe
+ * aiutare siccome logger e simulatore dovrebbero usare parti diverse della CPU.
  */
 /* @param s all the simulation data
  * @param dump used to dump the state of the simulation, returns null if
