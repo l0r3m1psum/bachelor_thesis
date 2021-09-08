@@ -9,12 +9,12 @@ static const int8_t Gamma[8][2] = {
 }; /* All offsets around a cell */
 static_assert(sizeof Gamma == 16, "bad size");
 
-static bool should_stop = false;
+static bool should_stop_early = false;
 
 void
 simulation_SIGINT_handler(int sig) {
 	(void) sig;
-	should_stop = true;
+	should_stop_early = true;
 }
 
 inline static float
@@ -28,9 +28,12 @@ maxf(float a, float b) {
  * a are taken from the errata of "Tables of Linear Congruential Generators of
  * Different Sizes and Good Lattice Structure", Mathematics of Computation, 68,
  * 225 (1999), 249–260.
+ *
+ * @param xn previous seed
  */
 inline static float
 rngf(uint32_t *xn) {
+	assert(xn);
 	const uint32_t m = 1u << 31, a = 37769685, c = 12345, max = m - 1;
 	*xn = (a * (*xn) + c) % m;
 	const float u1 = (float) (*xn)/max;
@@ -40,21 +43,30 @@ rngf(uint32_t *xn) {
 	return res;
 }
 
-/* NOTE: non so se il simulatore ha un bug o io non so scegliere bene i
- * parametri.
- *
- * NOTE: Ottimizzazione: tutti i parametri che non dipendono da old_state o da
+/* Converts a coordinate (i, j) in a one dimensional index
+ */
+uint64_t
+sim_index(uint64_t i, uint64_t j, simulation_t *s) {
+	assert(s);
+	const uint64_t res = i + j*s->Wstar;
+	return res;
+}
+
+/* NOTE: Ottimizzazione: tutti i parametri che non dipendono da old_state o da
  * funzioni casuali possono essere precalcolate. Quindi d, fw e fP (a meno del
  * parametro di perturbazione) possono essere precalcolate.
+ */
+/* @param s all the simulation data
+ * @param dump used to dump the state of the simulation, returns null if
+ * something goes wrong.
  */
 void
 simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	assert(s && dump);
 	assert(s->old_state && s->new_state && s->params);
-	assert(s->tau > 0 && s->theta > 0 && s->L > 0);
+	assert(s->tau > 0 && s->L > 0);
 	assert(s->Wstar >= 3 && s->Lstar >= 3);
 	assert(s->theta >= 0 && s->theta <= 1);
-	/* TODO: completare tutti i check */
 
 	syslog(LOG_INFO, "starting simulation");
 	uint32_t rng_state = s->seed;
@@ -62,7 +74,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		/* Skipping the border */
 		for (uint64_t i = 1; i < s->Lstar - 1; i++) {
 			for (uint64_t j = 1; j < s->Wstar - 1; j++) {
-				const uint64_t ij = i + j*s->Wstar;
+				const uint64_t ij = sim_index(i, j, s);
 				const float beta = 60*(1 + s->params[ij].F/10); /* burning rate */
 				const float old_B = s->old_state[ij].B;
 				assert(old_B >= 0);
@@ -75,9 +87,9 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					const int8_t e2 = Gamma[loop1][1];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-conversion"
-					const uint64_t ie1je2 = (i+e1) + (j+e2)*s->Wstar;
+					const uint64_t ie1je2 = sim_index(i+e1, j+e2, s);
 #pragma clang diagnostic pop
-					// Calculating probability
+					/* Calculating probability */
 					const float C = sinf(pi*s->old_state[ie1je2].B/s->params[ie1je2].gamma);
 					const float d = (1 - 0.5f*fabsf((float) e1*e2));
 					const float fw = expf(
@@ -108,7 +120,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 			syslog(LOG_INFO, "finished to dump the state of the simulation: %"
 				PRIu64, loop0/s->s);
 		}
-		if (should_stop) {
+		if (should_stop_early) {
 			syslog(LOG_INFO, "exiting the simulation prematurely due to SIGINT");
 			return;
 		}

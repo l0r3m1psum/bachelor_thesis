@@ -47,7 +47,8 @@ static_assert(sizeof (simulation_t) == 88, "bad size");
 
 #define pi 3.14159265359f
 
-/* TODO: add inline function to get index */
+uint64_t
+sim_index(uint64_t i, uint64_t j, simulation_t *s);
 
 void
 simulation_run(simulation_t *s, bool (*dump)(simulation_t *));

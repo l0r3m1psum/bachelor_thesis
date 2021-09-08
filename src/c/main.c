@@ -272,7 +272,7 @@ dump(simulation_t *s) {
 	}
 	for (uint64_t i = 0; i < s->Lstar; i++) {
 		for (uint64_t j = 0; j < s->Wstar-1; j++) {
-			const uint64_t ij = i + j*s->Wstar;
+			const uint64_t ij = sim_index(i, j, s);
 			assert(s->new_state[ij].B >= 0);
 			fprintf(fp, "%f,%d\n", s->new_state[ij].B, s->new_state[ij].N);
 		}
