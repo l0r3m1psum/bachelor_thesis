@@ -36,9 +36,9 @@ rngf(uint32_t *xn) {
 	assert(xn);
 	const uint32_t m = 1u << 31, a = 37769685, c = 12345, max = m - 1;
 	*xn = (a * (*xn) + c) % m;
-	const float u1 = (float) (*xn)/max;
+	const float u1 = (float) (*xn)/(float) max;
 	*xn = (a * (*xn) + c) % m;
-	const float u2 = (float) (*xn)/max;
+	const float u2 = (float) (*xn)/(float) max;
 	const float res = sqrtf(-2.0f*logf(u1))*cosf(2*pi*u2)/2.5f;
 	return res;
 }
