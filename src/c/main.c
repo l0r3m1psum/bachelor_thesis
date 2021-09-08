@@ -1,7 +1,10 @@
+#ifdef __linux__
+	#define _GNU_SOURCE
+	#define _DEFAULT_SOURCE
+#endif
+
 #include "csv.h"
 #include "simulator.h"
-
-#define _GNU_SOURCE
 
 #include <errno.h>
 #include <inttypes.h>
