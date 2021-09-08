@@ -1,6 +1,9 @@
 #include "csv.h"
 #include "simulator.h"
 
+#define _POSIX_C_SOURCE 200809L
+#define _DEFAULT_SOURCE
+
 #include <errno.h>
 #include <inttypes.h>
 #include <signal.h>
