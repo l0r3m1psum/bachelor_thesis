@@ -13,7 +13,7 @@ static const char field_sep = ',';
  */
 static inline bool
 try_insert_num(const char *str, csv_num *num, csv_type type) {
-	assert(str && nums);
+	assert(str && num);
 	char *endptr = NULL;
 	if (type == CSV_INT64) {
 		num->integ = strtoll(str, &endptr, 10);
