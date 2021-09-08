@@ -1,29 +1,3 @@
-/* Considerare "log" asincrono per salvare lo stato del simulatore. Questo
- * potrebbe essere realizzato tramite un ring buffer nel quale il simulatore
- * produce una sequenza di stati e il logger, con i suoi thread, li consuma
- * (i.e. li salva sul disco). Qui l'hypertreading dovrebbe aiutare siccome
- * logger e simulatore dovrebbero usare parti diverse della CPU.
- *
- * Fase di inizializzazione
- *   - Leggere il csv dei parametri delle celle, validarlo, emettendo
- *     eventuali warning o errori e trasformarli in quelli necessari alla
- *     simulazione;
- *   - leggere il csv dello stato iniziale e validarlo;
- *   - leggere il csv dei parametri globali della simulazione e e validarlo;
- *   - creare eventuali thread pool;
- *   - allocare tutta la memoria necessaria al simulatore.
- *
- * Fase di esecuzione
- *   - Durante questa fase, dopo aver lanciato il simulatore, mi devo solo
- *     preoccupare di gestire il segnale per la terminazione "gentile" (i.e.
- *     il programma deve finire di scrivere l'ultimo stato per intero)
- *
- * Fase di spegnimento
- *  - Nulla di particolare è necessario in questa fase, se non liberare la
- *    memoria, ma siccome il sistema operativo lo farà comunque alla fine
- *    per noi non è realmente necassario.
- */
-
 #include "csv.h"
 #include "simulator.h"
 
@@ -92,10 +66,8 @@ X(bool, N, CSV_INT64, integ, PRIu64, 1)
 #define CHECK_ALL(WHICH, fname, lineno, type, name, csv_type, csv_num, fmt, ord) \
 if (CHECK_##WHICH##ord(nums[ord].csv_num)) { \
 	syslog(LOG_ERR, "invalid "#name" value in file '%s' at line %"PRIu64, fname, lineno); \
-	exit(EXIT_FAILURE); \
+	return false; \
 }
-
-/* NOTE: maybe ASSIGN_ALL can be abstracted */
 
 #define GENERAL_PARAMS_NO 11
 #define CELLS_PARAMS_NO 8
@@ -113,32 +85,41 @@ if (CHECK_##WHICH##ord(nums[ord].csv_num)) { \
 	};
 #undef GET_CSV_TYPE
 
-#define INSERTER_FUNC(name) \
-name(simulation_t *sim, csv_num *nums, uint64_t index, uint64_t lineno, const char *fname)
+/* Insert the nums record in the sim struct, index is used to chose where to put
+ * the record in sim, lineno and fname are for error reporting. Before insertion
+ * check are made to validate the index and the nums. The length of nums in
+ * assumed to be known by the function. Also lineno should start at 1.
+ * @return true if insertion went ok else false
+ */
+#define INSERTER_FUNC(name) static bool \
+name(simulation_t *sim, const csv_num *nums, uint64_t index, uint64_t lineno, const char *fname)
 
-static void
+#define INSERTER_ASSERT assert(sim); assert(nums); assert(fname); assert(lineno);
+
 INSERTER_FUNC(insert_general_params) {
+	INSERTER_ASSERT
 	if (index != 0) {
 		syslog(LOG_ERR, "too many rows in file '%s'", fname);
-		exit(EXIT_FAILURE);
+		return false;
 	}
 #define CHECK(type, name, csv_type, csv_num, fmt, ord) CHECK_ALL(GENERAL_PARAMS, fname, lineno, type, name, csv_type, csv_num, fmt, ord)
 	GENERAL_PARAMS(CHECK)
 #undef CHECK
 	if (nums[3].integ /*s*/ > nums[2].integ /*h*/) {
 		syslog(LOG_ERR, "s cannot be greater then h");
-		exit(EXIT_FAILURE);
+		return false;
 	}
 #define ASSIGN_ALL(type, name, csv_type, csv_num, fmt, ord) sim->name = (type) nums[ord].csv_num;
 	GENERAL_PARAMS(ASSIGN_ALL)
 #undef ASSIGN_ALL
+	return true;
 }
 
-static void
 INSERTER_FUNC(insert_cells_params) {
+	INSERTER_ASSERT
 	if (index >= sim->Wstar * sim->Lstar) {
 		syslog(LOG_ERR, "too many rows in file '%s'", fname);
-		exit(EXIT_FAILURE);
+		return false;
 	}
 #define CHECK(type, name, csv_type, csv_num, fmt, ord) CHECK_ALL(CELLS_PARAMS, fname, lineno, type, name, csv_type, csv_num, fmt, ord)
 	CELLS_PARAMS(CHECK)
@@ -171,13 +152,14 @@ INSERTER_FUNC(insert_cells_params) {
 		.S = S, .P = altimetry, .F = wind_speed, .D = wind_dir,
 		.gamma = sim->L*1*S, /* NOTE: where 1 is alpha i.e. our patch to the model */
 	};
+	return true;
 }
 
-static void
 INSERTER_FUNC(insert_initial_state) {
+	INSERTER_ASSERT
 	if (index >= sim->Wstar * sim->Lstar) {
 		syslog(LOG_ERR, "too many rows in file '%s'", fname);
-		exit(EXIT_FAILURE);
+		return false;
 	}
 #define CHECK(type, name, csv_type, csv_num, fmt, ord) CHECK_ALL(INITIAL_STATE, fname, lineno, type, name, csv_type, csv_num, fmt, ord)
 	INITIAL_STATE(CHECK)
@@ -194,16 +176,27 @@ INSERTER_FUNC(insert_initial_state) {
 	} else {
 		sim->old_state[index] = (state_t){.N = N, .B = B};
 	}
+	return true;
 }
 
 /* NOTE: maybe I should pass a FILE pointer directly for testing purposes */
+/* @param fname null terminated string
+ * @param buf pointer to a dinamically allocated buffer (not owned)
+ * @param sim simulation data
+ * @param nums array to store temporarely converted numbers
+ * @param len length of nums and types
+ * @params types instructions to read numbers
+ * @params insert_data callback to insert data in sim return false is something goes wrong
+ * @return the number of inserted records
+ */
 static inline uint64_t
 read_data(const char *fname, char *buf, simulation_t *sim, csv_num *nums, uint64_t len, const csv_type *types,
-	void (*insert_data)(simulation_t *, csv_num *, uint64_t index, uint64_t lineno, const char *fname)) {
+	bool (*insert_data)(simulation_t *, const csv_num *, uint64_t index, uint64_t lineno, const char *fname)) {
+	assert(fname && sim && nums && len && types && insert_data);
 	FILE *fp = fopen(fname, "r");
 	if (!fp) {
 		syslog(LOG_ERR, "unable to open '%s': %s", fname, strerror(errno));
-		exit(EXIT_FAILURE);
+		return 0; /* 0 is always an error because it doesn't make sense to read 0 records */
 	}
 	size_t linecap = 0;
 	ssize_t linelen = 0;
@@ -221,16 +214,20 @@ read_data(const char *fname, char *buf, simulation_t *sim, csv_num *nums, uint64
 			free(buf);
 			syslog(LOG_ERR, "unable ro read cells parameters from file '%s' at "
 				"line %"PRIu64, fname, lineno);
-			exit(EXIT_FAILURE);
+			return index;
 		}
-		insert_data(sim, nums, index, lineno, fname);
+		if (!insert_data(sim, nums, index, lineno, fname)) {
+			syslog(LOG_ERR, "unable to insert_data data from file '%s' on line "
+				"%"PRIu64, fname, lineno);
+			return index;
+		}
 		index++;
 	}
 	if (errno) {
 		free(buf);
 		syslog(LOG_ERR, "error while getting line from '%s': %s", fname,
 			strerror(errno));
-		exit(EXIT_FAILURE);
+		return index;
 	}
 	if (fclose(fp) != 0) {
 		syslog(LOG_WARNING, "unable to close file '%s': %s", fname,
@@ -281,6 +278,13 @@ dump(simulation_t *s) {
 	return true;
 }
 
+static inline void
+free_all_sim(simulation_t *s) {
+	free(s->old_state);
+	free(s->new_state);
+	free(s->params);
+}
+
 int
 main(const int argc, const char *argv[]) {
 	openlog(argv[0], LOG_PERROR, 0);
@@ -302,8 +306,13 @@ main(const int argc, const char *argv[]) {
 
 		{
 			csv_num nums[GENERAL_PARAMS_NO] = {0};
-			(void) read_data(general_params, row, &sim, nums, GENERAL_PARAMS_NO,
-				general_params_types, insert_general_params);
+			if (read_data(general_params, row, &sim, nums, GENERAL_PARAMS_NO,
+				general_params_types, insert_general_params) != 1) {
+				syslog(LOG_ERR, "unable to read the general parameters from "
+					"file '%s'", general_params);
+				free(row);
+				return EXIT_FAILURE;
+			}
 		}
 
 		const uint64_t area = sim.Wstar * sim.Lstar;
@@ -316,6 +325,8 @@ main(const int argc, const char *argv[]) {
 				* area;
 			syslog(LOG_ERR, "unable to allocate %"PRIu64" bytes of memory: %s",
 				total, strerror(errno));
+			free_all_sim(&sim);
+			free(row);
 			return EXIT_FAILURE;
 		}
 
@@ -326,6 +337,8 @@ main(const int argc, const char *argv[]) {
 				cells_params_types, insert_cells_params)) != area) {
 				syslog(LOG_ERR, "not enough records in file '%s' only %"PRIu64,
 					cells_params, res);
+				free_all_sim(&sim);
+				free(row);
 				return EXIT_FAILURE;
 			}
 		}
@@ -337,6 +350,8 @@ main(const int argc, const char *argv[]) {
 				initial_state_types, insert_initial_state)) != area) {
 				syslog(LOG_ERR, "not enough records in file '%s' only %"PRIu64,
 					cells_params, res);
+				free_all_sim(&sim);
+				free(row);
 				return EXIT_FAILURE;
 			}
 		}
@@ -348,7 +363,8 @@ main(const int argc, const char *argv[]) {
 		if (out_dir_fd == -1) {
 			syslog(LOG_ERR, "cannot open directory '%s': %s", out_dir,
 				strerror(errno));
-			exit(EXIT_FAILURE);
+			free_all_sim(&sim);
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -371,9 +387,7 @@ main(const int argc, const char *argv[]) {
 
 	simulation_run(&sim, dump);
 
-	free(sim.old_state);
-	free(sim.new_state);
-	free(sim.params);
+	free_all_sim(&sim);
 
 	closelog();
 
