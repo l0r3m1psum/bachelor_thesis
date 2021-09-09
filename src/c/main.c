@@ -1,6 +1,6 @@
-#ifdef __linux__
-	#define _GNU_SOURCE
-	#define _DEFAULT_SOURCE
+#define _POSIX_C_SOURCE 200909L
+#ifdef __APPLE__
+	#define _DARWIN_C_SOURCE /* O_DIRECTORY */
 #endif
 
 #include "csv.h"
