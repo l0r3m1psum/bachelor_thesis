@@ -85,6 +85,7 @@ print_cache_info(cache_info_t info) {
 	printf("Number of Sets %" PRIu32 "\n", info.sets);
 }
 
+#ifdef TEST
 int
 main(void) {
 	printf("%s\n", get_cpu_name().buf);
@@ -108,3 +109,4 @@ main(void) {
 
 	return 0;
 }
+#endif
