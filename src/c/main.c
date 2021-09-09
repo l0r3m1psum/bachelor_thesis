@@ -11,7 +11,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> /* strerror */
+#include <string.h> /* strerror, strsignal */
 #include <syslog.h>
 #include <unistd.h> /* close */
 #include <fcntl.h> /* open, openat */
@@ -386,7 +386,7 @@ main(const int argc, const char *argv[]) {
 		};
 		if (sigaction(SIGINT, &action, NULL) == -1) {
 			syslog(LOG_WARNING, "unable to set %s handler: %s",
-				sys_siglist[SIGINT], strerror(errno));
+				strsignal(SIGINT), strerror(errno));
 		}
 	}
 
