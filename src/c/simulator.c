@@ -94,6 +94,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					const int8_t e2 = Gamma[loop1][1];
 					const uint64_t ie1je2 = sim_index(i+e1, j+e2, s);
 					const params_t *adj_param = s->params + ie1je2;
+					const state_t *adj_old_state = s->old_state +ie1je2;
 					/* Calculating probability */
 					const float d = (1 - 0.5f*fabsf((float) e1*e2));
 					const float fw = expf(
@@ -104,10 +105,11 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					const float fP = expf(
 						s->k2*atanf((cur_param->P - adj_param->P)/s->L)
 					) + rngf(&rng_state);
-					const float C = sinf(pi*s->old_state[ie1je2].B/adj_param->gamma);
+					const float C = sinf(pi*adj_old_state->B/adj_param->gamma);
 					const float p = s->k0 * cur_param->S * d * fw * fP * C;
 
-					V |= (p * old_N > s->theta);
+					/* this is Q */
+					V |= (p * adj_old_state->N > s->theta);
 				}
 
 				/* NOTE: in this eqation u has been purposely removed */
