@@ -81,7 +81,8 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		for (uint64_t i = 1; i < s->Lstar - 1; i++) {
 			for (uint64_t j = 1; j < s->Wstar - 1; j++) {
 				const uint64_t ij = sim_index(i, j, s);
-				const float beta = 60*(1 + s->params[ij].F/10); /* burning rate */
+				const params_t *cur_param = s->params + ij;
+				const float beta = 60*(1 + cur_param->F/10); /* burning rate */
 				const float old_B = s->old_state[ij].B;
 				assert(old_B >= 0);
 				const bool old_N = s->old_state[ij].N;
@@ -91,24 +92,22 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 				for (uint64_t loop1 = 0; loop1 < n_dir && !V; loop1++) {
 					const int8_t e1 = Gamma[loop1][0];
 					const int8_t e2 = Gamma[loop1][1];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-conversion"
 					const uint64_t ie1je2 = sim_index(i+e1, j+e2, s);
-#pragma clang diagnostic pop
+					const params_t *adj_param = s->params + ie1je2;
 					/* Calculating probability */
-					const float C = sinf(pi*s->old_state[ie1je2].B/s->params[ie1je2].gamma);
 					const float d = (1 - 0.5f*fabsf((float) e1*e2));
 					const float fw = expf(
-						s->k1*s->params[ie1je2].F
-						*(e1*cosf(s->params[ie1je2].D) + e2*sinf(s->params[ie1je2].D))
+						s->k1*adj_param->F
+						*(e1*cosf(adj_param->D) + e2*sinf(adj_param->D))
 						/sqrtf(e1*e1 + e2*e2)
 					) + rngf(&rng_state);
 					const float fP = expf(
-						s->k2*atanf((s->params[ij].P-s->params[ie1je2].P)/s->L)
+						s->k2*atanf((cur_param->P - adj_param->P)/s->L)
 					) + rngf(&rng_state);
-					const float p = s->k0 * s->params[ij].S * C * d * fw * fP;
+					const float C = sinf(pi*s->old_state[ie1je2].B/adj_param->gamma);
+					const float p = s->k0 * cur_param->S * d * fw * fP * C;
 
-					V = V || (p * s->old_state[ij].N > s->theta);
+					V |= (p * old_N > s->theta);
 				}
 
 				/* NOTE: in this eqation u has been purposely removed */
