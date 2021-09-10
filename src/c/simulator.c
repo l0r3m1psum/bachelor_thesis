@@ -98,6 +98,9 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 #pragma clang diagnostic pop
 					const params_t *adj_param = s->params + ie1je2;
 					const state_t *adj_old_state = s->old_state +ie1je2;
+					if (!adj_old_state->N) {
+						continue;
+					}
 					/* Calculating probability */
 					const float C = sinf(pi*adj_old_state->B/adj_param->gamma);
 					const float d = (1 - 0.5f*fabsf((float) e1*e2));
@@ -111,8 +114,10 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					) + rngf(&rng_state);
 					const float p = s->k0 * cur_param->S * d * fw * fP * C;
 
-					/* this is Q */
-					V |= (p * adj_old_state->N > s->theta);
+					/* this is Q, N has been purposely removed because it's
+					 * checked a priori
+					 */
+					V |= (p > s->theta);
 				}
 
 				/* NOTE: in this eqation u has been purposely removed */
