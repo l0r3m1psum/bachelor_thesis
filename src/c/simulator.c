@@ -4,8 +4,11 @@
 #include <syslog.h>
 #include <inttypes.h>
 
+/* NOTE: the order of lookup matters for caching reason */
 static const int8_t Gamma[8][2] = {
-	{0, 1}, {1, 0}, {1, 1}, {0, -1}, {-1, 0}, {-1, -1}, {1, -1}, {-1, 1}
+	{-1, 1},  {0, 1},  {1, 1},
+	{-1, 0},           {1, 0},
+	{-1, -1}, {0, -1}, {1, -1},
 }; /* All offsets around a cell */
 static_assert(sizeof Gamma == 16, "bad size");
 
