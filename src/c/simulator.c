@@ -99,6 +99,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					const params_t *adj_param = s->params + ie1je2;
 					const state_t *adj_old_state = s->old_state +ie1je2;
 					/* Calculating probability */
+					const float C = sinf(pi*adj_old_state->B/adj_param->gamma);
 					const float d = (1 - 0.5f*fabsf((float) e1*e2));
 					const float fw = expf(
 						s->k1*adj_param->F
@@ -108,7 +109,6 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					const float fP = expf(
 						s->k2*atanf((cur_param->P - adj_param->P)/s->L)
 					) + rngf(&rng_state);
-					const float C = sinf(pi*adj_old_state->B/adj_param->gamma);
 					const float p = s->k0 * cur_param->S * d * fw * fP * C;
 
 					/* this is Q */
