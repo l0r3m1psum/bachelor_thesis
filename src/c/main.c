@@ -152,6 +152,7 @@ INSERTER_FUNC(insert_cells_params) {
 		water1 == 253 ? 1    :
 		/*water1 == 255*/ 1;
 	const float S = H*(1-A)*(1-W);
+	assert(S >= 0 && S <= 3);
 	/* constructing the matrix in row-major form */
 	sim->params[index] = (params_t){
 		.S = S, .P = altimetry, .F = wind_speed, .D = wind_dir,
