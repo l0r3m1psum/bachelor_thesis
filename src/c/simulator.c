@@ -3,6 +3,7 @@
 #include <math.h>
 #include <syslog.h>
 #include <inttypes.h>
+#include <time.h> /* clock */
 
 /* NOTE: the order of lookup matters for caching reason */
 static const int8_t Gamma[8][2] = {
@@ -76,6 +77,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	assert(s->tau > 0 && s->L > 0);
 	assert(s->Wstar >= 3 && s->Lstar >= 3);
 	assert(s->theta >= 0 && s->theta <= 1);
+	const clock_t start = clock();
 
 	syslog(LOG_INFO, "starting simulation");
 	uint32_t rng_state = s->seed;
@@ -132,11 +134,13 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 			}
 		}
 		if ((loop0+1) % s->s == 0) {
-			syslog(LOG_INFO, "starting to dump the state of the simulation: %"
-				PRIu64, loop0/s->s);
+			syslog(LOG_INFO, "starting to dump the state #%"PRIu64" of the "
+				"simulation, %fs after its start",
+				loop0/s->s, 1.0f*(clock() - start)/CLOCKS_PER_SEC);
 			(void) dump(s);
-			syslog(LOG_INFO, "finished to dump the state of the simulation: %"
-				PRIu64, loop0/s->s);
+			syslog(LOG_INFO, "finished to dump the state #%"PRIu64" of the "
+				"simulation, %fs after its start",
+				loop0/s->s, 1.0f*(clock() - start)/CLOCKS_PER_SEC);
 		}
 		if (should_stop_early) {
 			syslog(LOG_INFO, "exiting the simulation prematurely due to SIGINT");
