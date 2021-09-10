@@ -187,7 +187,8 @@ INSERTER_FUNC(insert_initial_state) {
 
 /* NOTE: maybe I should pass a FILE pointer directly for testing purposes */
 /* @param fname null terminated string
- * @param buf pointer to a dinamically allocated buffer (not owned)
+ * @param buf pointer to ponter to a dinamically allocated buffer (not owned)
+ * @param linecap pointer to the size of the buffer pointed by buf;
  * @param sim simulation data
  * @param nums array to store temporarely converted numbers
  * @param len length of nums and types
@@ -196,7 +197,7 @@ INSERTER_FUNC(insert_initial_state) {
  * @return the number of inserted records
  */
 static inline uint64_t
-read_data(const char *fname, char *buf, simulation_t *sim, csv_num *nums, uint64_t len, const csv_type *types,
+read_data(const char *fname, char **buf, size_t *linecap, simulation_t *sim, csv_num *nums, uint64_t len, const csv_type *types,
 	bool (*insert_data)(simulation_t *, const csv_num *, uint64_t index, uint64_t lineno, const char *fname)) {
 	assert(fname && sim && nums && len && types && insert_data);
 	FILE *fp = fopen(fname, "r");
@@ -204,20 +205,19 @@ read_data(const char *fname, char *buf, simulation_t *sim, csv_num *nums, uint64
 		syslog(LOG_ERR, "unable to open '%s': %s", fname, strerror(errno));
 		return 0; /* 0 is always an error because it doesn't make sense to read 0 records */
 	}
-	size_t linecap = 0;
 	ssize_t linelen = 0;
 	errno = 0;
 	uint64_t index = 0;
 	syslog(LOG_INFO, "reading file: '%s'", fname);
 	for (uint64_t lineno = 1;
-		(linelen = getline(&buf, &linecap, fp)) != -1;
+		(linelen = getline(buf, linecap, fp)) != -1;
 		lineno++) {
 		/* debug code for skipping coments */
-		if (buf[0] == '#') {
+		if (*buf[0] == '#') {
 			continue;
 		}
-		if (!csv_read(buf, len, nums, types)) {
-			free(buf);
+		if (!csv_read(*buf, len, nums, types)) {
+			free(*buf);
 			syslog(LOG_ERR, "unable ro read cells parameters from file '%s' at "
 				"line %"PRIu64, fname, lineno);
 			return index;
@@ -230,7 +230,7 @@ read_data(const char *fname, char *buf, simulation_t *sim, csv_num *nums, uint64
 		index++;
 	}
 	if (errno) {
-		free(buf);
+		free(*buf);
 		syslog(LOG_ERR, "error while getting line from '%s': %s", fname,
 			strerror(errno));
 		return index;
@@ -312,10 +312,11 @@ main(const int argc, const char *argv[]) {
 		const char * const restrict initial_state = argv[3];
 		const char * const restrict out_dir = argv[4];
 		char *row = NULL;
+		size_t linecap = 0;
 
 		{
 			csv_num nums[GENERAL_PARAMS_NO] = {0};
-			if (read_data(general_params, row, &sim, nums, GENERAL_PARAMS_NO,
+			if (read_data(general_params, &row, &linecap, &sim, nums, GENERAL_PARAMS_NO,
 				general_params_types, insert_general_params) != 1) {
 				syslog(LOG_ERR, "unable to read the general parameters from "
 					"file '%s'", general_params);
@@ -342,7 +343,7 @@ main(const int argc, const char *argv[]) {
 		{
 			csv_num nums[CELLS_PARAMS_NO] = {0};
 			uint64_t res = 0;
-			if ((res = read_data(cells_params, row, &sim, nums, CELLS_PARAMS_NO,
+			if ((res = read_data(cells_params, &row, &linecap, &sim, nums, CELLS_PARAMS_NO,
 				cells_params_types, insert_cells_params)) != area) {
 				syslog(LOG_ERR, "not enough records in file '%s' only %"PRIu64,
 					cells_params, res);
@@ -355,7 +356,7 @@ main(const int argc, const char *argv[]) {
 		{
 			csv_num nums[INITIAL_STATE_NO] = {0};
 			uint64_t res = 0;
-			if ((res = read_data(initial_state, row, &sim, nums, INITIAL_STATE_NO,
+			if ((res = read_data(initial_state, &row, &linecap, &sim, nums, INITIAL_STATE_NO,
 				initial_state_types, insert_initial_state)) != area) {
 				syslog(LOG_ERR, "not enough records in file '%s' only %"PRIu64,
 					cells_params, res);
