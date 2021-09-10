@@ -272,6 +272,9 @@ dump(simulation_t *s) {
 		}
 		return false;
 	}
+	if (setvbuf(fp, NULL, _IOFBF, 0) == EOF) {
+		syslog(LOG_WARNING, "cannot put set stream for file '%s' to fully buffered", fnamebuf);
+	}
 	for (uint64_t i = 0; i < s->Lstar; i++) {
 		for (uint64_t j = 0; j < s->Wstar-1; j++) {
 			const uint64_t ij = sim_index(i, j, s);
