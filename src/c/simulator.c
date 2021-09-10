@@ -83,6 +83,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	uint32_t rng_state = s->seed;
 	for (uint64_t loop0 = 0; loop0 < s->h; loop0++) {
 		/* Skipping the border */
+		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma)
 		for (uint64_t i = 1; i < s->Lstar - 1; i++) {
 			for (uint64_t j = 1; j < s->Wstar - 1; j++) {
 				const uint64_t ij = sim_index(i, j, s);
