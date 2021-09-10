@@ -179,3 +179,9 @@
   * [DEFER and OBSTRUCT macros](https://stackoverflow.com/questions/29962560/understanding-defer-and-obstruct-macros)
   * [delay macro expansion](https://stackoverflow.com/questions/6671344/delaying-macro-expansion)
   * [comma in macro](https://stackoverflow.com/questions/13842468/comma-in-c-c-macro)
+
+## OpenMP
+
+  * [part 1](https://www.youtube.com/watch?v=pRtTIW9-Nr0)
+  * [part 2](https://www.youtube.com/watch?v=LRsQHDAqPHA)
+  * [part 3](https://www.youtube.com/watch?v=dK4PITrQtjY)
