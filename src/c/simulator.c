@@ -107,7 +107,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					const float fw = expf(
 						s->k1*adj_param->F
 						*(e1*cosf(adj_param->D) + e2*sinf(adj_param->D))
-						/sqrtf(e1*e1 + e2*e2)
+						/sqrtf((float) (e1*e1 + e2*e2))
 					) + rngf(&rng_state);
 					const float fP = expf(
 						s->k2*atanf((cur_param->P - adj_param->P)/s->L)
