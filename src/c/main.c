@@ -141,7 +141,7 @@ INSERTER_FUNC(insert_cells_params) {
 			"value: %"PRIu16, lineno, urbanization);
 	}
 	const uint8_t H = forest + 1; /* intentionally overflowing this unsigned integer */
-	const float A = (0 <= urbanization && urbanization <= 100)
+	const float A = (urbanization <= 100)
 		? ((float) urbanization / 100) : 0;
 	const float W =
 		water1 == 0   ? 0    :
