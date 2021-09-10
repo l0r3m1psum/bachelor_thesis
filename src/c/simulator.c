@@ -108,7 +108,8 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					) + rngf(&rng_state);
 					const float p = s->k0 * s->params[ij].S * C * d * fw * fP;
 
-					V = V || (p * s->old_state[ij].N > s->theta);
+					/* this is Q */
+					V = V || (p * s->old_state[ie1je2].N > s->theta);
 				}
 
 				/* NOTE: in this eqation u has been purposely removed */
