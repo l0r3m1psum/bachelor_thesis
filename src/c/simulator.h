@@ -5,28 +5,28 @@
 #include <stdint.h>
 #include <assert.h>
 
-struct {
+typedef struct {
 	float B; /* fuel quantity */
 	bool N; /* fire presence */
 	/* 24 bit padding */
-} typedef state_t;
+} state_t;
 static_assert(sizeof (state_t) == 8, "bad size");
 
 /* This struct contains only the parameter used during the simualtion, i.e.
  * already converted from the "row" form and "compressed" in the calculated
  * parameter S.
  */
-struct {
+typedef struct {
 	uint16_t P; /* altimetry */
 	/* 16bit padding */
 	float S; /* inflammability percentage */
 	float F; /* wind speed */
 	float D; /* wind direction */
 	float gamma; /* initial fuel */
-} typedef params_t;
+} params_t;
 static_assert(sizeof (params_t) == 20, "bad size");
 
-struct {
+typedef struct {
 	state_t * restrict old_state;
 	state_t * restrict new_state;
 	params_t *params;
@@ -42,7 +42,7 @@ struct {
 	float k1; /* wind optimization */
 	float k2; /* slope optimization */
 	float L; /* length of the sides of the cells in meters */
-} typedef simulation_t;
+} simulation_t;
 static_assert(sizeof (simulation_t) == 88, "bad size");
 
 #define pi 3.14159265359f

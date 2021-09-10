@@ -7,15 +7,15 @@
 
 /* NOTE: maybe I should add an "_t" to csv_type and csv_num */
 
-enum {
+typedef enum {
 	CSV_INT64,
 	CSV_DOUBLE
-} typedef csv_type;
+} csv_type;
 
-union {
+typedef union {
 	int64_t integ;
 	double doubl;
-} typedef csv_num;
+} csv_num;
 static_assert(sizeof (csv_num) == 8, "bad size");
 
 bool
