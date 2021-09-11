@@ -137,11 +137,11 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		if ((loop0+1) % s->s == 0) {
 			syslog(LOG_INFO, "starting to dump the state #%"PRIu64" of the "
 				"simulation, %fs after its start",
-				loop0/s->s, 1.0f*(clock() - start)/CLOCKS_PER_SEC);
+				loop0/s->s, (float) (clock() - start)/CLOCKS_PER_SEC);
 			(void) dump(s);
 			syslog(LOG_INFO, "finished to dump the state #%"PRIu64" of the "
 				"simulation, %fs after its start",
-				loop0/s->s, 1.0f*(clock() - start)/CLOCKS_PER_SEC);
+				loop0/s->s, (float) (clock() - start)/CLOCKS_PER_SEC);
 		}
 		if (should_stop_early) {
 			syslog(LOG_INFO, "exiting the simulation prematurely due to SIGINT");
