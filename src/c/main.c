@@ -132,6 +132,8 @@ INSERTER_FUNC(insert_cells_params) {
 #define ASSIGN_ALL(type, name, csv_type, csv_num, fmt, ord) const type name = (type) nums[ord].csv_num;
 	CELLS_PARAMS(ASSIGN_ALL)
 #undef ASSIGN_ALL
+	(void) naturemap;
+	(void) water2;
 	if (forest == 255) {
 		syslog(LOG_WARNING, "forest on line %"PRIu64" has undesired value: %"
 			PRIu16, lineno, forest);
