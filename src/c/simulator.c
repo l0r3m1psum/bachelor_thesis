@@ -84,8 +84,8 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	for (uint64_t loop0 = 0; loop0 < s->h; loop0++) {
 		/* Skipping the border */
 		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma)
-		for (uint64_t i = 1; i < s->Lstar - 1; i++) {
-			for (uint64_t j = 1; j < s->Wstar - 1; j++) {
+		for (uint64_t j = 1; j < s->Lstar - 1; j++) {
+			for (uint64_t i = 1; i < s->Wstar - 1; i++) {
 				const uint64_t ij = sim_index(i, j, s);
 				const params_t *cur_param = s->params + ij;
 				const float beta = 60*(1 + cur_param->F/10); /* burning rate */
