@@ -5,14 +5,6 @@
 #include <inttypes.h>
 #include <time.h> /* clock */
 
-/* NOTE: the order of lookup matters for caching reason */
-static const int8_t Gamma[8][2] = {
-	{-1, 1},  {0, 1},  {1, 1},
-	{-1, 0},           {1, 0},
-	{-1, -1}, {0, -1}, {1, -1},
-}; /* All offsets around a cell */
-static_assert(sizeof Gamma == 16, "bad size");
-
 static bool should_stop_early = false;
 
 void
@@ -78,6 +70,14 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	assert(s->Wstar >= 3 && s->Lstar >= 3);
 	assert(s->theta >= 0 && s->theta <= 1);
 	const clock_t start = clock();
+
+	/* NOTE: the order of lookup matters for caching reason */
+	const int8_t Gamma[8][2] = {
+		{-1, 1},  {0, 1},  {1, 1},
+		{-1, 0},           {1, 0},
+		{-1, -1}, {0, -1}, {1, -1},
+	}; /* All offsets around a cell */
+	static_assert(sizeof Gamma == 16, "bad size");
 
 	syslog(LOG_INFO, "starting simulation");
 	uint32_t rng_state = s->seed;
