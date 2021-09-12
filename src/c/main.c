@@ -278,12 +278,27 @@ dump(simulation_t *s) {
 	if (setvbuf(fp, NULL, _IOFBF, 0) == EOF) {
 		syslog(LOG_WARNING, "cannot put set stream for file '%s' to fully buffered", fnamebuf);
 	}
-	for (uint64_t i = 0; i < s->Lstar; i++) {
-		for (uint64_t j = 0; j < s->Wstar-1; j++) {
-			const uint64_t ij = sim_index(i, j, s);
-			assert(s->new_state[ij].B >= 0);
-			fprintf(fp, "%f,%d\n", s->new_state[ij].B, s->new_state[ij].N);
-		}
+	const uint64_t area = s->Lstar*s->Wstar;
+	const uint64_t div = 10;
+	const uint64_t div_area = area/div;
+	for (uint64_t i = 0; i < div_area; i += div) {
+		assert(s->new_state[i].B >= 0);
+		(void) fprintf(fp,
+			"%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n",
+			s->new_state[i+0].B, s->new_state[i+0].N,
+			s->new_state[i+1].B, s->new_state[i+1].N,
+			s->new_state[i+2].B, s->new_state[i+2].N,
+			s->new_state[i+3].B, s->new_state[i+3].N,
+			s->new_state[i+4].B, s->new_state[i+4].N,
+			s->new_state[i+5].B, s->new_state[i+5].N,
+			s->new_state[i+6].B, s->new_state[i+6].N,
+			s->new_state[i+7].B, s->new_state[i+7].N,
+			s->new_state[i+8].B, s->new_state[i+8].N,
+			s->new_state[i+9].B, s->new_state[i+9].N);
+	}
+	for (uint64_t i = div_area*div; i < area; i++) {
+		assert(area % div != 0);
+		(void) fprintf(fp, "%f,%d\n", s->new_state[i].B, s->new_state[i].N);
 	}
 	fclose(fp);
 	return true;
