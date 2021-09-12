@@ -281,7 +281,7 @@ dump(simulation_t *s) {
 	const uint64_t area = s->Lstar*s->Wstar;
 	const uint64_t div = 10;
 	const uint64_t div_area = area/div;
-	for (uint64_t i = 0; i < div_area; i += div) {
+	for (uint64_t i = 0; i < area; i += div) {
 		assert(s->new_state[i].B >= 0);
 		(void) fprintf(fp,
 			"%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n%f,%d\n",
