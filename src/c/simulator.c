@@ -79,7 +79,6 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	}; /* All offsets around a cell */
 	static_assert(sizeof Gamma == 16, "bad size");
 
-	syslog(LOG_INFO, "starting simulation");
 	uint32_t rng_state = s->seed;
 	for (uint64_t loop0 = 0; loop0 < s->h; loop0++) {
 		/* Skipping the border */
@@ -104,17 +103,22 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					if (!adj_old_state->N) {
 						continue;
 					}
+					/* TODO: precalcolare sqrt(...) e d(e1,e2) e vedere se hanno
+					 * qualche effetto, misurabile, sulle prestazioni
+					 */
 					/* Calculating probability */
+					const float r1 = rngf(&rng_state);
+					const float r2 = rngf(&rng_state);
 					const float C = sinf(pi*adj_old_state->B/adj_param->gamma);
 					const float d = (1 - 0.5f*fabsf((float) e1*e2));
 					const float fw = expf(
-						s->k1*adj_param->F
-						*(e1*cosf(adj_param->D) + e2*sinf(adj_param->D))
+						s->k1*(adj_param->F + r1)
+						*(e1*cosf(adj_param->D + r2) + e2*sinf(adj_param->D + r2))
 						/sqrtf((float) (e1*e1 + e2*e2))
-					) + rngf(&rng_state);
+					);
 					const float fP = expf(
 						s->k2*atanf((cur_param->P - adj_param->P)/s->L)
-					) + rngf(&rng_state);
+					);
 					const float p = s->k0 * cur_param->S * d * fw * fP * C;
 
 					/* this is Q, N has been purposely removed because it's
@@ -148,7 +152,6 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		s->old_state = s->new_state;
 		s->new_state = tmp;
 	}
-	syslog(LOG_INFO, "finished simulation");
 }
 
 #ifdef TEST
