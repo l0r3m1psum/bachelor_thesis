@@ -45,33 +45,34 @@
 (da scrivere alla fine)
 
 \subsection{Context}\label{sec:context}
-% Short description of context,  for example:
+% Short description of context
 
-Fire fighting in forests is a complex activity due to the limited availability
-of means and resources. Therefore the intervention strategy have to consider the
+Firefighting in forests is a complex activity due to the limited availability of
+means and resources. Therefore the intervention strategy have to consider the
 possible evolution of the fire to make the best use of what is available.
-
-\iffalse
-Lo spegnimento di un incendio boschivo è un attività complessa poichè, essendo
-la disponibilità di mezzi e risorse limitata, la strategia di intervento deve in
-qualche modo tenere in conto dell'evoluzione possibile dell'incendio in modo da
-utilizzare la meglio le risorse disponibili.
-\fi
 
 \subsection{Motivations}\label{sec:motivations}
 % Motivation for what we want to do
 
+A mathematical model for wildfires was developed by the university of Tor
+Vergata, to aid firefighters. The original implementation was made in Microsoft
+Excel\textsuperscript{\textregistered}, which is fine for prototyping but not
+suitable for large scale simulations.
+% \texttrademark
+
+So a more serious implementation was needed, also an easier user interface was
+needed.
+
+\iffalse
 Describe what is missing and instead would be useful to have\dots Non ne ho la
-minima idea. Also Modelica did not made the cut. The original model was
-implemented in Microsoft Excel\texttrademark.
-% \textregistered
+minima idea. Also Modelica did not made the cut.
+\fi
 
 \subsection{Contributions}\label{sec:contrib}
 
 %  Describe here your contributions, namely the missing items identified in the motivations.
-I have implemented from scrath the simulator using just C11 and an OpenMP
-capable compiler, using only POSIX functionalities making the model viable for
-large scale simulations and highly portable. % TODO: insert how big are the simulations
+I have implemented from scrath the simulator, the user interface will be
+implemented by others.
 
 \subsection{Related Work}\label{sec:related_work}
 
@@ -94,10 +95,10 @@ In the section \ref{sec:conclusions}\dots\\
 % Put in this section all the background knowledge needed to understand what you did.
 The simulator was implemented in C11 using the OpenMP compiler extension.
 Because the server used had a Linux based operating system on it the C standard
-library and the POSIX interfaces were used to comunicate with it. OpenMP was
-chosen as the threading interface, instead of the C11 one or the POSIX one,
-because of it's semplicity of use and beacuse the model was trivially
-parallelizable.
+library and the POSIX interfaces were used to comunicate with it\footnote{To
+make it highly portable}. OpenMP was chosen as the threading interface, instead
+of the C11 one or the POSIX one, because of it's semplicity of use and beacuse
+the model was trivially parallelizable.
 
 A SQL database (Postgresql) was chosen to integrate all the different data
 sources and to handle the concurrency. But the simulator inputs and outputs CSV
@@ -112,22 +113,22 @@ support that this format has.
 \section{Implementation}\label{sec:implementation}
 
 % describe here how you implemented the functionalities described int he methods section.
-Use pseudo code or diagrams.
+% Use pseudo code or diagrams.
 
 \section{Experimental Results}\label{sec:experimental_results}
 
 % describe the experimental results
 
 \subsection{Goals}\label{sec:goals}
-% describe here the objectives of the experimental activity: test correctness; 
-% evaluate computational performances (CPU time and RAM); ....
+% describe here the objectives of the experimental activity;
 
 \subsection{Setting}\label{sec:setting}
-% describe experimental setting: hardware used, software used, data used, etc. ....
+% describe experimental setting: hardware used, software used, data used, etc. ...
 
 \subsection{Correctness}\label{sec:correctness}
 
 \subsection{Computational Performance}\label{sec:computational_performance}
+% (CPU time and RAM);
 
 \section{Conclusions}\label{sec:conclusions}
 
