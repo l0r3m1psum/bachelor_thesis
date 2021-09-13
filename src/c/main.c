@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 200909L
+#define _POSIX_C_SOURCE 200809L
 #ifdef __APPLE__
 	#define _DARWIN_C_SOURCE /* O_DIRECTORY */
 #endif
@@ -279,6 +279,7 @@ dump(simulation_t *s) {
 		syslog(LOG_WARNING, "cannot put set stream for file '%s' to fully buffered", fnamebuf);
 	}
 	const uint64_t area = s->Lstar*s->Wstar;
+#if 0
 	const uint64_t div = 10;
 	const uint64_t div_area = area/div;
 	for (uint64_t i = 0; i < area; i += div) {
@@ -300,6 +301,11 @@ dump(simulation_t *s) {
 		assert(area % div != 0);
 		(void) fprintf(fp, "%f,%d\n", s->new_state[i].B, s->new_state[i].N);
 	}
+#else
+	for (uint64_t i = 0; i < area; i++) {
+		(void) fprintf(fp, "%f,%d\n", s->new_state[i].B, s->new_state[i].N);
+	}
+#endif
 	fclose(fp);
 	return true;
 }
@@ -412,7 +418,9 @@ main(const int argc, const char *argv[]) {
 		}
 	}
 
+	syslog(LOG_INFO, "starting simulation");
 	simulation_run(&sim, dump);
+	syslog(LOG_INFO, "finished simulation");
 
 	free_all_sim(&sim);
 
