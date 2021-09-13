@@ -6,7 +6,7 @@ LATEX = pdflatex
 TEXFLAGS = -no-shell-escape -halt-on-error -file-line-error
 BIBTEX = bibtex
 
-all: document.pdf NOTES.html
+all: document.pdf NOTES.html thesis.pdf
 
 clean:
 	rm -rf document.aux document.bbl document.blg document.log document.out document.toc document.lof document.lot

@@ -1,0 +1,139 @@
+\documentclass[draft]{article}
+
+\usepackage{hyperref} %this should always be the last package
+
+\newcommand{\mytitle}{Multi-thread simulation of a large scale dynamical system}
+\let\oldmarginpar\marginpar
+\renewcommand{\marginpar}[1]{\oldmarginpar{\raggedright #1}}
+
+\hypersetup{
+	pdfauthor={Diego Bellani},
+	pdftitle={\mytitle},
+	pdfsubject={Bachelor thesis},
+	pdfkeywords={bachelor,thesis,programming},
+	pdfproducer={LaTeX},
+	pdfcreator={pdfLaTeX},
+	pdfborder={0 0 0},
+	pageanchor=false
+}
+
+\title{\mytitle}
+\date{2021}
+\author{Diego Bellani\and Enrico Tronci\thanks{Supervisor}}
+
+\begin{document}
+
+\begin{titlepage}
+	\pagenumbering{roman}
+	\maketitle
+
+	\begin{abstract}
+	(Max one page, da scrivere alla fine)
+	\end{abstract}
+
+	\iffalse
+	\tableofcontents
+	\listoffigures
+	\listoftables
+	\fi
+\end{titlepage}
+
+\pagenumbering{arabic}
+
+\section{Introduction}\label{sec:intro}
+
+(da scrivere alla fine)
+
+\subsection{Context}\label{sec:context}
+% Short description of context,  for example:
+
+Fire fighting in forests is a complex activity due to the limited availability
+of means and resources. Therefore the intervention strategy have to consider the
+possible evolution of the fire to make the best use of what is available.
+
+\iffalse
+Lo spegnimento di un incendio boschivo è un attività complessa poichè, essendo
+la disponibilità di mezzi e risorse limitata, la strategia di intervento deve in
+qualche modo tenere in conto dell'evoluzione possibile dell'incendio in modo da
+utilizzare la meglio le risorse disponibili.
+\fi
+
+\subsection{Motivations}\label{sec:motivations}
+% Motivation for what we want to do
+
+Describe what is missing and instead would be useful to have\dots Non ne ho la
+minima idea. Also Modelica did not made the cut. The original model was
+implemented in Microsoft Excel\texttrademark.
+% \textregistered
+
+\subsection{Contributions}\label{sec:contrib}
+
+%  Describe here your contributions, namely the missing items identified in the motivations.
+I have implemented from scrath the simulator using just C11 and an OpenMP
+capable compiler, using only POSIX functionalities making the model viable for
+large scale simulations and highly portable. % TODO: insert how big are the simulations
+
+\subsection{Related Work}\label{sec:related_work}
+
+% Describe here the state of the art (e.g., algorithms and tools  available). 
+For each paper/tool explain what you do that it is not already available
+(killing). Again no clue\dots
+
+\subsection{Outline}\label{sec:outline}
+
+% Give an outline of the thesis structure (one sentence per section)
+In the section \ref{sec:background}\dots\\
+In the section \ref{sec:methods}\dots\\
+In the section \ref{sec:methods}\dots\\
+In the section \ref{sec:implementation}\dots\\
+In the section \ref{sec:experimental_results}\dots\\
+In the section \ref{sec:conclusions}\dots\\
+
+\section{Background}\label{sec:background}
+
+% Put in this section all the background knowledge needed to understand what you did.
+The simulator was implemented in C11 using the OpenMP compiler extension.
+Because the server used had a Linux based operating system on it the C standard
+library and the POSIX interfaces were used to comunicate with it. OpenMP was
+chosen as the threading interface, instead of the C11 one or the POSIX one,
+because of it's semplicity of use and beacuse the model was trivially
+parallelizable.
+
+A SQL database (Postgresql) was chosen to integrate all the different data
+sources and to handle the concurrency. But the simulator inputs and outputs CSV
+files. This format was chosen due to its simplicity and the simplicity of the
+data read and written from and to disk. Another important factor was the wide
+support that this format has.
+
+\section{Methods}\label{sec:methods}
+
+% Describe here the algorithm design from a math perspective. No code here.
+
+\section{Implementation}\label{sec:implementation}
+
+% describe here how you implemented the functionalities described int he methods section.
+Use pseudo code or diagrams.
+
+\section{Experimental Results}\label{sec:experimental_results}
+
+% describe the experimental results
+
+\subsection{Goals}\label{sec:goals}
+% describe here the objectives of the experimental activity: test correctness; 
+% evaluate computational performances (CPU time and RAM); ....
+
+\subsection{Setting}\label{sec:setting}
+% describe experimental setting: hardware used, software used, data used, etc. ....
+
+\subsection{Correctness}\label{sec:correctness}
+
+\subsection{Computational Performance}\label{sec:computational_performance}
+
+\section{Conclusions}\label{sec:conclusions}
+
+% Sum up what you did and outline some possible future developments .
+
+\bibliographystyle{plain}
+\bibliography{document}
+
+\end{document}
