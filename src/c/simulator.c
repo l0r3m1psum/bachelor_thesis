@@ -70,6 +70,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	assert(s->Wstar >= 3 && s->Lstar >= 3);
 	assert(s->theta >= 0 && s->theta <= 1);
 	const clock_t start = clock();
+	uint32_t rng_state = s->seed;
 
 #define NEIGHBOR_NO 8
 	/* NOTE: the order of lookup matters for caching reason */
@@ -90,10 +91,10 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		sqrtf(2), 1.0f, sqrtf(2),
 	};
 
-	uint32_t rng_state = s->seed;
 	for (uint64_t loop0 = 0; loop0 < s->h; loop0++) {
+		bool has_transmitted_fire = false;
 		/* Skipping the border */
-		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,d,sqrt)
+		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,d,sqrt,has_transmitted_fire)
 		for (uint64_t j = 1; j < s->Lstar - 1; j++) {
 			for (uint64_t i = 1; i < s->Wstar - 1; i++) {
 				const uint64_t ij = sim_index(i, j, s);
@@ -115,7 +116,10 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					/* Calculating probability */
 					const float r1 = rngf(&rng_state);
 					const float r2 = rngf(&rng_state);
-					const float C = -expf((adj_old_state->B - (adj_param->gamma*adj_param->gamma/4))/s->Delta);
+					const float C = expf(
+						-(adj_old_state->B - (adj_param->gamma*adj_param->gamma/4))
+						/s->Delta
+					);
 					// const float C = sinf(pi*adj_old_state->B/adj_param->gamma);
 					const float fw = expf(
 						s->k1*(adj_param->F + r1)
@@ -130,12 +134,15 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					/* this is Q, N has been purposely removed because it's
 					 * checked a priori
 					 */
-					V |= (p > s->theta);
+					V |= p > s->theta;
 				}
 
 #define beta (60*(1 + cur_param->F/10)) /* burning rate */
 				/* NOTE: in this eqation u has been purposely removed */
-				s->new_state[ij].N = old_B > 0 ? V : false;
+				bool is_on_fire = old_B > 0 ? V : false;
+#pragma omp atomic update
+				has_transmitted_fire |= is_on_fire;
+				s->new_state[ij].N = is_on_fire;
 				s->new_state[ij].B = old_N ? maxf(0, old_B - beta*s->tau) : old_B;
 				assert(s->new_state[ij-1].B >= 0);
 				assert(s->old_state[ij-1].B >= 0);
@@ -154,6 +161,11 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		}
 		if (should_stop_early) {
 			syslog(LOG_INFO, "exiting the simulation prematurely due to SIGINT");
+			return;
+		}
+		if (!has_transmitted_fire) {
+			syslog(LOG_INFO, "exiting the simulation at iteration %"PRIu64" "
+				"because no fire was transimtted", loop0+1);
 			return;
 		}
 		state_t *tmp = s->old_state;
