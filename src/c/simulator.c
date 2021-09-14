@@ -114,8 +114,8 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 						continue;
 					}
 					/* Calculating probability */
-					const float r1 = rngf(&rng_state);
-					const float r2 = rngf(&rng_state);
+					const float r1 = rngf(&rng_state)*0.2f*adj_param->F;
+					const float r2 = rngf(&rng_state)*0.2f*adj_param->D;
 					const float C = expf(
 						-(adj_old_state->B - (adj_param->gamma*adj_param->gamma/4))
 						/s->Delta
