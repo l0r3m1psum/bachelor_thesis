@@ -94,7 +94,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	for (uint64_t loop0 = 0; loop0 < s->h; loop0++) {
 		bool has_transmitted_fire = false;
 		/* Skipping the border */
-		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,d,sqrt,has_transmitted_fire)
+		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,d,sqrt) reduction(|: has_transmitted_fire)
 		for (uint64_t j = 1; j < s->Lstar - 1; j++) {
 			for (uint64_t i = 1; i < s->Wstar - 1; i++) {
 				const uint64_t ij = sim_index(i, j, s);
@@ -140,7 +140,6 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 #define beta (60*(1 + cur_param->F/10)) /* burning rate */
 				/* NOTE: in this eqation u has been purposely removed */
 				bool is_on_fire = old_B > 0 ? V : false;
-#pragma omp atomic update
 				has_transmitted_fire |= is_on_fire;
 				s->new_state[ij].N = is_on_fire;
 				s->new_state[ij].B = old_N ? maxf(0, old_B - beta*s->tau) : old_B;
