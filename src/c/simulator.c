@@ -78,11 +78,21 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		{-1, -1}, {0, -1}, {1, -1},
 	}; /* All offsets around a cell */
 	static_assert(sizeof Gamma == 16, "bad size");
+	const float d[8] = {
+		0.5f, 1.0f, 0.5f,
+		1.0f,       1.0f,
+		0.5f, 1.0f, 0.5f,
+	};
+	const float sqrt[8] = {
+		sqrtf(2), 1.0f, sqrtf(2),
+		1.0f,           1.0f,
+		sqrtf(2), 1.0f, sqrtf(2),
+	};
 
 	uint32_t rng_state = s->seed;
 	for (uint64_t loop0 = 0; loop0 < s->h; loop0++) {
 		/* Skipping the border */
-		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma)
+		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,d,sqrt)
 		for (uint64_t j = 1; j < s->Lstar - 1; j++) {
 			for (uint64_t i = 1; i < s->Wstar - 1; i++) {
 				const uint64_t ij = sim_index(i, j, s);
@@ -102,23 +112,19 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					if (!adj_old_state->N) {
 						continue;
 					}
-					/* TODO: precalcolare sqrt(...) e d(e1,e2) e vedere se hanno
-					 * qualche effetto, misurabile, sulle prestazioni
-					 */
 					/* Calculating probability */
 					const float r1 = rngf(&rng_state);
 					const float r2 = rngf(&rng_state);
 					const float C = sinf(pi*adj_old_state->B/adj_param->gamma);
-					const float d = (1 - 0.5f*fabsf((float) e1*e2));
 					const float fw = expf(
 						s->k1*(adj_param->F + r1)
 						*(e1*cosf(adj_param->D + r2) + e2*sinf(adj_param->D + r2))
-						/sqrtf((float) (e1*e1 + e2*e2))
+						/sqrt[loop1]
 					);
 					const float fP = expf(
 						s->k2*atanf((cur_param->P - adj_param->P)/s->L)
 					);
-					const float p = s->k0 * cur_param->S * d * fw * fP * C;
+					const float p = s->k0 * cur_param->S * d[loop1] * fw * fP * C;
 
 					/* this is Q, N has been purposely removed because it's
 					 * checked a priori
