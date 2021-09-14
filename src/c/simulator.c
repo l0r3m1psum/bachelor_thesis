@@ -71,19 +71,20 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	assert(s->theta >= 0 && s->theta <= 1);
 	const clock_t start = clock();
 
+#define NEIGHBOR_NO 8
 	/* NOTE: the order of lookup matters for caching reason */
-	const int8_t Gamma[8][2] = {
+	const int8_t Gamma[NEIGHBOR_NO][2] = {
 		{-1, 1},  {0, 1},  {1, 1},
 		{-1, 0},           {1, 0},
 		{-1, -1}, {0, -1}, {1, -1},
 	}; /* All offsets around a cell */
 	static_assert(sizeof Gamma == 16, "bad size");
-	const float d[8] = {
+	const float d[NEIGHBOR_NO] = {
 		0.5f, 1.0f, 0.5f,
 		1.0f,       1.0f,
 		0.5f, 1.0f, 0.5f,
 	};
-	const float sqrt[8] = {
+	const float sqrt[NEIGHBOR_NO] = {
 		sqrtf(2), 1.0f, sqrtf(2),
 		1.0f,           1.0f,
 		sqrtf(2), 1.0f, sqrtf(2),
@@ -101,9 +102,8 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 				assert(old_B >= 0);
 				const bool old_N = s->old_state[ij].N;
 
-				const uint64_t n_dir = sizeof Gamma / sizeof Gamma[0];
 				bool V = false;
-				for (uint64_t loop1 = 0; loop1 < n_dir && !V; loop1++) {
+				for (uint64_t loop1 = 0; loop1 < NEIGHBOR_NO && !V; loop1++) {
 					const int8_t e1 = Gamma[loop1][0];
 					const int8_t e2 = Gamma[loop1][1];
 					const uint64_t ie1je2 = sim_index(i + (uint64_t) e1, j + (uint64_t) e2, s);
