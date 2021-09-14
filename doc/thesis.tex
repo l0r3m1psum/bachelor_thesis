@@ -19,7 +19,7 @@
 
 \title{\mytitle}
 \date{2021}
-\author{Diego Bellani\and Enrico Tronci\thanks{Supervisor}}
+\author{Diego Bellani\thanks{Student}\and Enrico Tronci\thanks{Supervisor}}
 
 \begin{document}
 
@@ -31,8 +31,8 @@
 	(Max one page, da scrivere alla fine)
 	\end{abstract}
 
-	\iffalse
 	\tableofcontents
+	\iffalse
 	\listoffigures
 	\listoftables
 	\fi
@@ -102,9 +102,9 @@ the model was trivially parallelizable.
 
 A SQL database (Postgresql) was chosen to integrate all the different data
 sources and to handle the concurrency. But the simulator inputs and outputs CSV
-files. This format was chosen due to its simplicity and the simplicity of the
-data read and written from and to disk. Another important factor was the wide
-support that this format has.
+files \cite{csv}. This format was chosen due to its simplicity and the
+simplicity of the data read and written from and to disk. Another important
+factor was the wide support that this format has.
 
 \section{Methods}\label{sec:methods}
 
