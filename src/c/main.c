@@ -160,7 +160,7 @@ INSERTER_FUNC(insert_cells_params) {
 	/* constructing the matrix in row-major form */
 	sim->params[index] = (params_t){
 		.S = S, .P = altimetry, .F = wind_speed, .D = wind_dir,
-		.gamma = sim->L*1*S, /* NOTE: where 1 is alpha i.e. our patch to the model */
+		.gamma = 4000*(H - A), /* where 4000 is the average wood surface density */
 	};
 	return true;
 }
