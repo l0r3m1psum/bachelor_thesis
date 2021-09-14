@@ -35,7 +35,7 @@ typedef struct {
 	uint64_t h; /* horizon */
 	uint64_t s; /* snapshot frequency */
 	uint32_t seed;
-	/* 32bit padding */
+	float Delta;
 	float tau; /* time step */
 	float theta; /* ingnition threshold */
 	float k0; /* optimization parameter */

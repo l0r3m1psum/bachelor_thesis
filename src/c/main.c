@@ -27,7 +27,8 @@ X(float,    theta, CSV_DOUBLE, doubl, .2lf,   6) \
 X(float,    k0,    CSV_DOUBLE, doubl, .2lf,   7) \
 X(float,    k1,    CSV_DOUBLE, doubl, .2lf,   8) \
 X(float,    k2,    CSV_DOUBLE, doubl, .2lf,   9) \
-X(float,    L,     CSV_DOUBLE, doubl, .2lf,   10)
+X(float,    L,     CSV_DOUBLE, doubl, .2lf,   10) \
+X(float,    Delta, CSV_DOUBLE, doubl, .2lf,   11)
 
 #define CHECK_GENERAL_PARAMS0(x) ((x) < 3)
 #define CHECK_GENERAL_PARAMS1(x) ((x) < 3)
@@ -40,6 +41,7 @@ X(float,    L,     CSV_DOUBLE, doubl, .2lf,   10)
 #define CHECK_GENERAL_PARAMS8(x) (false)
 #define CHECK_GENERAL_PARAMS9(x) (false)
 #define CHECK_GENERAL_PARAMS10(x) ((x) < 0)
+#define CHECK_GENERAL_PARAMS11(x) (false)
 
 #define CELLS_PARAMS(X) \
 X(uint16_t, altimetry,    CSV_INT64,  integ, PRIu16, 0) \
@@ -74,7 +76,7 @@ if (CHECK_##WHICH##ord(nums[ord].csv_num)) { \
 	return false; \
 }
 
-#define GENERAL_PARAMS_NO 11
+#define GENERAL_PARAMS_NO 12
 #define CELLS_PARAMS_NO 8
 #define INITIAL_STATE_NO 2
 
@@ -219,7 +221,6 @@ read_data(const char *fname, char **buf, size_t *linecap, simulation_t *sim, csv
 			continue;
 		}
 		if (!csv_read(*buf, len, nums, types)) {
-			free(*buf);
 			syslog(LOG_ERR, "unable ro read cells parameters from file '%s' at "
 				"line %"PRIu64, fname, lineno);
 			return index;
@@ -232,7 +233,6 @@ read_data(const char *fname, char **buf, size_t *linecap, simulation_t *sim, csv
 		index++;
 	}
 	if (errno) {
-		free(*buf);
 		syslog(LOG_ERR, "error while getting line from '%s': %s", fname,
 			strerror(errno));
 		return index;

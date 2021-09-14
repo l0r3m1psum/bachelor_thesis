@@ -40,7 +40,7 @@ csv_read(char *row, uint64_t len, csv_num *nums, const csv_type *types) {
 	for (uint64_t i = 0; i < len-1; i++) {
 		char *sep = strchr(row, field_sep);
 		if (!sep) {
-			syslog(LOG_ERR, "wrong number of rows, expected %"PRIu64", found %"PRIu64, len, i);
+			syslog(LOG_ERR, "wrong number of rows, expected %"PRIu64", found %"PRIu64, len, i+1);
 			return false;
 		}
 		*sep = '\0';
