@@ -19,6 +19,19 @@ maxf(float a, float b) {
 	return res;
 }
 
+static float
+f_diag(int8_t e1, int8_t e2, float alpha) {
+	assert((e1 == 1 || e1 == -1) && (e2 == 1 || e2 == -1));
+	return e1*sqrtf(2)*sinf(pi/4.0f + (e1*e2)*alpha);
+}
+
+static float
+f_cross(int8_t e1, int8_t e2, float alpha) {
+	assert(e1*e2 == 0 && (e1+e1 == 1 || e1+e2 == -1));
+	const bool cond = e1 != 0;
+	return (e1+e2)*sinf(pi/2*cond + (cond ? -alpha : alpha));
+}
+
 /* Generates a normally distributed random number in [-1,1] using first a linear
  * cogruential generator and then the Box–Muller transform. The constants m and
  * a are taken from the errata of "Tables of Linear Congruential Generators of
@@ -35,7 +48,7 @@ rngf(uint32_t *xn) {
 	const float u1 = (float) (*xn)/(float) max;
 	*xn = (a * (*xn) + c) % m;
 	const float u2 = (float) (*xn)/(float) max;
-	const float res = sqrtf(-2.0f*logf(u1))*cosf(2*pi*u2)/2.5f;
+	const float res = sqrtf(-2.0f*logf(u1))*sinf(2*pi*u2)/2.5f;
 	return res;
 }
 
@@ -90,11 +103,16 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		1.0f,           1.0f,
 		sqrtf(2), 1.0f, sqrtf(2),
 	};
+	float (* const funcs[NEIGHBOR_NO])(int8_t,int8_t,float) = {
+		f_diag, f_cross, f_diag,
+		f_cross,         f_cross,
+		f_diag, f_cross, f_diag,
+	};
 
 	for (uint64_t loop0 = 0; loop0 < s->h; loop0++) {
 		bool has_transmitted_fire = false;
 		/* Skipping the border */
-		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,d,sqrt) reduction(|: has_transmitted_fire)
+		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,d,sqrt,funcs) reduction(|: has_transmitted_fire)
 		for (uint64_t j = 1; j < s->Lstar - 1; j++) {
 			for (uint64_t i = 1; i < s->Wstar - 1; i++) {
 				const uint64_t ij = sim_index(i, j, s);
@@ -123,7 +141,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					// const float C = sinf(pi*adj_old_state->B/adj_param->gamma);
 					const float fw = expf(
 						s->k1*(adj_param->F + r1)
-						*(e1*cosf(adj_param->D + r2) + e2*sinf(adj_param->D + r2))
+						* funcs[loop1](e1, e2, adj_param->D + r2)
 						/sqrt[loop1]
 					);
 					const float fP = expf(
