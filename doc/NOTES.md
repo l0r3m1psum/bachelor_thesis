@@ -167,6 +167,7 @@
 
 # Other cool stuff
   * [vyukov queue](https://int08h.com/post/ode-to-a-vyukov-queue/)
+  * [game of life optimizations](https://stackoverflow.com/questions/40485/optimizing-conways-game-of-life)
 
 ## Asynchronous loggers
   * [mini async log c](https://github.com/RafaGago/mini-async-log-c)
