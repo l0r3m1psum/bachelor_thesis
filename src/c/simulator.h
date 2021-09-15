@@ -8,7 +8,7 @@
 typedef struct {
 	float B; /* fuel quantity */
 	bool N; /* fire presence */
-	/* 24 bit padding */
+	/* 24 bit padding */ /* NOTE: potrei inserire qui un altro booleano per indicare se uno dei vicini è in fiamme */
 } state_t;
 static_assert(sizeof (state_t) == 8, "bad size");
 
