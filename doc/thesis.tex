@@ -51,16 +51,14 @@ Firefighting in forests is a complex activity due to the limited availability of
 means and resources. Therefore the intervention strategy have to consider the
 possible evolution of the fire to make the best use of what is available.
 
-The possible evolution of a fire can be modeled with mathematical tools and
-predictred with a faster-then-real-time simulation of said model.
+The possible evolution of a fire can be charaterized with a mathematical model
+and predictred with a faster-then-real-time simulation of said model. Given this
+actions can be taken ahead of time to minimize the damage caused by the fire and
+maximazing the fire extinction speed.
 
 \subsection{Motivations}\label{sec:motivations}
 % Motivation for what we want to do
-
-\iffalse
-Describe what is missing and instead would be useful to have\dots Non ne ho la
-minima idea. Also Modelica did not made the cut.
-\fi
+% Describe what is missing and instead would be useful to have
 
 To aid firefighters a mathematical model of fire evolution has been developed by
 the university of Tor Vergata.
@@ -71,18 +69,25 @@ suitable for fast large scale simulations. Therefore a better implementation was
 needed both for speed and user friendlyness.
 % \texttrademark
 
-\subsection{Contributions}\label{sec:contrib}
+The usual tool we used for implementation of mathematical models, Modelica, did
+not made the cut beacuse of it's limitation regarding dinamically sized arrays
+and the exponential (?) time taken by the optimization algorithm at the
+increasing of the size of the simulation grid.
 
+\subsection{Contributions}\label{sec:contrib}
 %  Describe here your contributions, namely the missing items identified in the
 % motivations.
-I have implemented from scrath the simulatorm making sure of its correctness and
-performanvce. The user interface will be implemented by others.
 
-Also by me and my advisor some corrections have been proposed to the model in
+I have implemented from scrath the simulator making sure of its correctness and
+performance. The user interface will be implemented by others. To make
+collaboration between me and the other party that will implement the user
+interface easier i have also created a database schema together with contrains
+to keep the data consistent.
+
+Also, by me and my advisor, some corrections have been proposed to the model in
 addition to the dimensional analysis made.
 
 \subsection{Related Work}\label{sec:related_work}
-
 % Describe here the state of the art (e.g., algorithms and tools  available). 
 % For each paper/tool explain what you do that it is not already available
 % (killing).
@@ -90,12 +95,20 @@ addition to the dimensional analysis made.
 The simulator was implemented using only relatively standard techniques. So no
 particular algorithm worth of notice was used.
 
-I habe use lots of tools to aid programming except the classic debugger and
-profiler namely copiler based source sanitizers.
+The only tool that I tried to use was Modelica that, as said before, was really
+meant to implement other kinds of mthematical models, namely continuous ones.
+Libraries exists to develop cellular automata models \cite{calib2}, but with
+generality comes a lost in performance.
+
+This said Modelica was still a valuable tool for prototyping a small version of
+the model before it's real implementation.
+
+% I have use lots of tools to aid programming except the classic debugger and
+% profiler namely copiler based source sanitizers.
 
 \subsection{Outline}\label{sec:outline}
-
 % Give an outline of the thesis structure (one sentence per section)
+
 In the section \ref{sec:background}\dots\\
 In the section \ref{sec:methods}\dots\\
 In the section \ref{sec:methods}\dots\\
@@ -104,17 +117,19 @@ In the section \ref{sec:experimental_results}\dots\\
 In the section \ref{sec:conclusions}\dots\\
 
 \section{Background}\label{sec:background}
-
-The provided server has an Intel processon and a Linux based operating system.
-
 % Put in this section all the background knowledge needed to understand what you
 % did.
-The simulator was implemented in C11 using the OpenMP compiler extension.
-Because the server used had a Linux based operating system on it the C standard
-library and the POSIX interfaces were used to comunicate with it\footnote{To
-make it highly portable}. OpenMP was chosen as the threading interface, instead
-of the C11 one or the POSIX one, because of it's semplicity of use and beacuse
-the model was trivially parallelizable.
+
+The provided server has a modern Intel processor and a Linux based operating
+system.
+
+To make the best use of the aveilable hardware the simulator was implemented in
+C11 using the OpenMP compiler extension.  Because the server used had a Linux
+based operating system on it the C standard library and the POSIX interfaces
+were used to comunicate with it\footnote{To make it highly portable and
+accomodate eventual changes}. OpenMP was chosen as the threading interface,
+instead of the C11 one or the POSIX one, because of it's semplicity of use and
+beacuse the model was trivially parallelizable.
 
 OpenMP made possible to keep a relatively clean code even in the face of
 frequent changes, but still archive reasonable performances. Also it alowed me
@@ -124,16 +139,18 @@ A SQL database (Postgresql) was chosen to integrate all the different data
 sources and to handle the concurrency. But the simulator inputs and outputs CSV
 files \cite{csv}. This format was chosen due to its simplicity and the
 simplicity of the data read and written from and to disk. Another important
-factor was the wide support that this format has.
+factor was the wide support that this format has. Extensive use of the
+\texttt{ARRAY} data type introuced in SQL:XX to better model the data tha was,
+most of the time a big 2D matrix.
 
 The model is based on a cellular automata \cite{gol}.
 
 \section{Methods}\label{sec:methods}
-
 % Describe here the algorithm design from a math perspective. No code here.
 
-\section{Implementation}\label{sec:implementation}
+% TODO: scrivere lo schema in FOL e l'algoritmo in matematica (i.e. il modello)
 
+\section{Implementation}\label{sec:implementation}
 % describe here how you implemented the functionalities described in the methods
 % section.
 % Use pseudo code or diagrams.
@@ -177,17 +194,36 @@ $\epsilon_1$ & $\epsilon_2$ & original equation & simplified equation\\
 \subsection{Goals}\label{sec:goals}
 % describe here the objectives of the experimental activity;
 
+The experimental activty had the objective of showing performance?? And
+correctness udring the operation??
+
 \subsection{Setting}\label{sec:setting}
 % describe experimental setting: hardware used, software used, data used, etc. ...
 
+Mac OS, Instruments.app, \texttt{time(1)}, compiler sanitizers, assert
+
 \subsection{Correctness}\label{sec:correctness}
 
+Other than by manual testing the software is ``correct by inspection''
+
 \subsection{Computational Performance}\label{sec:computational_performance}
-% (CPU time and RAM);
+% (CPU time and RAM); bytes/sec
+
+Here I'll show times with skips and without
 
 \section{Conclusions}\label{sec:conclusions}
+% Sum up what you did and outline some possible future developments.
 
-% Sum up what you did and outline some possible future developments .
+Future improvements could be made by abstracting the simualtion code in a
+library and make in callable from various languages (e.g. Java, Python etc\dots)
+and make integration even easier. Also the core assumption for it's performance
+is that the number of cell's on fire is tiny with respect to the others.
+Alternative implementations could be given for the opposite scenario. Or the
+current one could be re-architected as described in the section about game of
+life in the graphics programing black book.
+
+If those techniques turned out usefull they could be abstracted to a library of
+general cellular automata based models simulation.
 
 \bibliographystyle{plain}
 \bibliography{document}
