@@ -198,7 +198,7 @@ INSERTER_FUNC(insert_initial_state) {
  * @param len length of nums and types
  * @params types instructions to read numbers
  * @params insert_data callback to insert data in sim return false is something goes wrong
- * @return the number of inserted records
+ * @return the number of sucessfully inserted records
  */
 static inline uint64_t
 read_data(const char *fname, char **buf, size_t *linecap, simulation_t *sim, csv_num *nums, uint64_t len, const csv_type *types,
@@ -223,12 +223,12 @@ read_data(const char *fname, char **buf, size_t *linecap, simulation_t *sim, csv
 		if (!csv_read(*buf, len, nums, types)) {
 			syslog(LOG_ERR, "unable ro read cells parameters from file '%s' at "
 				"line %"PRIu64, fname, lineno);
-			return index;
+			return index-1;
 		}
 		if (!insert_data(sim, nums, index, lineno, fname)) {
 			syslog(LOG_ERR, "unable to insert_data data from file '%s' on line "
 				"%"PRIu64, fname, lineno);
-			return index;
+			return index-1;
 		}
 		index++;
 	}
