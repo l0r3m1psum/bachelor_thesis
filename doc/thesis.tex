@@ -42,7 +42,7 @@
 
 \section{Introduction}\label{sec:intro}
 
-(da scrivere alla fine)
+(da scrivere alla fine) internship report
 
 \subsection{Context}\label{sec:context}
 % Short description of context
@@ -51,34 +51,47 @@ Firefighting in forests is a complex activity due to the limited availability of
 means and resources. Therefore the intervention strategy have to consider the
 possible evolution of the fire to make the best use of what is available.
 
+The possible evolution of a fire can be modeled with mathematical tools and
+predictred with a faster-then-real-time simulation of said model.
+
 \subsection{Motivations}\label{sec:motivations}
 % Motivation for what we want to do
-
-A mathematical model for wildfires was developed by the university of Tor
-Vergata, to aid firefighters. The original implementation was made in Microsoft
-Excel\textsuperscript{\textregistered}, which is fine for prototyping but not
-suitable for large scale simulations.
-% \texttrademark
-
-So a more serious implementation was needed, also an easier user interface was
-needed.
 
 \iffalse
 Describe what is missing and instead would be useful to have\dots Non ne ho la
 minima idea. Also Modelica did not made the cut.
 \fi
 
+To aid firefighters a mathematical model of fire evolution has been developed by
+the university of Tor Vergata.
+
+The original implementation was made in Microsoft
+Excel\textsuperscript{\textregistered}, which is fine for prototyping but not
+suitable for fast large scale simulations. Therefore a better implementation was
+needed both for speed and user friendlyness.
+% \texttrademark
+
 \subsection{Contributions}\label{sec:contrib}
 
-%  Describe here your contributions, namely the missing items identified in the motivations.
-I have implemented from scrath the simulator, the user interface will be
-implemented by others.
+%  Describe here your contributions, namely the missing items identified in the
+% motivations.
+I have implemented from scrath the simulatorm making sure of its correctness and
+performanvce. The user interface will be implemented by others.
+
+Also by me and my advisor some corrections have been proposed to the model in
+addition to the dimensional analysis made.
 
 \subsection{Related Work}\label{sec:related_work}
 
 % Describe here the state of the art (e.g., algorithms and tools  available). 
-For each paper/tool explain what you do that it is not already available
-(killing). Again no clue\dots
+% For each paper/tool explain what you do that it is not already available
+% (killing).
+
+The simulator was implemented using only relatively standard techniques. So no
+particular algorithm worth of notice was used.
+
+I habe use lots of tools to aid programming except the classic debugger and
+profiler namely copiler based source sanitizers.
 
 \subsection{Outline}\label{sec:outline}
 
@@ -92,7 +105,10 @@ In the section \ref{sec:conclusions}\dots\\
 
 \section{Background}\label{sec:background}
 
-% Put in this section all the background knowledge needed to understand what you did.
+The provided server has an Intel processon and a Linux based operating system.
+
+% Put in this section all the background knowledge needed to understand what you
+% did.
 The simulator was implemented in C11 using the OpenMP compiler extension.
 Because the server used had a Linux based operating system on it the C standard
 library and the POSIX interfaces were used to comunicate with it\footnote{To
@@ -100,11 +116,17 @@ make it highly portable}. OpenMP was chosen as the threading interface, instead
 of the C11 one or the POSIX one, because of it's semplicity of use and beacuse
 the model was trivially parallelizable.
 
+OpenMP made possible to keep a relatively clean code even in the face of
+frequent changes, but still archive reasonable performances. Also it alowed me
+to test first for correctness and then performance, with minimal changes.
+
 A SQL database (Postgresql) was chosen to integrate all the different data
 sources and to handle the concurrency. But the simulator inputs and outputs CSV
 files \cite{csv}. This format was chosen due to its simplicity and the
 simplicity of the data read and written from and to disk. Another important
 factor was the wide support that this format has.
+
+The model is based on a cellular automata \cite{gol}.
 
 \section{Methods}\label{sec:methods}
 
@@ -112,8 +134,41 @@ factor was the wide support that this format has.
 
 \section{Implementation}\label{sec:implementation}
 
-% describe here how you implemented the functionalities described int he methods section.
+% describe here how you implemented the functionalities described in the methods
+% section.
 % Use pseudo code or diagrams.
+
+The simulator has a relatively simple architecture, upon initialization all the
+necessary data is read, validated and transformed for use in the simulation.
+Also all the memory needed is allocated, to avoid costly calls to
+\texttt{malloc(3)} during the simulation, to do this a double buffer technique
+has been used.
+
+% TODO: tell thad for input validation meta-programing has been used
+
+To be able to gracefully halt the simulation before its natural halting
+condition (i.e. reaching the event horizon or not transmitting anymore fire) a
+global variable is used that is cheked at the end of every iteration of the
+simulation. This variable is changed only by a signal handler that should be
+triggered only if a great change in the input parameters occurs.
+
+\begin{table}
+\centering
+\begin{tabular}{c c | c | c}
+$\epsilon_1$ & $\epsilon_2$ & original equation & simplified equation\\
+\hline
+-1 & 1 & $-\cos(\alpha)+\sin(\alpha)$ & $-\sqrt{2}\sin(\frac{\pi}{4}-\alpha)$\\
+0 & 1 & $\sin(\alpha)$ & $\sin(\alpha)$\\
+1 & 1 & $\cos(\alpha) + \sin(\alpha)$ & $-\sqrt{2}\sin(\alpha+\frac{\pi}{4})$\\
+-1 & 0 & $-\cos(\alpha)$ & $-\sin(\frac{\pi}{2}-\alpha)$\\
+1 & 0 & $\cos(\alpha)$ & $\sin(\frac{\pi}{2}-\alpha)$\\
+-1 & -1 & $-\cos(\alpha)-\sin(\alpha)$ & $-\sqrt{2}\sin(\alpha+\frac{\pi}{4})$\\
+0 & -1 & $-\sin(\alpha)$ & $-\sin(\alpha)$\\
+1 & -1 & $\cos(\alpha) + \sin(\alpha)$ & $\sqrt{2}\sin(\frac{\pi}{4}-\alpha)$\\
+\end{tabular}
+\caption{Simplifications}
+\label{tab:simplifications}
+\end{table}
 
 \section{Experimental Results}\label{sec:experimental_results}
 
