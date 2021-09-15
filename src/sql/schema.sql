@@ -79,6 +79,7 @@ comment on function rectInside is 'Checks is r1 is inside r2.';
 
 -- TABLES ----------------------------------------------------------------------
 
+-- NOTE: dovrei forzare l'area minima a 3x3?
 create table maps (
 	id   int4            generated always as identity primary key,
 	name str             unique,
