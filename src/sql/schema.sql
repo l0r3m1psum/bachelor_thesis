@@ -88,14 +88,23 @@ create table maps (
 	constraint "right area" check (rectArea(rect) = matrixArea(data))
 );
 
-create table simualtions (
+create table simulations (
 	id int4 generated always as identity primary key,
 	name str unique,
 	rect "map rectangle",
 	map int4 not null references maps(id),
-	horizon int4 check(horizon > 0),
-	-- etc.
-	started timestamp not null default current_timestamp
+	horizon int4 not null check (horizon > 0),
+	"snapshot freq" int4 not null check ("snapshot freq" > 0),
+	seed int4 not null check (seed > 0),
+	Delta float8 not null,
+	tau float8 not null check (tau > 0),
+	theta float8 not null check (theta > 0 and theta < 1),
+	k0 float8 not null,
+	k1 float8 not null,
+	k2 float8 not null,
+	L float8 not null check (L > 0),
+	started timestamp not null default current_timestamp,
+	constraint "horizon snapshot relation" check ("snapshot freq" <= horizon)
 );
 
 create table results (
