@@ -17,7 +17,6 @@ selectedY1="$5" # ordinate of the top right point in meters
 general_parameters_file=`pwd`/general_parameters.csv
 initial_state_file=`pwd`/initial_state.csv
 cells_parameters_file=`pwd`/cells_parameters.csv
-output_directory=`pwd`/res
 db_name=test
 # unit of measure for the coordinates of the rectangle stored in the database,
 # done to avoid coordinates that are not multiple of the unit of measure
