@@ -223,12 +223,12 @@ read_data(const char *fname, char **buf, size_t *linecap, simulation_t *sim, csv
 		if (!csv_read(*buf, len, nums, types)) {
 			syslog(LOG_ERR, "unable ro read cells parameters from file '%s' at "
 				"line %"PRIu64, fname, lineno);
-			return index-1;
+			return index != 0 ? index-1 : index;
 		}
 		if (!insert_data(sim, nums, index, lineno, fname)) {
 			syslog(LOG_ERR, "unable to insert_data data from file '%s' on line "
 				"%"PRIu64, fname, lineno);
-			return index-1;
+			return index != 0 ? index-1 : index;
 		}
 		index++;
 	}
