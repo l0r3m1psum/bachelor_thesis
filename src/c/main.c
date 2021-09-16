@@ -368,8 +368,8 @@ main(const int argc, const char *argv[]) {
 			uint64_t res = 0;
 			if ((res = read_data(cells_params, &row, &linecap, &sim, nums, CELLS_PARAMS_NO,
 				cells_params_types, insert_cells_params)) != area) {
-				syslog(LOG_ERR, "not enough records in file '%s' only %"PRIu64,
-					cells_params, res);
+				syslog(LOG_ERR, "unable to read the cells parameters from "
+					"file '%s'", cells_params);
 				free_all_sim(&sim);
 				free(row);
 				return EXIT_FAILURE;
@@ -381,8 +381,8 @@ main(const int argc, const char *argv[]) {
 			uint64_t res = 0;
 			if ((res = read_data(initial_state, &row, &linecap, &sim, nums, INITIAL_STATE_NO,
 				initial_state_types, insert_initial_state)) != area) {
-				syslog(LOG_ERR, "not enough records in file '%s' only %"PRIu64,
-					cells_params, res);
+				syslog(LOG_ERR, "unable to read the initial state from "
+					"file '%s'", initial_state);
 				free_all_sim(&sim);
 				free(row);
 				return EXIT_FAILURE;
