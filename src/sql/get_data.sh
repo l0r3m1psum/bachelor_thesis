@@ -69,6 +69,16 @@ fi
 
 mapX0=`echo $map_rect | cut -d, -f1`
 mapY0=`echo $map_rect | cut -d, -f2`
+mapX1=`echo $map_rect | cut -d, -f3`
+mapY1=`echo $map_rect | cut -d, -f4`
+
+if [ $(($selectedX0/$unit)) -lt $mapX0 ] || [ $(($selectedY0/$unit)) -lt $mapY0 ] \
+	|| [ $(($selectedX1/$unit)) -gt $mapX1 ] || [ $(($selectedY1/$unit)) -gt $mapY1 ]
+then
+	echo the selected points doesn\'t fit inside the selected map rectangle: \
+		$((mapX0*$unit)) $((mapY0*$unit)) $((mapX1*$unit)) $((mapY1*$unit))
+	exit 1
+fi
 
 X0=$((selectedX0/$unit-mapX0+1))
 Y0=$((selectedY0/$unit-mapY0+1))
