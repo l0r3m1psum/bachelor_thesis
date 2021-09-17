@@ -433,7 +433,7 @@ nelle tabelle riassuntive \ref{tab:globals} e \ref{tab:params}.
 \label{tab:params}
 \end{table}
 
-\section{Il Simulatore}
+\section{Il Simulatore} % XXX questa sezione farà sempre parte dei methods
 
 \marginpar{Questa sezione è da riorganizzare e riscrivere.}
 
@@ -795,76 +795,5 @@ I valori enumerati nella tabella \ref{tab:geo} sono definiti nelle tabelle
 
 \bibliographystyle{plain}
 \bibliography{document}
-
-% TODO: definire bene il formato dei file di output, perché da essi dipende
-% la possibilità di poter far cominciare la similazione con in input uno stato
-% raggiunto in precedenza.
-\iffalse
-\subsubsection{Formato dei CSV}
-
-\marginpar{Unità di misura dei dati? Tipo dei dati (int o float)?}
-
-I CSV emessi dalla base di dati conterranno in ogni riga i dati che si
-riferiscono ad una singola cella. I \file\ che ne indicano la grana avranno
-invece una struttura come quella della tabella \ref{tab:grain}, dove $x_n$ e
-$y_n$ rappresentano le coordinate degli angoli dell'area di interesse mentre
-\eng{length} e \eng{width} rappresentano, rispettivamente, la lunghezza e l
-larghezza di ogni singola cella.
-
-\begin{table}
-\centering
-\begin{tabular}{|c|c|c|c|c|c|}
-	\hline
-	$x_1$ & $y_1$ & $x_2$ & $y_2$ & \textbf{\eng{length}} & \textbf{\eng{width}}\\
-	\hline
-	450070 & 12980 & 670010 & 13300 & 1 & 1\\
-	\hline
-\end{tabular}
-\caption{Esempio \eng{file} grana.}
-\label{tab:grain}
-\end{table}
-
-Quelli emessi dal simulatore invece avranno una struttura come quella della
-tabella \ref{tab:output}.
-
-\begin{table}
-\centering
-\begin{tabular}{|c|c|c|c|c|}
-	\hline
-	$n_{11}$ & $b_{11}$ & \dots & $n_{1i}$ & $b_{1i}$\\
-	\vdots & \vdots & $\ddots$ & \vdots & \vdots\\
-	$n_{j1}$ & $b_{j1}$ & \dots & $n_{ji}$ & $b_{ji}$\\
-	\hline
-\end{tabular}
-\caption{Esempio \eng{output} simulatore.}
-\label{tab:output}
-\end{table}
-
-Dove $n$ è lo stato della cella, in fiamme o meno, e $b$ è la sua quantità di
-combustibile ancora a disposizione.
-\fi
-
-\iffalse % Old stuff for updating the data mid simulation
-I dati saranno quindi presi in \eng{input} da tre \file\ CSV: uno per i dati
-geografici, uno per quelli meteorologici e uno per lo stato iniziale
-dell'incendio. Ognuno di questi file sarà corredato da un'altro CSV che ne
-conterrà le informazioni sulla ``grana''.
-
-Per permettere l'aggiornamento di questi dati durante la simulazione il
-simulatore monitorerà la presenza di \file\ con nomi come \texttt{land.csv},
-\texttt{meteo.csv} e \texttt{fire.csv}. Nel caso in cui uno di questi file sia
-presente, dopo l'inizio della simulazione il simulatore provvederà a leggerli,
-aggiornare il suo stato interno e cambiargli nome\footnote{con nomi tipo
-\texttt{land\_<timestamp>.csv}} (o eliminarli) per evitare di rileggerli in
-futuro.
-
-Un implementazione ingenua della scrittura di questi file per l'aggiornamento
-dei dati potrebbe generare una \eng{race-condition}, ovvero la lettura di
-incompletidati, dato che la scrittura in un file non è atomica. Per evirate ciò
-una strateggia potrebbe essere quella di scrivere i dati in file con nomi tipo
-\texttt{tmpXXX} e una volta finito di scriverli si può usare \texttt{rename(2)},
-che è atomica, per dargli il nome giusto. Questo metodo sarà anche usata per la
-scrittura dei file.
-\fi
 
 \end{document}
