@@ -145,7 +145,7 @@ N_{ij}(0) &=& u_{ij}(0)\textrm{,}\\
 B_{ij}(0) &=& \gamma_{ij}\textrm{,}\\
 N_{ij}(t+1) &=& \cases{\max(V_{ij}(t), u_{ij}(t)), &se $\overbrace{B_{ij}(t) > 0}^\textrm{c'è combustibile}$;\cr
                        0, &altrimenti.}\\
-B_{ij}(t+1) &=& \cases{\max(0, B_{ij}(t)-\beta\tau), &se $\underbrace{N_{ij}(t) > 0}_\textrm{c'è incendio}$;\cr
+B_{ij}(t+1) &=& \cases{\max(0, B_{ij}(t)-\beta\tau), &se $\underbrace{N_{ij}(t) > 0}_\textrm{è infuocato}$;\cr
                        B_{ij}(t), &altrimenti.}
 \end{eqnarray}
 
