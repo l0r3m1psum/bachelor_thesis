@@ -140,7 +140,6 @@ assumere solo due valori 0 per niente incendio e 1 per incendio.
 
 Possiamo formalizzare tutto ciò che abbiamo detto finora con queste equazioni
 
-% TODO: capire qual'è la formula per gamma
 \begin{eqnarray}
 N_{ij}(0) &=& u_{ij}(0)\textrm{,}\\
 B_{ij}(0) &=& \gamma_{ij}\textrm{,}\\
@@ -154,7 +153,6 @@ Dove $\gamma_{ij}$ è la quantità iniziale di combustibile in una cella,
 $V_{ij}(t)$ è la possibilità che un l'incendio si sposti nella cella corrente da
 una delle sue limitrofe (figura \ref{fig:automata}), $\beta$ è la velocità di
 consumo del combustibile e $\tau$ e il passo temporale.
-% TODO: \beta deve esere calcolata dai dati a disposizione
 
 \begin{figure}
 \centering
@@ -269,7 +267,11 @@ S_{ij} = H_{ij} \cdot (1-A_{ij}) \cdot (1-W_{ij})\textrm{,}\\
 
 che è la percentuale di infiammabilità della cella, da notare che $A_{ij}$ la
 diminuisce probabilmente perché si considerano come zone abitate quelle col
-cemento.
+cemento. E $H_{ij}$ e $A_{ij}$ ci servono per calcolare
+
+\begin{equation} % NOTE: 4000 is the average wood density
+\gamma_{ij} = 4000(H_{ij}-A_{ij})\textrm{,}
+\end{equation}
 
 In fine
 
@@ -279,14 +281,21 @@ P_{ij} = P_{ij}\textrm{,}
 
 che  è l'altezza media ed è l'unico valore che non viene cambiato.
 
-% TODO: descrivere il comportamento del vento (gaussiano)
 Mentre delle stazioni meteo sul posto ci daranno dati riduardo la velocità e la
-direzione del vento\dots TODO: NON È ANCORA CHIARO COME FUNZIONANO.
+direzione del vento
 
 \begin{eqnarray}
-	F_{ij} &=& ??\\
-	D_{ij} &=& ??
+	F_{ij} &=& F_{ij} + F_{ij}0.2r_1\\
+	D_{ij} &=& D_{ij} + D_{ij}0.2r_1
 \end{eqnarray}
+
+Dove $r_1$ e $r_2$ sono due numeri casuali tra 1 e -1 dirstribuiti normamlmente.
+
+Ora possianmo anche calcolare
+
+\begin{equation}
+\beta_{ij} = 60(1+F_{ij}/10)\textrm{,}
+\end{equation}
 
 Sucessivamente nel modello saranno usate solo $S_{ij}$, $P_{ij}$, $F_{ij}$ e
 $D_{ij}$.
@@ -294,18 +303,18 @@ $D_{ij}$.
 \myrule
 
 Ora che sappiamo quali dati abbiamo disposizione, possiamo dare una definizione
-della possibilità di trasmisione dell'incendio $p_{ij}(\e_1, \e_2, t)$, della
+alla possibilità di trasmisione dell'incendio $p_{ij}(\e_1, \e_2, t)$, della
 funzione \ref{eq:probtest}.
 
 \begin{equation}\label{eq:prob}
-p_{ij}(\e_1, \e_2, t) = k_0 S_{ij} C_{i+\e_1j+\e_2}(t) d(\e_1, \e_2) f_w f_P\textrm{,}
+p_{ij}(\e_1, \e_2, t+1) = k_0 S_{ij} C_{i+\e_1j+\e_2}(t) d(\e_1, \e_2) f_w f_P\textrm{,}
 \end{equation}
 
 % NOTE: $k_0$ è UN parametro o IL parametro?
 dove $k_0$ è un parametro di ottimizzazione di soglia e
 
 \begin{equation}\label{eq:combust}
-C_{i+\e_1j+\e_2}(t) = \sin\left(\pi\frac{B_{i+\e_1j+\e_2}(t)}{\gamma_{i+\e_1j+\e_2}}\right)\textrm{,}
+C_{i+\e_1j+\e_2}(t+1) = \exp\left(-\frac{B_{i+\e_1j+\e_2}(t) - \gamma_{i+\e_1j+\e_2}^2/4}{\Delta}\right)\textrm{,}
 \end{equation}
 
 è lo stato di combustione della cella. Largomento di $C_{ij}(t)$ può assumere
@@ -401,7 +410,7 @@ nelle tabelle riassuntive \ref{tab:globals} e \ref{tab:params}.
 	$L$ & lato della singola cella & metri\\
 	$L^*$ & lunghezza area monitorata & metri\textsuperscript{2}\\
 	$W^*$ & ampiezza area monitorata & metri\textsuperscript{2}\\
-	$\beta$ & consumo combustibile & \combvar/secondo\\
+	$\Delta$ & Ah boh dimmelo tu & Again no clue\\
 	$\theta$ & probailità propagazione & adimensionale\\
 	$k_0$ & ottimizzazione soglia & adimensionale\\
 	$k_1$ & ottimizzazione vento & adimensionale\\
@@ -421,7 +430,7 @@ nelle tabelle riassuntive \ref{tab:globals} e \ref{tab:params}.
 	$H$ & altezza media della vegetazione & metri\\
 	$A$ & percentuale abitazione & adimensionale\\
 	$W$ & percentuale acqua presente & adimensionale\\
-	% NOTE: a quanto pare \gamma è una costante
+	$\beta$ & velocità di combustione & gotta go fast\\
 	$\gamma$ & quantità di combustibile & \combvar\\
 	$S$ & percentuale infiammabilità & adimensionale\\
 	$P$ & altitudine media & metri\\
@@ -613,6 +622,7 @@ riassunti nella tabella \ref{tab:config}.
 	$p_1$ & primo punto rettangolo\\
 	$p_2$ & secondo punto rettangolo\\
 	$g$ & grana simulatore\\
+	seed & stato iniziale per il generatore casuale\\
 	\hline
 \end{tabular}
 \caption{Parametri di configurazione addizionali del simulatore.}
