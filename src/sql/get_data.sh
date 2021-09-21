@@ -1,6 +1,7 @@
 #!/bin/sh
 # sh draft.sh turano 4559500 2121000 4569490 2130990
 # sh draft.sh turano 4559500 2121000 4569490 2130980
+set -e
 
 if [ $# -lt 5 ]
 then
