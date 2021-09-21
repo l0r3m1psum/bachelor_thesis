@@ -139,10 +139,16 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 						/s->Delta
 					);
 					// const float C = sinf(pi*adj_old_state->B/adj_param->gamma);
+					// const float d = (1 - 0.5f*fabsf((float) e1*e2));
 					const float fw = expf(
 						s->k1*(adj_param->F + r1)
+#if 1
 						* funcs[loop1](e1, e2, adj_param->D + r2)
 						/sqrt[loop1]
+#else
+						*(e1*cosf(s->params[ie1je2].D) + e2*sinf(s->params[ie1je2].D))
+						/sqrtf(e1*e1 + e2*e2)
+#endif
 					);
 					const float fP = expf(
 						s->k2*atanf((cur_param->P - adj_param->P)/s->L)
