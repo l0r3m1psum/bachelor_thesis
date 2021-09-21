@@ -157,7 +157,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 
 #define beta (60*(1 + cur_param->F/10)) /* burning rate */
 				/* NOTE: in this eqation u has been purposely removed */
-				bool is_on_fire = old_B > 0 ? V : false;
+				const bool is_on_fire = old_B > 0 ? V : false;
 				has_transmitted_fire |= is_on_fire;
 				s->new_state[ij].N = is_on_fire;
 				s->new_state[ij].B = old_N ? maxf(0, old_B - beta*s->tau) : old_B;
