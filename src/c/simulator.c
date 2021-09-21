@@ -6,6 +6,8 @@
 #include <time.h> /* clock */
 
 static bool should_stop_early = false;
+#define OPTIMIZED 1
+
 
 void
 simulation_SIGINT_handler(int sig) {
@@ -19,6 +21,7 @@ maxf(float a, float b) {
 	return res;
 }
 
+#if OPTIMIZED
 static float
 f_diag(int8_t e1, int8_t e2, float alpha) {
 	assert((e1 == 1 || e1 == -1) && (e2 == 1 || e2 == -1));
@@ -31,6 +34,7 @@ f_cross(int8_t e1, int8_t e2, float alpha) {
 	const bool cond = e1 != 0;
 	return (e1+e2)*sinf(pi/2*cond + (cond ? -alpha : alpha));
 }
+#endif
 
 /* Generates a normally distributed random number in [-1,1] using first a linear
  * cogruential generator and then the Box–Muller transform. The constants m and
@@ -93,6 +97,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		{-1, -1}, {0, -1}, {1, -1},
 	}; /* All offsets around a cell */
 	static_assert(sizeof Gamma == 16, "bad size");
+#if OPTIMIZED
 	const float d[NEIGHBOR_NO] = {
 		0.5f, 1.0f, 0.5f,
 		1.0f,       1.0f,
@@ -108,11 +113,16 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		f_cross,         f_cross,
 		f_diag, f_cross, f_diag,
 	};
+#endif
 
 	for (uint64_t loop0 = 0; loop0 < s->h; loop0++) {
 		bool has_transmitted_fire = false;
 		/* Skipping the border */
+#if OPTIMIZED
 		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,d,sqrt,funcs) reduction(|: has_transmitted_fire)
+#else
+		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma) reduction(|: has_transmitted_fire)
+#endif
 		for (uint64_t j = 1; j < s->Lstar - 1; j++) {
 			for (uint64_t i = 1; i < s->Wstar - 1; i++) {
 				const uint64_t ij = sim_index(i, j, s);
@@ -139,21 +149,25 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 						/s->Delta
 					);
 					// const float C = sinf(pi*adj_old_state->B/adj_param->gamma);
-					// const float d = (1 - 0.5f*fabsf((float) e1*e2));
+#if OPTIMIZED
+					const float myd = d[loop1];
+#else
+					const float myd = (1 - 0.5f*fabsf((float) e1*e2));
+#endif
 					const float fw = expf(
 						s->k1*(adj_param->F + r1)
-#if 1
+#if OPTIMIZED
 						* funcs[loop1](e1, e2, adj_param->D + r2)
 						/sqrt[loop1]
 #else
-						*(e1*cosf(s->params[ie1je2].D) + e2*sinf(s->params[ie1je2].D))
-						/sqrtf(e1*e1 + e2*e2)
+						*(e1*cosf(s->params[ie1je2].D+r2) + e2*sinf(s->params[ie1je2].D+r2))
+						/sqrtf((float) e1*e1 + e2*e2)
 #endif
 					);
 					const float fP = expf(
 						s->k2*atanf((cur_param->P - adj_param->P)/s->L)
 					);
-					const float p = s->k0 * cur_param->S * d[loop1] * fw * fP * C;
+					const float p = s->k0 * cur_param->S * myd * fw * fP * C;
 
 					/* this is Q, N has been purposely removed because it's
 					 * checked a priori
