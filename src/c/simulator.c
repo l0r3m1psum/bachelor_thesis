@@ -98,7 +98,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 	}; /* All offsets around a cell */
 	static_assert(sizeof Gamma == 16, "bad size");
 #if OPTIMIZED
-	const float d[NEIGHBOR_NO] = {
+	const float ds[NEIGHBOR_NO] = {
 		0.5f, 1.0f, 0.5f,
 		1.0f,       1.0f,
 		0.5f, 1.0f, 0.5f,
@@ -119,7 +119,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		bool has_transmitted_fire = false;
 		/* Skipping the border */
 #if OPTIMIZED
-		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,d,sqrt,funcs) reduction(|: has_transmitted_fire)
+		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,ds,sqrt,funcs) reduction(|: has_transmitted_fire)
 #else
 		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma) reduction(|: has_transmitted_fire)
 #endif
@@ -150,9 +150,9 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					);
 					// const float C = sinf(pi*adj_old_state->B/adj_param->gamma);
 #if OPTIMIZED
-					const float myd = d[loop1];
+					const float d = ds[loop1];
 #else
-					const float myd = (1 - 0.5f*fabsf((float) e1*e2));
+					const float d = (1 - 0.5f*fabsf((float) e1*e2));
 #endif
 					const float fw = expf(
 						s->k1*(adj_param->F + r1)
@@ -167,7 +167,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 					const float fP = expf(
 						s->k2*atanf((cur_param->P - adj_param->P)/s->L)
 					);
-					const float p = s->k0 * cur_param->S * myd * fw * fP * C;
+					const float p = s->k0 * cur_param->S * d * fw * fP * C;
 
 					/* this is Q, N has been purposely removed because it's
 					 * checked a priori
