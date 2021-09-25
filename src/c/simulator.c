@@ -24,13 +24,13 @@ maxf(float a, float b) {
 #if OPTIMIZED
 static float
 f_diag(int8_t e1, int8_t e2, float alpha) {
-	assert((e1 == 1 || e1 == -1) && (e2 == 1 || e2 == -1));
+	assert((e1 == 1 || e1 == -1) && (e2 == 1 || e2 == -1)); // e1*e2 != 0
 	return e1*sqrtf(2)*sinf(pi/4.0f + (e1*e2)*alpha);
 }
 
 static float
 f_cross(int8_t e1, int8_t e2, float alpha) {
-	assert(e1*e2 == 0 && (e1+e2 == 1 || e1+e2 == -1));
+	assert(e1*e2 == 0 && (e1+e2 == 1 || e1+e2 == -1)); // e1*e1 == 0
 	const bool cond = e1 != 0;
 	return (e1+e2)*sinf(pi/2*cond + (cond ? -alpha : alpha));
 }
