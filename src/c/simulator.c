@@ -8,7 +8,6 @@
 static bool should_stop_early = false;
 #define OPTIMIZED 1
 
-
 void
 simulation_SIGINT_handler(int sig) {
 	(void) sig;
@@ -20,21 +19,6 @@ maxf(float a, float b) {
 	const float res = a > b ? a : b;
 	return res;
 }
-
-#if OPTIMIZED
-static float
-f_diag(int8_t e1, int8_t e2, float alpha) {
-	assert((e1 == 1 || e1 == -1) && (e2 == 1 || e2 == -1)); // e1*e2 != 0
-	return e1*sqrtf(2)*sinf(pi/4.0f + (e1*e2)*alpha);
-}
-
-static float
-f_cross(int8_t e1, int8_t e2, float alpha) {
-	assert(e1*e2 == 0 && (e1+e2 == 1 || e1+e2 == -1)); // e1*e1 == 0
-	const bool cond = e1 != 0;
-	return (e1+e2)*sinf(pi/2*cond + (cond ? -alpha : alpha));
-}
-#endif
 
 /* Generates a normally distributed random number in [-1,1] using first a linear
  * cogruential generator and then the Box–Muller transform. The constants m and
@@ -108,11 +92,6 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		1.0f,           1.0f,
 		sqrtf(2), 1.0f, sqrtf(2),
 	};
-	float (* const funcs[NEIGHBOR_NO])(int8_t,int8_t,float) = {
-		f_diag, f_cross, f_diag,
-		f_cross,         f_cross,
-		f_diag, f_cross, f_diag,
-	};
 #endif
 
 	for (uint64_t loop0 = 0; loop0 < s->h; loop0++) {
@@ -154,16 +133,24 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 #else
 					const float d = (1 - 0.5f*fabsf((float) e1*e2));
 #endif
+#if OPTIMIZED
+					const int8_t s1 = e1*e2 != 0;
+					const int8_t s2 = (e1 != 0) & (e2 == 0);
+					const int8_t f2 = (e1+e2 == 0) | s2 ? -1 : 1;
+					const float  f1 = ((e1+e2 == 1)|((e1 == 1) & (e2 == -1)) ? 1 : -1)
+						* (s1 ? sqrtf(2) : 1);
 					const float fw = expf(
 						s->k1*(adj_param->F + r1)
-#if OPTIMIZED
-						* funcs[loop1](e1, e2, adj_param->D + r2)
+						* f1*sinf(f2*(adj_param->D + r2) + s1*pi/4 + s2*pi/2)
 						/sqrt[loop1]
+					);
 #else
+					const float fw = expf(
+						s->k1*(adj_param->F + r1)
 						*(e1*cosf(s->params[ie1je2].D+r2) + e2*sinf(s->params[ie1je2].D+r2))
 						/sqrtf((float) e1*e1 + e2*e2)
-#endif
 					);
+#endif
 					const float fP = expf(
 						s->k2*atanf((cur_param->P - adj_param->P)/s->L)
 					);
