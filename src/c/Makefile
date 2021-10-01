@@ -20,3 +20,4 @@ profile:
 	caffeinate -d time main ../../res/general_params.csv ../../res/turano_cells.csv ../../res/initial_state.csv ../../res/
 	xcrun xctrace record --template MyTemplate --time-limit 20s --window 10s --attach main
 	xcrun xctrace record --template 'Time Profiler' --launch -- main
+	OMP_NUM_THREADS=1 main
