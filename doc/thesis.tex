@@ -1,4 +1,4 @@
-\documentclass[draft]{article}
+\documentclass{article}
 
 \usepackage{graphicx}
 \usepackage{hyperref} % this should always be the last package
@@ -598,13 +598,14 @@ simple diagram where attributes have been omitted but are reported here.
 \begin{figure} % TODO: to finish
 \centering
 \setlength{\unitlength}{1cm}
-\begin{picture}(6,6)
-\setlength{\fboxsep}{8pt}
-\put(0,0){\fbox{Map}}
-\put(1,1){\fbox{Simulation}}
-\put(2,2){\fbox{Result}}
-\put(3,3){Work in progress\dots}
-\end{picture}
+\includegraphics[width=\linewidth]{er_diagram.pdf}
+% \begin{picture}(6,6)
+% \setlength{\fboxsep}{8pt}
+% \put(0,0){\fbox{Map}}
+% \put(1,1){\fbox{Simulation}}
+% \put(2,2){\fbox{Result}}
+% \put(3,3){Work in progress\dots}
+% \end{picture}
 \caption{ER diagram}
 \label{fig:er}
 \end{figure}
@@ -824,23 +825,22 @@ of the simulator. The only \texttt{pragma} used was the one in figure
 just tells OpenMP tho parallelize this for across the default number of cores
 and equally divides the number of iterations to the number of default cores. The
 \texttt{collapse(2)} just fuses the two nested loops into one.
-\verb+default(none)+ \verb+firstprivate(rng_state)+
-\verb+shared(s,Gamma,d,sqrt,funcs)+ are used to specify the visibility of the
-variables outside the loop, the first one just tell to not use any default, so
-that for every single variable we have to specify the sharing policy, the second
-one gives a copy of the variable \verb+rng_state+ to each core and initializes
-it to the same value in each of them, the third just sais that those variables
-are shared among threads. Finally \verb+reduction(|: has_transmitted_fire)+ just
-tels that at the end of the execution each thread all the prvate copies of
-\verb+has_transmitted_fire+ shall be ORed together. This is done to efficiently
-implement the halting condition avoiding problema like lock contetnio or false
-sharing.
+\verb+default(none)+ \verb+firstprivate(rng_state)+ \verb+shared(s,Gamma,d,sqrt)+
+are used to specify the visibility of the variables outside the loop, the first
+one just tell to not use any default, so that for every single variable we have
+to specify the sharing policy, the second one gives a copy of the variable
+\verb+rng_state+ to each core and initializes it to the same value in each of
+them, the third just sais that those variables are shared among threads. Finally
+\verb+reduction(|: has_transmitted_fire)+ just tels that at the end of the
+execution each thread all the prvate copies of \verb+has_transmitted_fire+ shall
+be ORed together. This is done to efficiently implement the halting condition
+avoiding problema like lock contetnio or false sharing.
 
 \begin{figure}
 \centering
 \footnotesize
 \verb+#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state)+
-\verb+shared(s,Gamma,d,sqrt,funcs) reduction(|: has_transmitted_fire)+
+\verb+shared(s,Gamma,d,sqrt) reduction(|: has_transmitted_fire)+
 \caption{OpenMP \texttt{pragma} used}
 \label{fig:pragma}
 \end{figure}
@@ -911,21 +911,38 @@ line of code.
 
 \subsection{Computational Performances}
 
-The non multicore optimizations save together more or less a second of execution
-time as measured with \texttt{time(1)} (single core performance). Even though
-they don't seem to be faster when analysed in isolation with Googlebench. I
-think that this is realted to the use of the ports in the CPU but I haven't
-verified this claim.
+The parallel code is much faster than the single core one as shown in table
+\ref{tab:performance}, in the first column the number of updated cell is
+expressed as the width times the height of the grid, time the number of
+iteretions. Then number of state dumps is displayed to show its effect on
+performance. Then columns $T_S$ and $T_P$, shows serial and parallel time
+respectivelly. Finally $S = T_S/T_P$ and $E = S/p$ shows the speedup and
+efficiency, where $p$ is the number of cores (6 in this case).
 
-The parallel code is instead is roughly three times faster than the single core
-one.
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{Updates} & \textbf{Dumps} & \textbf{$T_S$} & \textbf{$T_P$} & \textbf{$S$} & \textbf{$E$}\\
+\hline
+$10^6\times 100$ & 10 & 12.85s & 4.30s & 2.98 & 0.49\\
+$10^6\times 100$ & 1 & 10.00s & 1.80s & 5.55 & 0.92\\
+$10^6\times 1000$ & 10 & 98.64s & 17.35s & 5.68 & 0.94\\
+$10^6\times 1000$ & 1 & 93.94s & 13.15s & 7.14 & 1.19\\
+$10^6\times 10000$ & 1 & 929.67s & 147.09s & 6.32 & 1.05\\
+\hline
+\end{tabular}
+\caption{Performance report.}
+\label{tab:performance}
+\end{table}
 
-To give an idea of the level of performance reached by the final implementation
-the current one is able to do 100 iterations on a grid of $1000\times 1000$
-cell\footnote{The size of the state is 8MB and the one of the cells parameters
-is 20MB bytes.}, taking a snapshot every 10, from a starting condidion where all
-the cells are on fire, takes roughly 4.30s of real time including the file
-reading.
+The size of the state for all the simulations  was 8MB and the one for the cells
+paramenters was 20MB. The compiler options for the optimization were just
+\texttt{-O3 -flto -DNDEBUG}. Taking the last row of table \ref{tab:performance}
+as a reference we are able to process one cell in roughly $147.09s/10^{10}
+\approx 14.7\textrm{ns}$, and we should always keep in mind that this is
+starting from the worst possible starting conditions i.e. when all cells are on
+fire.
 
 % TODO: nell'implementatione e qua devo parlare dello skip e di quanto tempo salva.
 
