@@ -98,7 +98,7 @@ simulation_run(simulation_t *s, bool (*dump)(simulation_t *)) {
 		bool has_transmitted_fire = false;
 		/* Skipping the border */
 #if OPTIMIZED
-		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,ds,sqrt,funcs) reduction(|: has_transmitted_fire)
+		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma,ds,sqrt) reduction(|: has_transmitted_fire)
 #else
 		#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state) shared(s,Gamma) reduction(|: has_transmitted_fire)
 #endif
