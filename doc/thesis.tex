@@ -983,8 +983,6 @@ all the integration dance and concentrating directly in performat simulation.
 A trivial version could be implemented on a GPU to see if the work saved by the
 CPU implementation still makes it faster with respect to a GPU implementation.
 
-\newpage
-
 \appendix
 
 \section{Description of the satellitar data}\label{sec:desc}
@@ -993,7 +991,7 @@ The values enumerated in the table \ref{tab:geo} are defined in the table
 \ref{tab:forest}, \ref{tab:urbanization}, \ref{tab:water1}, \ref{tab:water2} and
 \ref{tab:altimetry}.
 
-\begin{table}
+\begin{table}[ht]
 \centering
 \begin{tabular}{|c|l|}
 \hline
@@ -1008,8 +1006,8 @@ The values enumerated in the table \ref{tab:geo} are defined in the table
 \caption{Forests}
 \label{tab:forest}
 \end{table}
-
-\begin{table}
+%
+\begin{table}[ht]
 \centering
 \begin{tabular}{|c|l|}
 \hline
@@ -1025,8 +1023,37 @@ The values enumerated in the table \ref{tab:geo} are defined in the table
 \caption{Urbanization}
 \label{tab:urbanization}
 \end{table}
-
-\begin{table}
+%
+\begin{table}[ht]
+\centering
+\begin{tabular}{|c|l|}
+\hline
+\textbf{Value} & \textbf{Class}\\
+\hline
+0 & Torrent absence\\
+1 & Torrent presence\\
+\hline
+\end{tabular}
+\caption{Water 2}
+\label{tab:water2}
+\end{table}
+%
+\begin{table}[ht]
+\centering
+\begin{tabular}{|c|l|}
+\hline
+\textbf{Value} & \textbf{Class}\\
+\hline
+0 & Minimum height\\
+\vdots & \vdots\\
+4380 & Maximum height\\
+\hline
+\end{tabular}
+\caption{Altimetry}
+\label{tab:altimetry}
+\end{table}
+%
+\begin{table}[ht]
 \centering
 \begin{tabular}{|c|l|}
 \hline
@@ -1043,35 +1070,6 @@ The values enumerated in the table \ref{tab:geo} are defined in the table
 \end{tabular}
 \caption{Water 1}
 \label{tab:water1}
-\end{table}
-
-\begin{table}
-\centering
-\begin{tabular}{|c|l|}
-\hline
-\textbf{Value} & \textbf{Class}\\
-\hline
-0 & Torrent absence\\
-1 & Torrent presence\\
-\hline
-\end{tabular}
-\caption{Water 2}
-\label{tab:water2}
-\end{table}
-
-\begin{table}
-\centering
-\begin{tabular}{|c|l|}
-\hline
-\textbf{Value} & \textbf{Class}\\
-\hline
-0 & Minimum height\\
-\vdots & \vdots\\
-4380 & Maximum height\\
-\hline
-\end{tabular}
-\caption{Altimetry}
-\label{tab:altimetry}
 \end{table}
 
 \clearpage
