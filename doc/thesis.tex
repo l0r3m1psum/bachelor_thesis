@@ -682,7 +682,37 @@ Given the description of the model the algorithm used for the simulation is
 essentialy map reduce \cite{sac}. Map in the sense that the input is
 evenly distributed between the machine core and reduce in the sense that the
 halting condition has to be checked by ORing together a piece of the work done
-by all the cores.
+by all the cores. A pseudo-code description is shown in figure \ref{fig:code}.
+Instead in figure \ref{fig:architecture} there is a simple architectural diagram
+of the simulator program.
+
+\begin{figure}
+\centering
+\begin{verse}
+\textbf{until} simulation horizon has not been reached\\
+\hspace{2em} \textbf{parallel for} each cell\\
+\hspace{2em}\hspace{2em} \textbf{if} neighborhood can transmit fire to current cell \textbf{then}\\
+\hspace{2em}\hspace{2em}\hspace{2em} update cell state and local termination condition\\
+\hspace{2em}\hspace{2em} \textbf{else:}\\
+\hspace{2em}\hspace{2em}\hspace{2em} copy old cell state\\
+\hspace{2em} \textbf{reduce} all termination condition into one\\
+\hspace{2em} \textbf{if} it is time to dump state \textbf{then}\\
+\hspace{2em}\hspace{2em} dump state\\
+\hspace{2em} \textbf{if} should exit because graceful halt signal has arrived \textbf{then}\\
+\hspace{2em}\hspace{2em} exit\\
+\hspace{2em} \textbf{if} should exit because termination condition \textbf{then}\\
+\hspace{2em}\hspace{2em} exit
+\end{verse}
+\caption{Pseudo-code.}
+\label{fig:code}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.7\linewidth]{architecture.pdf}
+\caption{Architecture.}
+\label{fig:architecture}
+\end{figure}
 
 \section{Implemetation}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
