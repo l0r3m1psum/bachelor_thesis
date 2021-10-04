@@ -385,9 +385,10 @@ Let's suspend, for now, our discussion about the model to better describe the
 data at our disposal, introdiced in section \ref{sec:data}.
 
 The satellite puts at our disposal a series of data, described in the table
-\ref{tab:geo}, the meaning of the values is described in the appendix
-\ref{sec:desc}. However those data cannot be used as is in the model but have to
-be ``refined'' with the following mathematical corrispondences.
+\ref{tab:geo}, the underlined ones are currently not used, the meaning of the
+values is described in the appendix \ref{sec:desc}. However those data cannot be
+used as is in the model but have to be ``refined'' with the following
+mathematical corrispondences.
 
 \begin{table}
 \centering
@@ -395,11 +396,12 @@ be ``refined'' with the following mathematical corrispondences.
 	\hline
 	\textbf{Symbol} & \textbf{Name} & \textbf{Interval}\\
 	\hline
-	$G$ & Foreste & 0,1,2,255\\
-	$U$ & Urbanizzazione & 0,\ldots,100,255\\
+	$G$ & Forests & 0,1,2,255\\
+	$U$ & Urbanization & 0,\ldots,100,255\\
 	$W1$ & Water1 & 0,\ldots,4,253,255\\
 	$W2$ & \underline{Water2} & 0,1\\
-	$P$ & Altimetria & 0,\ldots,4380\\
+	$P$ & Altimetry & 0,\ldots,4380\\
+	$CN$ & \underline{Nature Card} & 1,\ldots,90\\
 	\hline
 \end{tabular}
 \caption{Geographical data for the single cell.}
