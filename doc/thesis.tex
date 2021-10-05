@@ -1,21 +1,17 @@
-\documentclass{article}
+% !TeX encoding = UTF-8
+% !TeX program = pdflatex
+% !TeX spellcheck = it_IT
+\let\oldcases\cases % to fool amsmath
+\documentclass[Lau]{sapthesis} % LaM for a Laurea Magistrale
 
-\usepackage{graphicx}
-\usepackage{hyperref} % this should always be the last package
-
-\newcommand{\mytitle}{Multi-thread simulation of a large scale dynamical system}
-\newtheorem{requirement}{Requirement}
-\newcommand{\e}{\epsilon}
-\newlength{\rulewidth}\setlength{\rulewidth}{0.4pt}
-\newcommand{\myrule}{\noindent\rule{\textwidth}{\rulewidth}}
-
-\title{\mytitle}
-\date{2021}
-\author{Diego Bellani\thanks{Student}\and Enrico Tronci\thanks{Supervisor}}
+\usepackage{microtype}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
 
 \hypersetup{
+	pdftitle={Multi-thread simulation of a large scale dynamical system},
 	pdfauthor={Diego Bellani},
-	pdftitle={\mytitle},
 	pdfsubject={Bachelor thesis},
 	pdfkeywords={bachelor,thesis,programming},
 	pdfproducer={LaTeX},
@@ -23,6 +19,22 @@
 	pdfborder={0 0 0},
 	pageanchor=false
 }
+
+\title{Multi-thread simulation of a large scale dynamical system}
+\author{Diego Bellani}
+\IDnumber{1838645}
+\course{Informatica}
+\courseorganizer{Facoltà di Ingegneria dell'Informazione Informatica e Statistica}
+\AcademicYear{2020/2021}
+\copyyear{2021}
+\advisor{Prof. Tronci}
+\authoremail{bellanidiego@gmail.com}
+
+\newtheorem{requirement}{Requirement}
+\newcommand{\e}{\epsilon}
+\newlength{\rulewidth}\setlength{\rulewidth}{0.4pt}
+\newcommand{\myrule}{\noindent\rule{\textwidth}{\rulewidth}}
+\def\cases#1{\oldcases{#1}} % always to fool amsmath
 
 % TODO:
 % * devo citare il più possibile e fare ricerca sulle varie cose citate
@@ -60,8 +72,7 @@
 
 \begin{document}
 
-\begin{titlepage}
-\pagenumbering{gobble}
+\frontmatter
 \maketitle
 
 \begin{abstract}
@@ -73,15 +84,11 @@ process. Finally some possible improvements and future developments are
 described at the end.
 \end{abstract}
 
-\end{titlepage}
-
-\pagenumbering{roman}
 \tableofcontents
 \listoffigures
 \listoftables
-\newpage
 
-\pagenumbering{arabic}
+\mainmatter
 
 \section{Introduction}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
