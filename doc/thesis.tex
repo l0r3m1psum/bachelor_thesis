@@ -61,7 +61,7 @@
 \begin{document}
 
 \begin{titlepage}
-\pagenumbering{roman}
+\pagenumbering{gobble}
 \maketitle
 
 \begin{abstract}
@@ -73,10 +73,13 @@ process. Finally some possible improvements and future developments are
 described at the end.
 \end{abstract}
 
+\end{titlepage}
+
+\pagenumbering{roman}
 \tableofcontents
 \listoffigures
 \listoftables
-\end{titlepage}
+\newpage
 
 \pagenumbering{arabic}
 
@@ -125,9 +128,8 @@ provided.
 
 The usual tool we used for implementation of mathematical models, Modelica, did
 not made the cut beacuse of its limitation regarding dinamically sized arrays
-and the exponential (\textbf{I'm not shure I can say that it is exponential})
-time taken by the optimization algorithm at the increasing of the size of the
-simulation grid.
+and the exponential time taken by the optimization algorithm at the increasing
+of the size of the simulation grid.
 
 Libraries exists to develop cellular automata models \cite{calib2}, but with
 generality comes a lost in performance.
@@ -1103,8 +1105,6 @@ The values enumerated in the table \ref{tab:geo} are defined in the table
 \caption{Water 1}
 \label{tab:water1}
 \end{table}
-
-\clearpage
 
 \bibliographystyle{plain}
 \bibliography{document} % TODO: cambiare il file in thesis.bib
