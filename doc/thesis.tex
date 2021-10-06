@@ -43,9 +43,6 @@
 \def\subsection{\oldsection}
 \def\section{\chapter}
 
-% TODO:
-% * devo dire quanti MB al secondo sono processati
-
 % ERRORI TROVATI:
 % * la probabilità deterministica (si erano scordati di dirci quali termini
 %   perturbare)
@@ -422,7 +419,7 @@ H_{ij} = \cases{1 + G_{ij}, &if $0 \leq G_{ij} \leq 2$;\cr
                   0, &if $G_{ij} = 255$.}
 \end{equation}
 
-is the medium height  of the vegetation in a cell,
+is the medium height of the vegetation in a cell,
 
 \begin{equation}\label{eq:inhabitants}
 A_{ij} = \cases{U_{ij}/100, &if $0 \leq U_{ij} \leq 100$;\cr
@@ -691,7 +688,7 @@ Given the description of the model the algorithm used for the simulation is
 essentially map reduce \cite{sac}. Map in the sense that the input is evenly
 distributed between the machine core and reduce in the sense that the halting
 condition has to be checked by ORing together a piece of the work done by all
-the cores. A pseudo-code description is shown in figure \ref{fig:code}.  Instead
+the cores. A pseudo-code description is shown in figure \ref{fig:code}. Instead
 in figure \ref{fig:architecture} there is a simple architectural diagram of the
 simulator program.
 
@@ -843,7 +840,7 @@ but still contributed to shave of some time from the simulation. The first was
 archived moving the calculation of $\beta_{ij}$ from the start of the simulation
 loop to the end of it, in a conditional branch this because on most cells no
 calculation has to be done and reading $\mathcal{F}$ would bring in its entire
-cache line, causing a probable miss.  Instead in this way it is calculated only
+cache line, causing a probable miss. Instead in this way it is calculated only
 when needed and when the cache line was already loaded due to previous mandatory
 calculations.
 
@@ -854,7 +851,7 @@ and cosine in a form where a single call to the sine function is made.
 Before talking about those optimizations a little note about precalculating
 functions has to be made, in modern day usually the bottle neck is not the
 number of instructions to execute but the amount of memory that one has to
-access, therefore big tables of precalculated values are of no help.  But the
+access, therefore big tables of precalculated values are of no help.But the
 ones considered in my scenario are all tiny, in fact they all fit in a single
 cache line.
 
@@ -959,10 +956,12 @@ testing and performance measuring.
 
 \subsection{Goals}
 
-The goals of the experiments done on the simulator software were to show the
-correct execution of the single parts and the integration between the
+The goals of the experiments done on the simulator software were first to show
+the correct execution of the single parts and the integration between the
 database part of the simulator and the part that executes the model worked
-correctly. Also a good level of performance had to be archived.
+correctly. The second objective was to show the fulfillment of the performance
+requirements established by my advisor, which were a maximum o 1$\mu$s of time
+to process a single cell, which was largely respected.
 
 \subsection{Setting}
 
@@ -981,16 +980,18 @@ features namely sanitizers. And the C language standard library offered the
 \subsection{Correctness}
 
 Correctness of the various parts of the software has been shown with mostly hand
-generated test cases, and manual testing.
+generated test cases, and manual testing. Automated testing like fuzzing has not
+been used mostly becouse of my inexpirience with them. Also a unit-testig could
+not be done in an effective way becouse of the continous change of requirements.
 
 For the database schema testing various \texttt{INSERT}, \texttt{DELETE} and
 \texttt{UPDATE} clauses have been tried to trigger all the various check of the
 data. No bogus data was able to get in the database after the testing was done.
 
-C is a notoriously error prone language to program in, this includes
-it's integer (and float) conversion, manual memory allocation,
-undefined behavior and pointer arithmetic. But tools can help a
-lot in producing good quality software.
+C is a notoriously error prone language to program in, this includes it's
+integer (and float) conversion, manual memory management, undefined behavior and
+pointer arithmetic. But tools can help a lot in producing good quality software,
+most of which comes included with modern compilers.
 
 For the execution part the majority of bugs where caught or reported via
 warnings and the AddressSanitizer \cite{asan} feature of both \texttt{gcc(1)}
@@ -1000,7 +1001,8 @@ that were encountered all caught by setting \texttt{default(none)} in the OpenMP
 \texttt{pragma}.
 
 The only bugs that were not found by the previously mentioned tools in the model
-executor, were logic ones related to the input validation.
+executor, were logic ones related to the input validation. Wich some of them
+were tricky to fix due to some poor choiches early in development.
 
 The core part of the model executor was shown to be correct by inspection
 because it is a relatively simple and straightforward function, thanks in part
@@ -1035,7 +1037,7 @@ $10^6\times 10000$ & 1 & 929.67s & 147.09s & 6.32 & 1.05\\
 \label{tab:performance}
 \end{table}
 
-The size of the state for all the simulations  was 8MB and the one for the cells
+The size of the state for all the simulations was 8MB and the one for the cells
 parameters was 20MB. The compiler options for the optimization were just
 \texttt{-O3 -flto -DNDEBUG}. Taking the last row of table \ref{tab:performance}
 as a reference we are able to process one cell in roughly $147.09s/10^{10}
@@ -1043,7 +1045,12 @@ as a reference we are able to process one cell in roughly $147.09s/10^{10}
 starting from the worst possible starting conditions i.e. when all cells are on
 fire.
 
-% TODO: nell'implementatione e qua devo parlare dello skip e di quanto tempo salva.
+To conclude the computational performance discussion I would like to remark the
+amount of bytes/second processed, always taking the last row of table
+\ref{tab:performance}. The state has been processed 10000, which times 8MB gives
+us 80GB read and written in 929.67s or 86MB/s, with the same reasoning we get
+215.1MB/s read from the parameters.
+
 
 \section{Conclusion}
 
@@ -1071,6 +1078,8 @@ Another optimization could be tried like the one proposed in the Game
 Programming Graphics Black Book (citation), that are especially suited for
 sparse cellular automata simulation. Also the use of \texttt{PREFETCH}
 instructions could help.
+
+Also fuzzing could help find some lurking (unobvious) bugs.
 
 \subsection{Future Work}
 
