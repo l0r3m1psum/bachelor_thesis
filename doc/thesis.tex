@@ -36,9 +36,18 @@
 \newcommand{\myrule}{\noindent\rule{\textwidth}{\rulewidth}}
 \def\cases#1{\oldcases{#1}} % always to fool amsmath
 
+\let\oldsection\section
+\let\oldsubsection\subsection
+
+\def\subsubsection{\oldsubsection}
+\def\subsection{\oldsection}
+\def\section{\chapter}
+
 % TODO:
-% * devo includere delle metriche sul codice e.g. il numero di linee di codice
-% * forse dovrei parlare di cos'è POSIX
+% * devo includere delle metriche sul codice e.g. il numero di linee di codice 1300
+% * devo dire quanti MB al secondo sono processati
+% * devo parlare più approfonditamente di ARRAY
+% * devo parlare di cos'è POSIX
 
 % ERRORI TROVATI:
 % * la probabilità deterministica (si erano scordati di dirci quali termini
