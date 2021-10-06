@@ -44,10 +44,7 @@
 \def\section{\chapter}
 
 % TODO:
-% * devo includere delle metriche sul codice e.g. il numero di linee di codice 1300
 % * devo dire quanti MB al secondo sono processati
-% * devo parlare più approfonditamente di ARRAY
-% * devo parlare di cos'è POSIX
 
 % ERRORI TROVATI:
 % * la probabilità deterministica (si erano scordati di dirci quali termini
@@ -255,6 +252,19 @@ and then standardized by POSIX.
 
 Other shells exists but this is the only standardized one and many of the other
 ones have this as a subset, so it is easy to found in a system.
+
+\subsubsection{POSIX}
+
+As said in the previous section the shell used is the one standardized by POSIX.
+POSIX is a family of standards defined by the IEEE (technically called IEEE
+1003) for portability among operating systems, in fact it stands for ``Portable
+Operating System Interface''. It defines both user programs (like the shell and
+its utilities) and operating system API (system calls).
+
+While not necessary, for performance reason some POSIX API have been used in the
+C code too. This decreased its portability (which is guaranteed among all
+operating systems if the standard library is used) to only POSIX systems, but
+this kind of system was the only system the simulator was meant to run on.
 
 \section{Methods}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -623,7 +633,7 @@ meteorological and geographical, of the single cells discussed before, the
 `data' attribute in Result is an array tuples containing the state of the cell
 i.e. the presence of fire and the amount of fuel in it. `rect' in both Map and
 Simulation is a pair of points that in the first one indicates where on the
-globe, in the LAEA\footnote{Proiezione Lambert azimuthal Equal-Area} Europe
+globe, in the LAEA\footnote{Projection Lambert azimuthal Equal-Area} Europe
 \cite{laeae} coordinate system with reference system ETRS89\footnote{European
 Terrestrial Reference System} \cite{etrs89}, the map is situated. The second one
 indicates which subset of the map the simulation has been run on.
@@ -685,6 +695,18 @@ the cores. A pseudo-code description is shown in figure \ref{fig:code}.  Instead
 in figure \ref{fig:architecture} there is a simple architectural diagram of the
 simulator program.
 
+Something which is not quite clear from the pseudo-code is that the most
+complicated part of the code is the checking of fire transmission by neighboring
+cells. which is where the vast majority of the optimization efforts (excluding
+the parallelization of the for loop) were made.
+
+Also for brevity all the error checking/reporting while reading the input data
+has been omitted but it required a good deal of effort to implement. But a brief
+note on its implementation can be done here. To make file reading fast the
+parsing and validation of the files is done in a single pass and the minimal
+amount of allocation is done by the routine that reads the files from disk. This
+has been archived via reuse of a resizable memory area (\texttt{realloc(3)}).
+
 \begin{figure}
 \centering
 \begin{verse}
@@ -742,7 +764,17 @@ simple algorithmic improvement i.e. not always simulating all the cells.
 The rest of what is written in this section is ultimately what has been chosen
 and used for the implementation.
 
+The total number of lines of code (including comments) is roughly 1300. Not that
+much considering what has been accomplished and the complete absence of external
+libraries. Approximately a 950 of those are C code 250 SQL and the last 100
+shell.
+
 \subsection{SQL}
+
+Firstly a DBMS had to be chosen for the implementation of the database schema.
+The choice ended up being PostgreSQL thanks to its proven reliability (it has
+more than 30 years of active development behind its back) and its support for
+object-relational features of modern SQL, namely \texttt{ARRAY} data types.
 
 The implementation of the schema for the database was divided in three parts.
 First the creation of various \texttt{TYPE} and \texttt{DOMAIN} that modeled
@@ -752,6 +784,19 @@ various related data and to establish the relations among them. Third the
 creation of the trigger to maintain the invariance stated in section
 \ref{sec:schema}, across the various operations that modify the state of the
 database.
+
+The use of the \texttt{ARRAY} data type made really easy querying rectangular
+shaped data (i.e. maps). For example let us say that we want to select the
+sub-rectangle located between points $(x_0,y_0)$ and $(x_1,y_1)$, in our
+rectangle, as a flat list of values, then the select part of our query would be
+just this \texttt{(unnest(data[Y0:Y1][X0:X1])).*}, where we assume that our
+rectangle is in the row called data.
+
+Given the fact that we have to interact with geo-spatial data one may ask one
+not use specific extensions like PostGIS. The reasons are simple, PostGIS
+supports much more advanced operations that what we needed and sticking to
+standard SQL ensures maximum portability of the schema and the queries (where
+it is possible).
 
 \subsection{C}
 
@@ -848,30 +893,45 @@ The most effective optimization was the parallelization of the algorithm
 together with the skip of cell that did not needed to be simulated. This
 obviously because the algorithm is trivially parallelizable, due to the fact
 that there is no need to communication between the thread, except for the one at
-the end of the for loop.
+the end of the for loop. But even if the algorithm lends itself well to
+parallelization some consideration had to be taken to avoid trivial performance
+losses.
 
 Because of this OpenMP allowed to easily and efficiently parallelize the main
 loop of the simulator. The only \texttt{pragma} used was the one in figure
 \ref{fig:pragma}. Now let's explain it, the first part \verb+#pragma omp parallel for+
-just tells OpenMP to parallelize this for across the default number of cores
-and equally divides the number of iterations to the number of default cores. The
-\texttt{collapse(2)} just fuses the two nested loops into one.
+just tells OpenMP to parallelize this \texttt{for} across the default number of
+cores and equally divides the number of iterations to the number of default
+cores.
+
+The \texttt{collapse(2)} just fuses the two nested loops into one, this is done
+to avoid problems in case of particularly short and wide simulation areas. In
+this cases the work could not be rightly divided among the cores. And speaking
+about work splitting among cores \texttt{schedule(static)} was chosen. This
+basically tells the compiler to divide the iterations of the loop in a number of
+chunks equal to the number of cores and assign one of those chunk to each core.
+Because the amount of work that each core had to do was almost equal this should
+pretty much be the optimal configuration. The other kinds of schedule offered by
+OpenMP like \texttt{dynamic} and \texttt{guided} just added more overhead due to
+the synchronization that they require to operate.
+
 \verb+default(none)+ \verb+firstprivate(rng_state)+ \verb+shared(s,Gamma,d,sqrt)+
 are used to specify the visibility of the variables outside the loop, the first
 one just tell to not use any default, so that for every single variable we have
 to specify the sharing policy, the second one gives a copy of the variable
 \verb+rng_state+ to each core and initializes it to the same value in each of
-them, the third just says that those variables are shared among threads. Finally
-\verb+reduction(|: has_transmitted_fire)+ just tells that at the end of the
-execution each thread all the private copies of \verb+has_transmitted_fire+ shall
-be ORed together. This is done to efficiently implement the halting condition
-avoiding problems like lock contention or false sharing.
+them, the third just says that those variables are shared among threads.
+
+Finally \verb+reduction(|: has_transmitted_fire)+ just tells that at the end of
+the execution each thread all the private copies of \verb+has_transmitted_fire+
+shall be ORed together. This is done to efficiently implement the halting
+condition avoiding problems like lock contention or false sharing.
 
 \begin{figure}
 \centering
 \footnotesize
 \verb+#pragma omp parallel for collapse(2) default(none) firstprivate(rng_state)+
-\verb+shared(s,Gamma,d,sqrt) reduction(|: has_transmitted_fire)+
+\verb+shared(s,Gamma,d,sqrt) reduction(|: has_transmitted_fire) schedule(static)+
 \caption{OpenMP \texttt{pragma} used}
 \label{fig:pragma}
 \end{figure}
@@ -882,6 +942,14 @@ The POSIX shell \texttt{sh(1)}, together with its utilities, was used in the and
 as the integration language between the two pieces of the simulator. It was used
 especially for its omnipresence in UNIX like systems, and my familiarity with
 it.
+
+The most used command in the script was \texttt{psql(1)}. While it is not a
+POSIX command it still comes bundled with PostgreSQL our database of choice, so
+no additional dependencies are required. It allowed to easily mix SQL with shell
+code, and thanks to its support of variables it allowed safe interpolation
+between user supplied strings and the SQL code. Also the output generated by the
+query could be easily formatted to make it easier to use in the rest of the
+shell script.
 
 \section{Experimental Results}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
