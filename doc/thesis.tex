@@ -57,10 +57,10 @@
 \maketitle
 
 \begin{abstract}
-In this intership report I describe how a software for large scale, high
+In this internship report I describe how a software for large scale, high
 performance, forest fire simulation was developed, starting from a model given
-by a third party and ending in a functioning implementation. The tecnology used
-are described toghether with the various problems faced during the development
+by a third party and ending in a functioning implementation. The technology used
+are described together with the various problems faced during the development
 process. Finally some possible improvements and future developments are
 described at the end.
 \end{abstract}
@@ -77,14 +77,14 @@ Firefighting in forests is a complex activity due to the limited availability of
 means and resources. Therefore the intervention strategy have to consider the
 possible evolution of the fire to make the best use of what is available.
 
-The possible evolution of a fire can be charaterized with a mathematical model
-and predictred with a faster-then-real-time simulation of said model. Given
+The possible evolution of a fire can be characterized with a mathematical model
+and predicted with a faster-then-real-time simulation of said model. Given
 this, actions can be taken ahead of time to minimize the damage caused by the
 fire and maximize the fire extinction speed.
 
 \subsection{Context}
 
-This intership is part of a project called ``Satellite Driven Fire Simulator'',
+This internship is part of a project called ``Satellite Driven Fire Simulator'',
 financed by the region of Lazio, to aid firefighters fight put out forest fires.
 
 This project is divided in four parts:
@@ -92,9 +92,9 @@ This project is divided in four parts:
 \begin{enumerate}
 \item development of a mathematical model (done by Paola Russo of the Tor
 Vergata university \cite{mod});
-\item \label{enum:my_work} development of a software to run the mathematcal
+\item \label{enum:my_work} development of a software to run the mathematical
 model (done by me);
-\item \label{enum:interaction} development of a user interface for inputung data
+\item \label{enum:interaction} development of a user interface for data input
 to the simulator and showing the results in a human readable fashion;
 \item \label{enum:data} gathering the data from the field, this includes
 geographic data from satellites \cite{cop} and meteorologic data from on field
@@ -109,13 +109,13 @@ evolution of forest fires ahead of time.
 The original implementation was made in Microsoft
 Excel\textsuperscript{\textregistered}, which is fine for prototyping but not
 suitable for fast large scale simulations. Therefore a better implementation was
-needed both for speed and user friendlyness.
+needed both for speed and user friendliness.
 
 For this purpose an Intel server running a Linux based operating system was
 provided.
 
 The usual tool we used for implementation of mathematical models, Modelica, did
-not made the cut beacuse of its limitation regarding dinamically sized arrays
+not made the cut because of its limitation regarding dynamically sized arrays
 and the exponential time taken by the optimization algorithm at the increasing
 of the size of the simulation grid.
 
@@ -130,11 +130,11 @@ the model before its real implementation.
 I have implemented from scratch the simulator dividing it in two parts a data
 integration one and a model execution one. Given that other parts of the project
 have still to be implemented the data integration part of my software can be
-used to make this other parts comunicate between each other.
+used to make this other parts communicate between each other.
 
 Regarding the model that was used to implement the software, some corrections
 have been done to it, by me and my advisor (i.e. I have noticed the problems and
-my advisor promptly reported them or cerrected them on his own).
+my advisor promptly reported them or corrected them on his own).
 
 \subsection{Related Work}
 
@@ -156,7 +156,7 @@ could be done better in the current implementation and in eventual future works.
 
 \section{Background}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The work done in this internship revolves arround three topics in particular:
+The work done in this internship revolves around three topics in particular:
 cellular automata, the relational data model \cite{codd} and multithreaded
 programming.
 
@@ -178,27 +178,27 @@ generation.
 
 A particularly famous cellular automata configuration is the one created by
 John~H.~Conway called ``Game of Life'' \cite{gol} it is played on a rectangular
-grid (or a thorus), the neighborhood of each cell are the 8 arround it (also
+grid (or a thorus), the neighborhood of each cell are the 8 around it (also
 known as the Moore neighborhood) and each cell has two state alive or dead.
 There are three rules, one that determines the survival of a cell, on the death
 and one the birth.
 
-Even such a simple celluar automata has many intresting features, one of which
-is beeing Turing complete \cite{win}.
+Even such a simple cellular automata has many interesting features, one of which
+is being Turing complete \cite{win}.
 
 Cellular automata have found applications in various scientific fields
-\cite{cellularbio}. Even in the modelling of fire evolutiona as this project
+\cite{cellularbio}. Even in the modeling of fire evolution as this project
 shows.
 
 \subsection{Relational Data Model}
 
 The relational data model is a data model proposed by Edgar~F.~Codd for database
 management systems. As the name implies it is based on mathematical relations. A
-database is a collection of relation of tuples each of wich is made of atomical
+database is a collection of relation of tuples each of which is made of atomical
 values, this can be viewed as a set of tables. In the years what `atomical'
 values are is changed \cite{ordb}. In the modern days an atomical value can be
 an array, a tree structure or ever a tuple (record or struct) itself. This while
-beeing counter intuitive is done for performance and expressiveness reasons.
+being counter intuitive is done for performance and expressiveness reasons.
 
 In the schema made for this project array ad tuples where used as atomic values
 in fact.
@@ -209,8 +209,8 @@ Multithreading is a computer architecture term that indicates that a single CPU
 has multiples `cores' on it, each one with its own computational capability.
 This can be taken advantage by programs, because the work can be divided across
 the cores and executed in parallel. This can lead to speed ups in the execution
-time linear to the amout of cores on the CPU, but often is not that easy to
-archive this improvements due to syncronization problems.
+time linear to the amount of cores on the CPU, but often is not that easy to
+archive this improvements due to synchronization problems.
 
 \subsection{C}
 
@@ -231,8 +231,8 @@ minimal source code modification.
 
 \subsection{SQL}
 
-SQL stands for Structured Query Language, and it is a domani specific language,
-for quering, manipulating and defining relational data. It is the de fato
+SQL stands for Structured Query Language, and it is a domain specific language,
+for querying, manipulating and defining relational data. It is the de facto
 standard language used for interfacing with databases based on the relational
 data model.
 
@@ -252,26 +252,26 @@ ones have this as a subset, so it is easy to found in a system.
 The majority of time in this project was spent on refining the mathematical
 model given to us. Not only by stating it in a precise way the math in the model
 but also in deriving from it a set of implementable requirements, that were not
-very clear in the beginnning, even though in retrospect seems obvious.
+very clear in the beginning, even though in retrospect seems obvious.
 
 After this activity was terminated the creation of the database schema and the
-implementation of the model was relatively straight foreward.
+implementation of the model was relatively straight forward.
 
 \subsection{Model \& Data}
 
 I have divided the model discussion in two parts a short introduction to the
-data used, and than a longer discussion abouth the math used where the data
-used, introduced in precendence, is refined.
+data used, and than a longer discussion about the math used where the data used,
+introduced in precedence, is refined.
 
 \subsubsection{Data}\label{sec:data}
 
 Now let's briefly talk about the data that the simulation will have at its
-disposal, succesivelly they will be described in a more precise way. The
+disposal, successively they will be described in a more precise way. The
 simulation has two kinds of data at his disposal geographical, from satellite
 \cite{cop}, and meteorological from meteo station in place. The zone is divided
 in squares and each square has uniform data.
 
-The geographical datas are: altimetry, forest kind, urbanization level, eventual
+The geographical datum are: altimetry, forest kind, urbanization level, eventual
 water presence and the ``carta natura'', the last one is currently unused.
 
 The meteorological data are just wind speed and direction.
@@ -289,18 +289,18 @@ observations
 
 After having divided a rectangular area in $L^* \times W^*$ squared cells, we
 understand that of each cell, in row $i$ and column $j$, of the forest we care
-about just two charateristics: the fuel quantity it it at a certain point in
+about just two characteristics: the fuel quantity it it at a certain point in
 time $B_{ij}(t)$ and the presence or not of a fire in said cell at a certain
 point in time $N_{ij}(t)$, $N$ can assume only two values 0 for no fire and 1
-for fire, we will call finction like this \emph{fire indicator functions}. Those
+for fire, we will call function like this \emph{fire indicator functions}. Those
 two functions will represent the \emph{state} of the cell at any point in time.
 
 Next to describe the concept of movement of the fire to neighboring cells a
-cellular automata aproach was used.
+cellular automata approach was used.
 
-But first we have to consider that a fire coud have multiple triggering points
+But first we have to consider that a fire could have multiple triggering points
 across time, for example when we consider arson, for this cases a simple notion
-of initial state is not sufficient, we need a way to talk about the exogenus
+of initial state is not sufficient, we need a way to talk about the exogenous
 input of the system, let's call it $u_{ij}(t)$, and it is a fire indicator
 function.
 
@@ -372,13 +372,13 @@ fire propagation threshold.
 \myrule
 
 Let's suspend, for now, our discussion about the model to better describe the
-data at our disposal, introdiced in section \ref{sec:data}.
+data at our disposal, introduced in section \ref{sec:data}.
 
 The satellite puts at our disposal a series of data, described in the table
 \ref{tab:geo}, the underlined ones are currently not used, the meaning of the
 values is described in the appendix \ref{sec:desc}. However those data cannot be
 used as is in the model but have to be ``refined'' with the following
-mathematical corrispondences.
+mathematical correspondences.
 
 \begin{table}
 \centering
@@ -413,24 +413,24 @@ A_{ij} = \cases{U_{ij}/100, &if $0 \leq U_{ij} \leq 100$;\cr
 is the percentage of the cell that is inhabited,
 
 \begin{equation}\label{eq:water}
-W_{ij} = \cases{0, &se $W1_{ij} = 0$;\cr
-                1, &se $W1_{ij} = 1$;\cr
-                0.75, &se $W1_{ij} = 2$;\cr
-                0.75, &se $W1_{ij} = 3$;\cr
-                0.5, &se $W1_{ij} = 4$;\cr
-                1, &se $W1_{ij} = 253$;\cr
-                1, &se $W1_{ij} = 255$.}
+W_{ij} = \cases{0, &if $W1_{ij} = 0$;\cr
+                1, &if $W1_{ij} = 1$;\cr
+                0.75, &if $W1_{ij} = 2$;\cr
+                0.75, &if $W1_{ij} = 3$;\cr
+                0.5, &if $W1_{ij} = 4$;\cr
+                1, &if $W1_{ij} = 253$;\cr
+                1, &if $W1_{ij} = 255$.}
 \end{equation}
 
 is the percentage of water present. Those last three values are needed to
-calculate due valori
+calculate two values
 
 \begin{equation}
 S_{ij} = H_{ij} \cdot (1-A_{ij}) \cdot (1-W_{ij})\textrm{,}\\
 \end{equation}
 
 that is the level of inflammability of the cell, notice that $A_{ij}$ decreases
-it because inhabited zones are usually cementified, and
+it because inhabited zones are usually cemented, and
 
 \begin{equation} % NOTE: 4000 is the average wood density
 \gamma_{ij} = 4000(H_{ij}-A_{ij})\textrm{.}
@@ -450,18 +450,18 @@ and direction of the wind
 Where $r_1$ and $r_2$ are two random numbers drawn from a normal distribution
 centered in 0 between 1 and -1.
 
-Finally we can caluculate
+Finally we can calculate
 
 \begin{equation}
 \beta_{ij} = 60(1+\mathcal{F}_{ij}/10)\textrm{,}
 \end{equation}
 
-Of the values not mentioned in precendence in the model just $S_{ij}$, $P_{ij}$,
+Of the values not mentioned in precedence in the model just $S_{ij}$, $P_{ij}$,
 $\mathcal{F}_{ij}$ and $\mathcal{D}_{ij}$ will be used.
 
 \myrule
 
-Now that we know which data we have at our disposal, we ca finally define
+Now that we know which data we have at our disposal, we can finally define
 $p_{ij}(\e_1, \e_2, t)$ from function \ref{eq:probtest}.
 
 \begin{equation}\label{eq:prob}
@@ -482,11 +482,11 @@ is burned.
 d(\e_1, \e_2) = \left(1-\frac{1}{2}|\e_1\e_2|\right)\textrm{,}
 \end{equation}
 
-is the disomogeneity factor at the border of cells. It can assume only two
-values 1 and $1/2$, the first is asumed when the considered cell is above,
+is the dishomogeneity factor at the border of cells. It can assume only two
+values 1 and $1/2$, the first is assumed when the considered cell is above,
 below, to the left or to the right of the current cell the second one, instead,
 when the considered cell is on a diagonal. This is done to take into account the
-fact that the fire transmits less to digonal neighbor, as shown in figure
+fact that the fire transmits less to diagonal neighbor, as shown in figure
 \ref{fig:disom}.
 
 \begin{figure} % TODO: fix nummber positioning
@@ -533,7 +533,7 @@ f_P = \exp\left(k_2\arctan\left(\frac{P_{ij}-P_{i+\e_1j+\e_2}}{L}\right)\right)
 is the contribution given from the slope between two cells and $k_2$ is its
 optimization parameter.
 
-To conclude the description of the model we state the alting condition: the
+To conclude the description of the model we state the halting condition: the
 simulation halts iff no fire has been transmitter to a neighboring cell in an
 entire simulation step.
 
@@ -611,11 +611,11 @@ seed, Delta, tau, theta, k0, k1, k2, L, started)
 
 The `data' attribute in Map is an array of tuples containing all the data,
 meteorological and geographical, of the single cells discussed before, the
-`data' attibute in Result is an array tuples containing the state of the cell
+`data' attribute in Result is an array tuples containing the state of the cell
 i.e. the presence of fire and the amount of fuel in it. `rect' in both Map and
 Simulation is a pair of points that in the first one indicates where on the
 globe, in the LAEA\footnote{Proiezione Lambert azimuthal Equal-Area} Europe
-\cite{laeae} coordinate system with referiment system ETRS89\footnote{European
+\cite{laeae} coordinate system with reference system ETRS89\footnote{European
 Terrestrial Reference System} \cite{etrs89}, the map is situated. The second one
 indicates which subset of the map the simulation has been run on.
 
@@ -625,8 +625,8 @@ in the correct multiple of digit, because the points in `rect' are stored as
 integers.
 
 Obviously the various arrays and rectangles have to be kept in check to avoid
-incosistend database state, using the ER semantic of Toni Mancini \cite{bd2}
-let's express the non-trivial contrains on the data first in natural language
+inconsistent database state, using the ER semantic of Toni Mancini \cite{bd2}
+let's express the non-trivial constrains on the data first in natural language
 and then in fist order logic.
 
 \begin{enumerate}
@@ -669,12 +669,12 @@ starting from zero
 \subsection{Algorithm}
 
 Given the description of the model the algorithm used for the simulation is
-essentialy map reduce \cite{sac}. Map in the sense that the input is
-evenly distributed between the machine core and reduce in the sense that the
-halting condition has to be checked by ORing together a piece of the work done
-by all the cores. A pseudo-code description is shown in figure \ref{fig:code}.
-Instead in figure \ref{fig:architecture} there is a simple architectural diagram
-of the simulator program.
+essentially map reduce \cite{sac}. Map in the sense that the input is evenly
+distributed between the machine core and reduce in the sense that the halting
+condition has to be checked by ORing together a piece of the work done by all
+the cores. A pseudo-code description is shown in figure \ref{fig:code}.  Instead
+in figure \ref{fig:architecture} there is a simple architectural diagram of the
+simulator program.
 
 \begin{figure}
 \centering
@@ -704,77 +704,77 @@ of the simulator program.
 \label{fig:architecture}
 \end{figure}
 
-\section{Implemetation}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Implementation}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 For the implementation various technologies have been considered but ultimately
-discarted.
+discarded.
 
-Modelica was considered initialy as the implementation language but it has bad
+Modelica was considered initially as the implementation language but it has bad
 support for this kind of simulation and on such a large scale, as said before.
 
 Then for the data storage initially a simple flat file (a CSV \cite{csv} or
 custom binary file for space reasons, in case space and reading speed were a
-concearn) was considered where all the data for the cells could have been stored
+concern) was considered where all the data for the cells could have been stored
 together with a coordinated but then it was ditched because of problem with
-integration between various data souces and the handling of concurrent writes.
+integration between various data sources and the handling of concurrent writes.
 
 But the simulator inputs and outputs CSV files, to be more precise a subset of
 this format was chosen: quoted numbers are not supported. This format was chosen
 due to its simplicity. Another important factor was the wide support that this
 format has.
 
-Once C was chosen as the implementation language a possible apporoach for
+Once C was chosen as the implementation language a possible approach for
 speeding up the program execution was the use of SIMD instructions, because each
-cell has 8 neighborhs which if stored as \texttt{float} could neatly fit inside
-a \texttt{YMM} register on x86. To avoid portability issues libraries like SLEEF
+cell has 8 neighbors which if stored as \texttt{float} could neatly fit inside a
+\texttt{YMM} register on x86. To avoid portability issues libraries like SLEEF
 could have been used \cite{sleef}. This idea was ultimately ditched after a
 simple algorithmic improvement i.e. not always simulating all the cells.
 
-The rest of what is written in this section is ultimatelly what has ben chosen
+The rest of what is written in this section is ultimately what has been chosen
 and used for the implementation.
 
 \subsection{SQL}
 
-The implementation of the schema for the database was devided in three parts.
-First the creation of various \texttt{TYPE} and \texttt{DOMAIN} that modelled
-the varous data type needed for use in \texttt{ARRAY} so that they could be
-easly stored and queryed together. Second the creation of the tables to hold the
-various related data and to enstablish the relations amogn them. Third the
-creation of the trigger to mantain the invariance stated in section
+The implementation of the schema for the database was divided in three parts.
+First the creation of various \texttt{TYPE} and \texttt{DOMAIN} that modeled
+the various data type needed for use in \texttt{ARRAY} so that they could be
+easily stored and queryed together. Second the creation of the tables to hold the
+various related data and to establish the relations among them. Third the
+creation of the trigger to maintain the invariance stated in section
 \ref{sec:schema}, across the various operations that modify the state of the
 database.
 
 \subsection{C}
 
 The simulator starts reading and validating three CSV files, for validation
-meta-programming has been used throgh X-macros, to avoid excessive code
-repetition. Eventual errors and comunication to the user are all reported via
+meta-programming has been used through X-macros, to avoid excessive code
+repetition. Eventual errors and communication to the user are all reported via
 \texttt{syslog(3)}, that is the standardized logging mechanism by POSIX.
 
 After this the code for handling software interrupts is set up. This was done
-because a safe way of shutting down the program is needed in case of abrubt
+because a safe way of shutting down the program is needed in case of abrupt
 changes to the meteorological data or the exogenous input. In this case the
-simualtion is terminated whaiting for the last state dump to finish and then
+simulation is terminated waiting for the last state dump to finish and then
 restarted with the last valid state (or the best suited as starting conditions)
 and the new data.
 
 To avoid costly calls to \texttt{malloc(3)} all the memory allocations are done
 before the start of the simulation and a double buffer technique is used to
-recicle the memory of the last iteration.
+recycle the memory of the last iteration.
 
-Succeding this the simulation is started, and after a certain number of
+Succeeding this the simulation is started, and after a certain number of
 iterations (specified by the user) a snapshot of the state is taken to permit
 both external programs to render the evolution of the fire and to enable recover
-in case of the codition said before.
+in case of the condition said before.
 
 Various optimizations has been done for improving the performances of the
 initial, trivial, implementation. The first was done by taking into
 consideration the typical form of a forest fire, shown in figure \ref{fig:fire}.
 It is clear that only a tiny part of the map is on fire at any point in time,
-therfore we have to simulate only a fraction of the cell in the map, because a
+therefore we have to simulate only a fraction of the cell in the map, because a
 cell can transmit fire iff it is it self on fire, as stated in function
-\ref{eq:probtest}. Therefore if we see that a neightboring cell is not on fire
-we can avoid doing calcultions all together.
+\ref{eq:probtest}. Therefore if we see that a neighboring cell is not on fire
+we can avoid doing calculations all together.
 
 \begin{figure}
 % https://www.copernicus.eu/en/copernicus-ems-rapid-mapping-activated-forest-fires-central-sweden
@@ -789,31 +789,31 @@ but still contributed to shave of some time from the simulation. The first was
 archived moving the calculation of $\beta_{ij}$ from the start of the simulation
 loop to the end of it, in a conditional branch this because on most cells no
 calculation has to be done and reading $\mathcal{F}$ would bring in its entire
-cacheline, causing a probable miss.  Instead in this way it is calculated only
+cache line, causing a probable miss.  Instead in this way it is calculated only
 when needed and when the cache line was already loaded due to previous mandatory
 calculations.
 
-The second optimization was done precalulating $d$ and the sqare root in $f_w$,
+The second optimization was done precalulating $d$ and the square root in $f_w$,
 because both can assume only two values, and finally rewriting the sum of sine
 and cosine in a form where a single call to the sine function is made.
 
 Before talking about those optimizations a little note about precalculating
 functions has to be made, in modern day usually the bottle neck is not the
-number of instructions to execute but the amout of memory that one has to acces,
-therfore big tables of precalculated values are of no help.  But the ones
-considered in my scenario are all tiny, in fact they all fit in a single
-cacheline.
+number of instructions to execute but the amount of memory that one has to
+access, therefore big tables of precalculated values are of no help.  But the
+ones considered in my scenario are all tiny, in fact they all fit in a single
+cache line.
 
-While $d$ is a relatively inexpensive value to calculte but it still contains a
+While $d$ is a relatively inexpensive value to calculate but it still contains a
 call to libc and if the compiler is not smart enough could not be inlined, so
 better to avoid this problem, the square root is a relatively expensive
-operation espetially in a hot loop like this but the really slow function were
+operation especially in a hot loop like this but the really slow function were
 the sine and cosine calculations, those certainly cannot be avoided but can be
 improved removing the two function call to sine and cosine and transforming them
 in a single one to sine. The procedure is shown in table
-\ref{tab:simplifications}. As a sidenote sine is also the same fuction called in
-the Box-Muller transform to generate the normally distributed random numbers, so
-that the sine code is always hot in the i-cache.
+\ref{tab:simplifications}. As a side-note sine is also the same function called
+in the Box-Muller transform to generate the normally distributed random numbers,
+so that the sine code is always hot in the i-cache.
 
 \begin{table}
 \centering
@@ -837,14 +837,14 @@ $\epsilon_1$ & $\epsilon_2$ & original equation & simplified equation\\
 
 The most effective optimization was the parallelization of the algorithm
 together with the skip of cell that did not needed to be simulated. This
-obvously because the algorithm is trivially parallelizable, due to the fact that
-there is no need to comunication between the thread, except for the one at the
-end of the for loop.
+obviously because the algorithm is trivially parallelizable, due to the fact
+that there is no need to communication between the thread, except for the one at
+the end of the for loop.
 
-Because of this OpenMP allowed to easly and efficently parallelize the main loop
-of the simulator. The only \texttt{pragma} used was the one in figure
+Because of this OpenMP allowed to easily and efficiently parallelize the main
+loop of the simulator. The only \texttt{pragma} used was the one in figure
 \ref{fig:pragma}. Now let's explain it, the first part \verb+#pragma omp parallel for+
-just tells OpenMP tho parallelize this for across the default number of cores
+just tells OpenMP to parallelize this for across the default number of cores
 and equally divides the number of iterations to the number of default cores. The
 \texttt{collapse(2)} just fuses the two nested loops into one.
 \verb+default(none)+ \verb+firstprivate(rng_state)+ \verb+shared(s,Gamma,d,sqrt)+
@@ -852,11 +852,11 @@ are used to specify the visibility of the variables outside the loop, the first
 one just tell to not use any default, so that for every single variable we have
 to specify the sharing policy, the second one gives a copy of the variable
 \verb+rng_state+ to each core and initializes it to the same value in each of
-them, the third just sais that those variables are shared among threads. Finally
-\verb+reduction(|: has_transmitted_fire)+ just tels that at the end of the
-execution each thread all the prvate copies of \verb+has_transmitted_fire+ shall
+them, the third just says that those variables are shared among threads. Finally
+\verb+reduction(|: has_transmitted_fire)+ just tells that at the end of the
+execution each thread all the private copies of \verb+has_transmitted_fire+ shall
 be ORed together. This is done to efficiently implement the halting condition
-avoiding problema like lock contetnio or false sharing.
+avoiding problems like lock contention or false sharing.
 
 \begin{figure}
 \centering
@@ -869,9 +869,9 @@ avoiding problema like lock contetnio or false sharing.
 
 \subsection{Shell}
 
-The POSIX shell \texttt{sh(1)}, togheter with its utilities, was used in the and
+The POSIX shell \texttt{sh(1)}, together with its utilities, was used in the and
 as the integration language between the two pieces of the simulator. It was used
-expecially for its omnipresence in UNIX like systems, and my familiarity with
+especially for its omnipresence in UNIX like systems, and my familiarity with
 it.
 
 \section{Experimental Results}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -890,15 +890,15 @@ correctly. Also a good level of performance had to be archived.
 \subsection{Setting}
 
 The majority of the testing and development was done on a machine running mac OS
-Big Sur with an Intel Core i7 6 core processor. But for ensuring the corretc
+Big Sur with an Intel Core i7 6 core processor. But for ensuring the correct
 execution in the Linux environment, where the program was supposed to run,
 compilation and execution of workloads has also been done on Linux (and some
-bugs have been discovered there exclusivelly).
+bugs have been discovered there exclusively).
 
 On the software side of things two compilers have been used \texttt{clang(1)}
 and \texttt{gcc(1)}, the profiler used was Apple's Instruments.app, the debugger
-was \texttt{lldb(1)}. Both compiler supported various warnings and debbuging
-fetures namely sanitizers. And the C language standard library offered the
+was \texttt{lldb(1)}. Both compiler supported various warnings and debugging
+features namely sanitizers. And the C language standard library offered the
 \texttt{assert(3)} macro that was extensively used throughout the code.
 
 \subsection{Correctness}
@@ -907,26 +907,26 @@ Correctness of the various parts of the software has been shown with mostly hand
 generated test cases, and manual testing.
 
 For the database schema testing various \texttt{INSERT}, \texttt{DELETE} and
-\texttt{UPDATE} clauses have been tried to trigger all the varius check of the
+\texttt{UPDATE} clauses have been tried to trigger all the various check of the
 data. No bogus data was able to get in the database after the testing was done.
 
 C is a notoriously error prone language to program in, this includes
 it's integer (and float) conversion, manual memory allocation,
-undefined behavior and pointher arithmetic. But tools can help a
+undefined behavior and pointer arithmetic. But tools can help a
 lot in producing good quality software.
 
-For the execution part the majority of bugs where cought or reported via
+For the execution part the majority of bugs where caught or reported via
 warnings and the AddressSanitizer \cite{asan} feature of both \texttt{gcc(1)}
 and \texttt{clang(1)}. During testing all the reported problems were solved and
 no more were found. A special note has to be made about the few concurrency bugs
-that were encountered all counght by setting \texttt{default(none)} in the
-OpenMP \texttt{pragma}.
+that were encountered all caught by setting \texttt{default(none)} in the OpenMP
+\texttt{pragma}.
 
 The only bugs that were not found by the previously mentioned tools in the model
 executor, were logic ones related to the input validation.
 
-The core part of the model executor was shown to be correct by inspeciton
-because it is a relatively simple and straightforweard function, thanks in part
+The core part of the model executor was shown to be correct by inspection
+because it is a relatively simple and straightforward function, thanks in part
 to OpenMP who handled all the parallelism in a clean and transparent way, and
 allowed to test sequential and parallel code correctness commenting out just a
 line of code.
@@ -936,9 +936,9 @@ line of code.
 The parallel code is much faster than the single core one as shown in table
 \ref{tab:performance}, in the first column the number of updated cell is
 expressed as the width times the height of the grid, times the number of
-iteretions. Then number of state dumps is displayed to show its effect on
+iterations. Then number of state dumps is displayed to show its effect on
 performance. Then columns $T_S$ and $T_P$, shows serial and parallel time
-respectivelly. Finally $S = T_S/T_P$ and $E = S/p$ shows the speedup and
+respectively. Finally $S = T_S/T_P$ and $E = S/p$ shows the speedup and
 efficiency, where $p$ is the number of cores (6 in this case).
 
 \begin{table}
@@ -959,7 +959,7 @@ $10^6\times 10000$ & 1 & 929.67s & 147.09s & 6.32 & 1.05\\
 \end{table}
 
 The size of the state for all the simulations  was 8MB and the one for the cells
-paramenters was 20MB. The compiler options for the optimization were just
+parameters was 20MB. The compiler options for the optimization were just
 \texttt{-O3 -flto -DNDEBUG}. Taking the last row of table \ref{tab:performance}
 as a reference we are able to process one cell in roughly $147.09s/10^{10}
 \approx 14.7\textrm{ns}$, and we should always keep in mind that this is
@@ -971,10 +971,10 @@ fire.
 \section{Conclusion}
 
 In the end a correct and performant implementation of the simulator was
-delivered, definatelly the hardest part of this intership did not came from the
-development side but the software engeneering one. Having to take a imprecise
-model and transforming it into a real programm was a real challenge. The
-continous update and changes made it really difficult to actualy develop
+delivered, definitely the hardest part of this internship did not came from the
+development side but the software engineering one. Having to take a imprecise
+model and transforming it into a real program was a real challenge. The
+continuous update and changes made it really difficult to actually develop
 something.
 
 All the source code can be found here
@@ -982,13 +982,13 @@ All the source code can be found here
 
 \subsection{Possible Improvements}
 
-There are definatelly many things to improve. First of all the error handling
-and the logging are a little bit messy. Than the part of code that dumps the
-result of simulation to disk could be made to execute on separate threads, to
-avoid pauses while running the simulation, but then the software will not be
-anymore allocation free in the main loop, so a carefully designed allocation
-stategy would have to be developed. Something like a pool allocator should be
-good enough knowing that that the simulation state has alwas the same size.
+There are definitely many things to improve. First of all the error handling and
+the logging are a little bit messy. Than the part of code that dumps the result
+of simulation to disk could be made to execute on separate threads, to avoid
+pauses while running the simulation, but then the software will not be anymore
+allocation free in the main loop, so a carefully designed allocation strategy
+would have to be developed. Something like a pool allocator should be good
+enough knowing that that the simulation state has always the same size.
 
 Another optimization could be tried like the one proposed in the Game
 Programming Graphics Black Book (citation), that are especially suited for
@@ -998,16 +998,16 @@ instructions could help.
 \subsection{Future Work}
 
 The execution part of the software could be rewritten as a library instead of
-beeing a standalone program, because beeing written in C it is particularly
+being a stand-alone program, because being written in C it is particularly
 suited to be called by other languages (e.g. Java, Python etc\dots). To avoid
-all the integration dance and concentrating directly in performat simulation.
+all the integration dance and concentrating directly in performant simulation.
 
 A trivial version could be implemented on a GPU to see if the work saved by the
 CPU implementation still makes it faster with respect to a GPU implementation.
 
 \appendix
 
-\section{Description of the satellitar data}\label{sec:desc}
+\section{Description of the satellite data}\label{sec:desc}
 
 The values enumerated in the table \ref{tab:geo} are defined in the table
 \ref{tab:forest}, \ref{tab:urbanization}, \ref{tab:water1}, \ref{tab:water2} and
@@ -1085,7 +1085,7 @@ The values enumerated in the table \ref{tab:geo} are defined in the table
 1 & Permanent water\\
 2 & Temporary water\\
 3 & Permanently wet\\
-4 & Temporarely wet\\
+4 & Temporarily wet\\
 253 & Sea cost water\\
 255 & External area\\
 \hline
