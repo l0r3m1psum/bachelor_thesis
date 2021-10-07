@@ -603,17 +603,45 @@ grouped in tables \ref{tab:globals} and \ref{tab:params}.
 The ER diagram for the database schema is shown in figure \ref{fig:er}. It is a
 simple diagram where attributes have been omitted but are reported here.
 
-\begin{figure} % TODO: to finish
-\centering
+\begin{figure}
 \setlength{\unitlength}{1cm}
-\includegraphics[width=\linewidth]{er_diagram.pdf}
-% \begin{picture}(6,6)
-% \setlength{\fboxsep}{8pt}
-% \put(0,0){\fbox{Map}}
-% \put(1,1){\fbox{Simulation}}
-% \put(2,2){\fbox{Result}}
-% \put(3,3){Work in progress\dots}
-% \end{picture}
+\setlength{\fboxsep}{6pt}
+\newlength{\rhombuslength}
+\setlength{\rhombuslength}{2\unitlength}
+\newlength{\rhombuswidth}
+\setlength{\rhombuswidth}{2\rhombuslength}
+\newlength{\cardinalitydistance}
+\setlength{\cardinalitydistance}{2.7\unitlength}
+
+\centering
+\begin{picture}(4,10)
+
+\newsavebox{\rhombus}
+\savebox{\rhombus}(\rhombuswidth,2)[bl]{
+	\put(0,0){\line(2,1){\rhombuslength}}
+	\put(0,0){\line(2,-1){\rhombuslength}}
+	\put(\rhombuslength,1){\line(2,-1){\rhombuslength}}
+	\put(\rhombuslength,-1){\line(2,1){\rhombuslength}}
+}
+
+\put(1.4,9){\fbox{Map}}
+\put(\rhombuslength,8.7){\line(0,-1){0.6}}
+\put(0,6.1){\usebox{\rhombus}}
+\put(0.7,7){simulationResult}
+\put(\rhombuslength,6.1){\line(0,-1){0.6}}
+\put(1,5){\fbox{Simulation}}
+\put(\rhombuslength,4.8){\line(0,-1){0.7}}
+\put(0,2.1){\usebox{\rhombus}}
+\put(0.9,3){mapSimulation}
+\put(\rhombuslength,2.1){\line(0,-1){0.6}}
+\put(1.2,1){\fbox{Result}}
+
+\put(\cardinalitydistance,8){(0,N)}
+\put(\cardinalitydistance,6){(1,1)}
+\put(\cardinalitydistance,4){(0,N)}
+\put(\cardinalitydistance,2){(1,1)}
+
+\end{picture}
 \caption{ER diagram}
 \label{fig:er}
 \end{figure}
