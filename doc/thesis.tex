@@ -726,8 +726,30 @@ has been archived via reuse of a resizable memory area (\texttt{realloc(3)}).
 \end{figure}
 
 \begin{figure}
+\setlength{\unitlength}{1cm}
+\newlength{\arrowlen}
+\setlength{\arrowlen}{0.5\unitlength}
+\newlength{\xcenter}
+\setlength{\xcenter}{3.5\unitlength}
+\newlength{\lateralarrowlength}
+\setlength{\lateralarrowlength}{1\unitlength}
 \centering
-\includegraphics[width=0.7\linewidth]{architecture.pdf}
+
+\begin{picture}(7,3)
+
+\put(2.5,2){\fbox{CSV reader}}
+\put(\xcenter,1.9){\vector(0,-1){\arrowlen}}
+\put(2.5,1){\fbox{Simulation}}
+\put(\xcenter,0.9){\vector(0,-1){\arrowlen}}
+\put(3,0){\fbox{Exit}}
+
+\put(0,1){Dump}
+\put(1,1.1){\vector(1,0){\lateralarrowlength}}
+\put(6,1.1){\vector(-1,0){\lateralarrowlength}}
+\put(6,1){Signal}
+
+\end{picture}
+\vspace{0.6cm}
 \caption{Architecture.}
 \label{fig:architecture}
 \end{figure}
