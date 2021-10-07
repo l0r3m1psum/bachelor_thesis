@@ -852,12 +852,37 @@ meta-programming has been used through X-macros, to avoid excessive code
 repetition. Eventual errors and communication to the user are all reported via
 \texttt{syslog(3)}, that is the standardized logging mechanism by POSIX.
 
-After this the code for handling software interrupts is set up. This was done
-because a safe way of shutting down the program is needed in case of abrupt
-changes to the meteorological data or the exogenous input. In this case the
-simulation is terminated waiting for the last state dump to finish and then
-restarted with the last valid state (or the best suited as starting conditions)
-and the new data.
+For the uninitiated X-macros is the name of a technique used in C programming to
+take advantage of the powerful but limited abilities of the C pre-processor
+(\texttt{cpp(1)}), the basic idea is the following, we create a macro that takes
+as an argument the name of a macro and then calls it multiples times with
+various arguments like so
+
+\begin{quote}
+\begin{verbatim}
+#define MYXMACRO(X) \
+X(x11, x12, x13, ..., x1n) \
+X(x21, x22, x23, ..., x2n) \
+...
+X(xm1, xm2, xm3, ..., xmn)
+\end{verbatim}
+\end{quote}
+
+This creates a table that can hold various properties of a series of related
+(for example) variables such as name, type, string representation etc\dots
+
+After doing so we can pass to \texttt{MYXMACRO} a purposefully created macro to
+select the right arguments and generate the needed code.
+
+In the simulator code this was used to generate the error checking and
+subsequent casting of some of the data needed to initialize the simulation.
+
+After having read all the necessary data, the code for handling software
+interrupts is set up. This was done because a safe way of shutting down the
+program is needed in case of abrupt changes to the meteorological data or the
+exogenous input. In this case the simulation is terminated waiting for the last
+state dump to finish and then restarted with the last valid state (or the best
+suited as starting conditions) and the new data.
 
 To avoid costly calls to \texttt{malloc(3)} all the memory allocations are done
 before the start of the simulation and a double buffer technique is used to
