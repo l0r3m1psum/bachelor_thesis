@@ -51,6 +51,11 @@
 \def\subsection{\oldsection}
 \def\section{\chapter}
 
+\newlength{\sideoffset}
+\setlength{\sideoffset}{0.4cm}
+\addtolength{\oddsidemargin}{\sideoffset}
+\addtolength{\evensidemargin}{-\sideoffset}
+
 % ERRORI TROVATI:
 % * la probabilità deterministica (si erano scordati di dirci quali termini
 %   perturbare)
